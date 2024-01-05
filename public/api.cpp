@@ -66,6 +66,12 @@ Piece get_next_piece(NOTAGAME g) {
 	return next_piece(game);
 }
 
+size_t forecast_captures(NOTAGAME g) {
+
+	BE_game;
+	return attack(game, false, true, false);
+}
+
 struct Game* malloc_init_default_game() {
 
 	struct Game* ret = malloc_init_game(DEFAULT_SETTINGS);

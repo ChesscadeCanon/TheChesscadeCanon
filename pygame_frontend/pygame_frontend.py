@@ -37,7 +37,8 @@ class Game(ctypes.Structure):
         ("moved_down", ctypes.c_long),
         ("state", ctypes.c_char * STATE_LENGTH),
         ("histotrie", ctypes.POINTER(Histotrie)),
-        ("settings", ctypes.c_ulonglong)
+        ("settings", ctypes.c_ulonglong),
+        ("repeat", ctypes.c_bool),
     ]
     
 engine.malloc_init_default_game.restype = ctypes.POINTER(Game)
@@ -60,6 +61,8 @@ engine.get_cursor_file.argtypes = [ctypes.POINTER(Game)]
 engine.get_cursor_file.restype = ctypes.c_ulonglong
 engine.get_next_piece.argtypes = [ctypes.POINTER(Game)]
 engine.get_next_piece.restype = ctypes.c_wchar
+engine.forecast_captures.argtypes = [ctypes.POINTER(Game)]
+engine.forecast_captures.restype = ctypes.c_ulonglong
 
 screen = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Chesscade")
@@ -160,7 +163,6 @@ def play():
     engine.begin_game(game)
     carryOn = True
     clock = pygame.time.Clock()
-    
     while carryOn:
         for event in pygame.event.get(): 
             if event.type == pygame.KEYDOWN:
@@ -168,7 +170,6 @@ def play():
                     game.contents.dropped = True
             if event.type == pygame.QUIT: 
                 carryOn = False 
-
         passed = clock.tick(30)
         take_input(game, passed)
         engine.increment_game(game, passed)

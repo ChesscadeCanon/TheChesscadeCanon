@@ -11,6 +11,7 @@
 #define HAS_CAPTURED(S) (strncmp(EMPTY_CAPTURES, S + CAPTURE_INDEX, CAPTURE_LENGTH) != 0)
 #define SQUARE_RANK(I) (I / LINE_LENGTH)
 #define SQUARE_FILE(I) (I % LINE_LENGTH)
+#define SQUARE_BIT(I) (1ull << (SQUARE_RANK(I) * FILES + SQUARE_FILE(I)))
 #define SET_PLAYER(S, V) (S[PLAYER_INDEX] = V)
 #define SET_PLAYER_RANK(S, V) (S[PLAYER_RANK_INDEX] = '0' + (char)(V))
 #define SET_PLAYER_FILE(S, V) (S[PLAYER_FILE_INDEX] = '0' + (char)(V))
@@ -30,10 +31,10 @@
 #define PLAYER_DOWN_LEFT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state) + 1, GET_PLAYER_FILE(G->state) - 1)
 #define PLAYER_DOWN_RIGHT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state) + 1, GET_PLAYER_FILE(G->state) + 1)
 #define EASE(G) 1024 * (1 + DOUBLE_BISHOP(G))
-#define QUEEN_ME(G) (\
+#define QUEEN_ME(G, R) (\
 	IS_SET(G->settings, PAWNS_PROMOTE) ?\
-		GET_PLAYER(G->state) == WHITE_PAWN && GET_PLAYER_RANK(G->state) == 0 ? WHITE_QUEEN \
-		: ((GET_PLAYER(G->state) == BLACK_PAWN && GET_PLAYER_RANK(G->state) == LAST_RANK) ? BLACK_QUEEN \
+		GET_PLAYER(G->state) == WHITE_PAWN && (R) == 0 ? WHITE_QUEEN \
+		: ((GET_PLAYER(G->state) == BLACK_PAWN && (R) == LAST_RANK) ? BLACK_QUEEN \
 		: GET_PLAYER(G->state)) \
 	: GET_PLAYER(G->state) \
 )
@@ -225,6 +226,30 @@ const size_t PIECE_VALUES[SQUARE_COUNT] = {
 
 #define PIECE_VALUE(P) (PIECE_VALUES[PIECE_MAP[P]])
 
+size_t bit_index(size_t bit) {
+
+	size_t i = 0, b = 1;
+
+	while (i < 64) {
+
+		if (bit & b) break;
+		++i;
+		b <<= 1;
+	}
+
+	return i >= 64 ? 0 : i;
+}
+
+size_t bit_rank(size_t bit) {
+
+	return bit_index(bit) / FILES;
+}
+
+size_t bit_file(size_t bit) {
+
+	return bit_index(bit) % FILES;
+}
+
 time_t get_ease(struct Game* game) {
 
 	return EASE(game);
@@ -365,62 +390,49 @@ void init_board(Board board) {
 	}
 }
 
-void kill(State state, const size_t square, const unsigned short move) {
+void kill(State state, const size_t square, const size_t move) {
 
 	Piece piece = GET_SQUARE(state, square);
 	SET_CAPTURE(state, move, piece);
 	SET_SQUARE(state, square, EMPTY);
 }
 
-void capture(State state, Board piece_buffer, const size_t square, const unsigned short move) {
+size_t capture(State state, const size_t square, const size_t move, const bool execute) {
 
-	if (piece_buffer) {
-
-		piece_buffer[square] = GET_SQUARE(state, square);
-	}
-	else {
+	if (execute) {
 
 		kill(state, square, move);
 	}
+
+	return SQUARE_BIT(square);
 }
 
-bool hit(struct Game* game, Board piece_buffer, struct MoveSet* move_set, const unsigned short rank, const unsigned short file, const unsigned short move) {
+size_t hit(struct Game* game, enum Square piece_type, const size_t rank, const size_t file, const size_t move, const bool execute, const bool pattern) {
 
-	const short reverse = GET_PLAYER(game->state) == WHITE_PAWN && IS_SET(game->settings, WHITE_PAWN_HIT_UP) ? -1 : 1;
-	const unsigned short to_rank = rank + move_set->moves[move][0] * reverse;
-	const unsigned short to_file = file + move_set->moves[move][1];
+	struct MoveSet move_set = MOVES[piece_type];
+	const short reverse = piece_type == PAWN && IS_WHITE(GET_PLAYER(game->state)) && IS_SET(game->settings, WHITE_PAWN_HIT_UP) ? -1 : 1;
+	const size_t to_rank = rank + move_set.moves[move][0] * reverse;
+	const size_t to_file = file + move_set.moves[move][1];
 	size_t square = SQUARE_INDEX(to_rank, to_file);
 
-	if (move_set->repeat && CAN_STRIKE(game, square)) {
+	if (move_set.repeat && CAN_STRIKE(game, square)) {
 
-		return hit(game, piece_buffer, move_set, to_rank, to_file, move);
+		return hit(game, piece_type, to_rank, to_file, move, execute, pattern);
 	}
 	else if(CAN_CAPTURE(game, square)) {
 
-		capture(game->state, piece_buffer, square, move);
-		return 1;
+		return capture(game->state, square, move, execute);
 	}
 
 	return 0;
 }
 
-unsigned short strike(struct Game* game, Board piece_buffer, struct MoveSet* move_set, unsigned short move) {
+size_t strike(struct Game* game, const enum Square piece_type, const size_t rank, const size_t file, const size_t move, const bool execute, const bool pattern) {
 
-	if (move >= move_set->count) return 0;
-
-	const unsigned short rank = GET_PLAYER_RANK(game->state);
-	const unsigned short file = GET_PLAYER_FILE(game->state);
-	const unsigned short ret = hit(game, piece_buffer, move_set, rank, file, move);
-	return ret + strike(game, piece_buffer, move_set, move + 1);
-}
-
-unsigned short attack(struct Game* game) {
-
-	Piece piece = GET_PLAYER(game->state);
-	enum Square piece_type = PIECE_MAP[piece];
-	struct MoveSet move_set = MOVES[piece_type];
-	init_captures(game->state);
-	return strike(game, NULL, &move_set, 0);
+	const struct MoveSet move_set = MOVES[piece_type];
+	if (move >= move_set.count) return 0;
+	const size_t ret = hit(game, piece_type, rank, file, move, execute, pattern);
+	return ret | strike(game, piece_type, rank, file, move + 1, execute, pattern);
 }
 
 size_t drop_to(struct Game* game, const size_t from) {
@@ -428,7 +440,7 @@ size_t drop_to(struct Game* game, const size_t from) {
 	size_t to = SQUARE_DOWN(from);
 
 	if (DOUBLE_BISHOP(game)) {
-		
+
 		to = SQUARE_DOWN(to);
 	}
 
@@ -438,6 +450,23 @@ size_t drop_to(struct Game* game, const size_t from) {
 	}
 
 	return from;
+}
+
+size_t attack(struct Game* game, const bool execute, const bool forecast, const bool pattern) {
+
+	Piece piece = GET_PLAYER(game->state);
+	size_t rank = GET_PLAYER_RANK(game->state);
+	const size_t file = GET_PLAYER_FILE(game->state);
+
+	if (forecast) {
+
+		rank = SQUARE_RANK(drop_to(game, SQUARE_INDEX(rank, file)));
+		piece = QUEEN_ME(game, rank);
+	}
+
+	enum Square piece_type = PIECE_MAP[piece];
+	init_captures(game->state);
+	return strike(game, piece_type, rank, file, 0, execute, pattern);
 }
 
 size_t resolve(struct Game* game) {
@@ -469,16 +498,19 @@ size_t resolve(struct Game* game) {
 
 bool move_player(struct Game* game, size_t to) {
 
+	const size_t to_rank = SQUARE_RANK(to), to_file = SQUARE_FILE(to);
+	const size_t from_rank = GET_PLAYER_RANK(game->state), from_file = GET_PLAYER_FILE(game->state);
+
 	if (CAN_MOVE(game, to)) {
 
-		SET_PLAYER_RANK(game->state, SQUARE_RANK(to));
-		SET_PLAYER_FILE(game->state, SQUARE_FILE(to));
+		SET_PLAYER_RANK(game->state, to_rank);
+		SET_PLAYER_FILE(game->state, to_file);
 		return true;
 	}
-	else if (SQUARE_RANK(to) > GET_PLAYER_RANK(game->state)) {
+	else if (to_rank > from_rank) {
 
-		SET_PLAYER(game->state, QUEEN_ME(game));
-		const unsigned short captures = attack(game);
+		SET_PLAYER(game->state, QUEEN_ME(game, from_rank));
+		const size_t captures = attack(game, true, false, false);
 		LAND(game);
 		
 		if (captures) {

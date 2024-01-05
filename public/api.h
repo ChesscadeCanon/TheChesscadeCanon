@@ -15,6 +15,7 @@ extern "C" {
     __declspec(dllexport) size_t get_cursor_rank(NOTAGAME);
     __declspec(dllexport) size_t get_cursor_file(NOTAGAME);
     __declspec(dllexport) Piece get_next_piece(NOTAGAME);
+    __declspec(dllexport) size_t forecast_captures(NOTAGAME);
     __declspec(dllexport) struct Game* malloc_init_default_game();
     __declspec(dllexport) void begin_game(NOTAGAME);
     __declspec(dllexport) void increment_game(NOTAGAME, time_t);

@@ -38,18 +38,18 @@ typedef char* State;
 #define BLACK_KNIGHT 'n'
 #define WHITE_BISHOP 'B'
 #define BLACK_BISHOP 'b'
-#define FILES 8
-#define RANKS 8
-#define LAST_FILE (FILES - 1)
-#define LAST_RANK (RANKS - 1)
-#define MAX_CAPTURES 8
-#define LINE_LENGTH (FILES + 1)
-#define TWO_LINES (LINE_LENGTH * 2)
+#define FILES 8ull
+#define RANKS 8ull
+#define LAST_FILE (FILES - 1ull)
+#define LAST_RANK (RANKS - 1ull)
+#define MAX_CAPTURES 8ull
+#define LINE_LENGTH (FILES + 1ull)
+#define TWO_LINES (LINE_LENGTH * 2ull)
 #define BOARD_LENGTH (LINE_LENGTH * RANKS)
-#define CAPTURE_LENGTH 8
-#define DATA_LENGTH 15
+#define CAPTURE_LENGTH 8ull
+#define DATA_LENGTH 15ull
 #define STATE_LENGTH (BOARD_LENGTH + CAPTURE_LENGTH + DATA_LENGTH)
-#define NEWLINE_COUNT 17
+#define NEWLINE_COUNT 17ull
 #define CURSES_STATE_LENGTH (STATE_LENGTH + NEWLINE_COUNT)
 #define CAPTURE_INDEX BOARD_LENGTH
 #define PLAYER_INDEX (STATE_LENGTH - 14)
@@ -142,6 +142,7 @@ void fall(struct Game*, time_t);
 void exist(struct Game* game, const time_t falls);
 void take_input(struct Game*);
 Piece next_piece(struct Game*);
+size_t attack(struct Game*, const bool, const bool, const bool);
 bool chronicle(struct Game*);
 struct Histotrie* malloc_histotrie();
 void free_histotrie(struct Game*);
