@@ -44,7 +44,7 @@
 #define NEXT_PIECE(G) (\
 	EMPTY_SQUARE(G->state, SQUARE_INDEX(SPAWN_RANK(G), GET_CURSOR_FILE(G->state))) ?\
 		GET_WRAPPED(G->state) ?\
-			 KING_ME(G->state, DRAW_NEXT(G->state)) \
+			KING_ME(G->state, DRAW_NEXT(G->state)) \
 		:\
 			DRAW_NEXT(G->state) \
 	:\
@@ -226,6 +226,11 @@ const size_t PIECE_VALUES[SQUARE_COUNT] = {
 
 #define PIECE_VALUE(P) (PIECE_VALUES[PIECE_MAP[P]])
 
+size_t square_bit(size_t rank, size_t file) {
+
+	return SQUARE_BIT(SQUARE_INDEX(rank, file));
+}
+
 size_t bit_index(size_t bit) {
 
 	size_t i = 0, b = 1;
@@ -250,9 +255,14 @@ size_t bit_file(size_t bit) {
 	return bit_index(bit) % FILES;
 }
 
-time_t get_ease(struct Game* game) {
+time_t ease(struct Game* game) {
 
 	return EASE(game);
+}
+
+const char* get_deck() {
+
+	return DECK[0];
 }
 
 Piece next_piece(struct Game* game) {

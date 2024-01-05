@@ -130,7 +130,9 @@ struct Game {
 	Settings settings;
 };
 
-time_t get_ease(struct Game* game);
+time_t ease(struct Game*);
+const char* get_deck();
+size_t square_bit(size_t, size_t);
 void init_board(Board);
 void init_game(struct Game*);
 struct Game* malloc_init_game(Settings);

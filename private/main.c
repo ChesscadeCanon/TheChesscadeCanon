@@ -40,7 +40,7 @@ void default_model(struct Game* game, const time_t falls) {
 
 bool tick(struct Game* game, const time_t passed, CONTROL_FUNCTOR(control), MODEL_FUNCTOR(model), VIEW_FUNCTOR(view)) {
 
-	const time_t falls = COUNT_INTERVALS(game->fell, game->time, get_ease(game));;
+	const time_t falls = COUNT_INTERVALS(game->fell, game->time, ease(game));;
 
 	game->time += passed * !game->paused;
 	control(game, passed);

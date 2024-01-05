@@ -1,8 +1,9 @@
 import ctypes
 import pygame
+from res import *
 
 pygame.init()
-engine = ctypes.CDLL('../out/build/x64-Debug/ChesscadeLib.dll')
+engine = ctypes.CDLL(ENGINE_PATH)
 
 engine.get_ranks.restype = ctypes.c_ulonglong
 engine.get_files.restype = ctypes.c_ulonglong
@@ -63,13 +64,13 @@ engine.get_next_piece.argtypes = [ctypes.POINTER(Game)]
 engine.get_next_piece.restype = ctypes.c_wchar
 engine.forecast_captures.argtypes = [ctypes.POINTER(Game)]
 engine.forecast_captures.restype = ctypes.c_ulonglong
+engine.get_square_bit.argtypes = [ctypes.c_ulonglong, ctypes.c_ulonglong]
+engine.get_square_bit.restype = ctypes.c_ulonglong
+engine.get_deck.restype = ctypes.c_wchar_p
 
 screen = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Chesscade")
 
-BOARD_PIECES_DIR = "../assets/grey_pieces/"
-NEXT_PIECES_DIR = "../assets/blue_pieces/"
-NEXT_PIECE_PIECES_DIR = "../assets/orange_pieces/"
 PIECES = ['p', 'q', 'k', 'n', 'b', 'r']
 piece_path = lambda p, d: d + ('w' + p if p.isupper() else 'b' + p) + ".png"
 load_piece = lambda n, d: pygame.image.load(piece_path(n, d))
@@ -88,8 +89,9 @@ def load_pieces(directory):
     return ret
 
 board_pieces = load_pieces(BOARD_PIECES_DIR)
+deck_pieces = load_pieces(DECK_PIECES_DIR)
 next_pieces = load_pieces(NEXT_PIECES_DIR)
-next_piece_pieces = load_pieces(NEXT_PIECE_PIECES_DIR)
+threatened_pieces = load_pieces(THREATENED_PIECES_DIR)
 draw_piece = lambda P, p, x, y: p in P and screen.blit(P[p], (x, y))
 draw_piece_on_square = lambda P, p, r, f: draw_piece(P, p, (f + 1) * SQUARE, (r + 1) * SQUARE)
 
@@ -103,13 +105,17 @@ def draw_board():
 
 def draw_pieces(game):
     index = 0
+    threats = engine.forecast_captures(game)
     for r in range(RANKS):
         for f in range(FILES):
             while chr(game.contents.state[index]) == '\n':
                 index += 1
             square = chr(game.contents.state[index])
             if square in board_pieces:
-                draw_piece_on_square(board_pieces, square, r, f)
+                if threats & engine.get_square_bit(r, f):
+                    draw_piece_on_square(threatened_pieces, square, r, f)
+                else:
+                    draw_piece_on_square(board_pieces, square, r, f)
             index += 1
 
 def draw_player(game):
@@ -137,8 +143,8 @@ def draw_next(game):
             nexts = 'kKkKkKkK'
     else:
         nexts = 'rNbQqBnR'
-    [draw_piece(next_pieces, nexts[i], (i+1) * SQUARE, 0) for i in range(FILES)]
-    draw_piece_on_square(next_piece_pieces, next_piece, -1, cursor_file)
+    [draw_piece(deck_pieces, nexts[i], (i+1) * SQUARE, 0) for i in range(FILES)]
+    draw_piece_on_square(next_pieces, next_piece, -1, cursor_file)
 
 def take_input(game, passed):
     keys=pygame.key.get_pressed()

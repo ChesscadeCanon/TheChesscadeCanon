@@ -72,6 +72,16 @@ size_t forecast_captures(NOTAGAME g) {
 	return attack(game, false, true, false);
 }
 
+size_t get_square_bit(size_t rank, size_t file) {
+
+	return square_bit(rank, file);
+}
+
+const char* get_deck() {
+
+	return deck();
+}
+
 struct Game* malloc_init_default_game() {
 
 	struct Game* ret = malloc_init_game(DEFAULT_SETTINGS);
@@ -87,7 +97,7 @@ void begin_game(NOTAGAME g) {
 void increment_game(NOTAGAME g, time_t passed) {
 
 	BE_game;
-	const time_t falls = COUNT_INTERVALS(game->fell, game->time, get_ease(game));
+	const time_t falls = COUNT_INTERVALS(game->fell, game->time, ease(game));
 	if (GAME_OVER(game->state)) return;
 	game->time += passed;
 	exist(game, falls);
