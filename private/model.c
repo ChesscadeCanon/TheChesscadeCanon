@@ -1,0 +1,603 @@
+#include "Model.h"
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <ctype.h>
+#include <stdio.h>
+
+#define MOVE_RATE(G) 128
+#define EMPTY_CAPTURES "********"
+#define EMPTY_SQUARE(S, I) (GET_SQUARE(S, I) == EMPTY)
+#define HAS_CAPTURED(S) (strncmp(EMPTY_CAPTURES, S + CAPTURE_INDEX, CAPTURE_LENGTH) != 0)
+#define SQUARE_RANK(I) (I / LINE_LENGTH)
+#define SQUARE_FILE(I) (I % LINE_LENGTH)
+#define SET_PLAYER(S, V) (S[PLAYER_INDEX] = V)
+#define SET_PLAYER_RANK(S, V) (S[PLAYER_RANK_INDEX] = '0' + (char)(V))
+#define SET_PLAYER_FILE(S, V) (S[PLAYER_FILE_INDEX] = '0' + (char)(V))
+#define SET_CAPTURE(S, C, V) (S[CAPTURE_INDEX + C] = V)
+#define SET_CURSOR(S, V) (S[CURSOR_INDEX] = V < 0 ? '0' : '1')
+#define SET_CURSOR_RANK(S, V) (S[CURSOR_RANK_INDEX] = '0' + (char)(V))
+#define SET_CURSOR_FILE(S, V) (S[CURSOR_FILE_INDEX] = '0' + (char)(V))
+#define REVERSE_CURSOR(S) SET_CURSOR(S, -1 * GET_CURSOR(S))
+#define SET_WRAPPED(S, V) (S[WRAPPED_INDEX] = '0' + (V))
+#define SQUARE_DOWN(I) (I + LINE_LENGTH)
+#define PLAYER_SQUARE(S) SQUARE_INDEX(GET_PLAYER_RANK(S), GET_PLAYER_FILE(S))
+#define DOUBLE_BISHOP(G) (PIECE_MAP[GET_PLAYER(G->state)] == BISHOP && IS_SET(G->settings, DOUBLE_BISHOPS))
+#define BISHOP_SPEED(G, M) ((M) / (1 + DOUBLE_BISHOP(game)))
+#define PLAYER_DOWN(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state) + (DOUBLE_BISHOP(G) + 1), GET_PLAYER_FILE(G->state))
+#define PLAYER_LEFT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state), GET_PLAYER_FILE(G->state) - (1 + DOUBLE_BISHOP(G)))
+#define PLAYER_RIGHT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state), GET_PLAYER_FILE(G->state) + (1 + DOUBLE_BISHOP(G)))
+#define PLAYER_DOWN_LEFT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state) + 1, GET_PLAYER_FILE(G->state) - 1)
+#define PLAYER_DOWN_RIGHT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state) + 1, GET_PLAYER_FILE(G->state) + 1)
+#define EASE(G) 1024 * (1 + DOUBLE_BISHOP(G))
+#define QUEEN_ME(G) (\
+	IS_SET(G->settings, PAWNS_PROMOTE) ?\
+		GET_PLAYER(G->state) == WHITE_PAWN && GET_PLAYER_RANK(G->state) == 0 ? WHITE_QUEEN \
+		: ((GET_PLAYER(G->state) == BLACK_PAWN && GET_PLAYER_RANK(G->state) == LAST_RANK) ? BLACK_QUEEN \
+		: GET_PLAYER(G->state)) \
+	: GET_PLAYER(G->state) \
+)
+#define KING_ME(S, P) (IS_WHITE(P) ? WHITE_KING : BLACK_KING)
+#define DRAW_NEXT(S) DECK[GET_CURSOR_RANK(S)][GET_CURSOR_FILE(S)]
+#define SPAWN_RANK(G) (IS_SET(G->settings, WHITE_PAWN_SPAWN_HIGH) && DRAW_NEXT(G->state) == WHITE_PAWN ? 0 : GET_CURSOR_RANK(G->state))
+#define NEXT_PIECE(G) (\
+	EMPTY_SQUARE(G->state, SQUARE_INDEX(SPAWN_RANK(G), GET_CURSOR_FILE(G->state))) ?\
+		GET_WRAPPED(G->state) ?\
+			 KING_ME(G->state, DRAW_NEXT(G->state)) \
+		:\
+			DRAW_NEXT(G->state) \
+	:\
+		DEAD_PLAYER \
+)
+#define IN_BOUNDS(V, L, H) (V >= L && V < H)
+#define RAISE_FLOOR(G) (IS_SET(G->settings, WHITE_PAWN_LAND_HIGH) && (GET_PLAYER(G->state) == WHITE_PAWN) ? LINE_LENGTH : 0)
+#define ON_BOARD(G, I) (IN_BOUNDS(I, 0, BOARD_LENGTH) && G->state[I] != '\n')
+#define CAN_CAPTURE(G, I) (\
+	ON_BOARD(G, I) &&\
+	IS_PIECE(GET_SQUARE(G->state, I)) &&\
+	IS_WHITE(GET_SQUARE(G->state, I)) != IS_WHITE(GET_PLAYER(G->state)) &&\
+	!G->repeat \
+)
+#define NEXT_PLAYER(G) SET_PLAYER(G->state, NEXT_PIECE(G)) 
+#define SPAWN(G) (\
+	NEXT_PLAYER(G) &\
+	SET_PLAYER_RANK(G->state, SPAWN_RANK(G)) &\
+	SET_PLAYER_FILE(G->state, GET_CURSOR_FILE(G->state)) \
+)
+#define PACMAN(G, I) (abs(SQUARE_FILE(I) - GET_PLAYER_FILE(G->state)) > 2)
+#define CAN_STRIKE(G, I) (ON_BOARD(G, I + RAISE_FLOOR(G)) && EMPTY_SQUARE(G->state, I))
+#define CAN_MOVE(G, I) (CAN_STRIKE(G, I) && !PACMAN(G, I))
+#define LAND(G) (\
+	PLACE_PLAYER(G->state) &\
+	SPAWN(G) &\
+	SET_WRAPPED(G->state, 0) &\
+	resolve(G) \
+)
+#define MOVE_DOWN(G) (move_player(G, PLAYER_DOWN(G)))
+#define MOVE_RIGHT(G) (move_player(G, PLAYER_RIGHT(G)))
+#define MOVE_LEFT(G) (move_player(G, PLAYER_LEFT(G)))
+#define MOVE_DOWN_RIGHT(G) (move_player(G, PLAYER_DOWN_RIGHT(G)))
+#define MOVE_DOWN_LEFT(G) (move_player(G, PLAYER_DOWN_LEFT(G)))
+#define INCREMENT_CURSOR(S, V) (\
+	SET_CURSOR_FILE(S, GET_CURSOR_FILE(S) + (V)) &\
+	(abs(V) > 1 && SET_WRAPPED(S, 1)) \
+)
+#define UPDATE_CURSOR(S) (\
+	INCREMENT_CURSOR(S, \
+		(GET_CURSOR(S) > 0 && GET_CURSOR_FILE(S) < LAST_FILE) ||\
+		(GET_CURSOR(S) < 0 && GET_CURSOR_FILE(S) > 0) ?\
+		GET_CURSOR(S) : -GET_CURSOR(S) * LAST_FILE \
+	)\
+)
+#define FALL(G) (MOVE_DOWN(G) && UPDATE_CURSOR(G->state))
+#define INIT(S) (\
+	SET_CURSOR(S, 1)&\
+	SET_CURSOR_RANK(S, 1)&\
+	SET_CURSOR_FILE(S, 0)&\
+	SET_WRAPPED(S, 0) & \
+	TERMINATE(S) \
+)
+
+struct MoveSet {
+
+	const bool repeat;
+	const unsigned short count;
+	const short moves[8][2];
+};
+
+const struct MoveSet MOVES[SQUARE_COUNT] = {
+	[PAWN] = {
+		.repeat = false,
+		.count = 2,
+		.moves = {
+			{1, 1},
+			{1, -1}
+		}
+	},
+	[BISHOP] = {
+		.repeat = true,
+		.count = 4,
+		.moves = {
+			{1, 1},
+			{-1, 1},
+			{-1, -1},
+			{1, -1}
+		}
+	},
+	[ROOK] = {
+		.repeat = true,
+		.count = 4,
+		.moves = {
+			{0, 1},
+			{-1, 0},
+			{0, -1},
+			{1, 0}
+		}
+	},
+	[KNIGHT] = {
+		.repeat = true,
+		.count = 8,
+		.moves = {
+			{1, 2},
+			{-1, 2},
+			{-2, 1},
+			{-2, -1},
+			{-1, -2},
+			{1, -2},
+			{2, -1},
+			{2, 1}
+		}
+	},
+	[QUEEN] = {
+		.repeat = true,
+		.count = 8,
+		.moves = {
+			{1, 1},
+			{-1, 1},
+			{-1, -1},
+			{1, -1},
+			{0, 1},
+			{-1, 0},
+			{0, -1},
+			{1, 0}
+		}
+	},
+	[KING] = {
+		.repeat = false,
+		.count = 8,
+		.moves = {
+			{1, 1},
+			{-1, 1},
+			{-1, -1},
+			{1, -1},
+			{0, 1},
+			{-1, 0},
+			{0, -1},
+			{1, 0}
+		}
+	}
+};
+
+const char DECK[2][9] = {
+	"rNbQqBnR",
+	"PpPpPpPp"
+};
+
+const size_t PIECE_SET =
+PIECE_BIT(WHITE_PAWN) |
+PIECE_BIT(BLACK_PAWN) |
+PIECE_BIT(WHITE_BISHOP) |
+PIECE_BIT(BLACK_BISHOP) |
+PIECE_BIT(WHITE_ROOK) |
+PIECE_BIT(BLACK_ROOK) |
+PIECE_BIT(WHITE_KNIGHT) |
+PIECE_BIT(BLACK_KNIGHT) |
+PIECE_BIT(WHITE_QUEEN) |
+PIECE_BIT(BLACK_QUEEN) |
+PIECE_BIT(WHITE_KING) |
+PIECE_BIT(BLACK_KING);
+
+const enum Square PIECE_MAP[128] = {
+	[WHITE_PAWN] = PAWN,
+	[BLACK_PAWN] = PAWN,
+	[WHITE_BISHOP] = BISHOP,
+	[BLACK_BISHOP] = BISHOP,
+	[WHITE_ROOK] = ROOK,
+	[BLACK_ROOK] = ROOK,
+	[WHITE_KNIGHT] = KNIGHT,
+	[BLACK_KNIGHT] = KNIGHT,
+	[WHITE_QUEEN] = QUEEN,
+	[BLACK_QUEEN] = QUEEN,
+	[WHITE_KING] = KING,
+	[BLACK_KING] = KING,
+	[EMPTY] = NO_PIECE
+};
+
+const size_t PIECE_VALUES[SQUARE_COUNT] = {
+	[PAWN] = 1,
+	[BISHOP] = 3,
+	[KNIGHT] = 3,
+	[ROOK] = 5,
+	[QUEEN] = 9,
+	[KING] = 0,
+	[NO_PIECE] = 0
+};
+
+#define PIECE_VALUE(P) (PIECE_VALUES[PIECE_MAP[P]])
+
+time_t get_ease(struct Game* game) {
+
+	return EASE(game);
+}
+
+Piece next_piece(struct Game* game) {
+
+	return NEXT_PIECE(game);
+}
+
+struct Game* malloc_init_game(Settings settings) {
+
+	struct Game* game = malloc(sizeof(struct Game));
+	assert(game);
+	init_game(game);
+	game->histotrie = malloc_histotrie();
+	game->settings = settings;
+	return game;
+}
+
+void init_game(struct Game* game) {
+
+	game->score = 0;
+	game->combo = 0;
+	game->scored = 0;
+	game->time = 0;
+	game->fell = 0;
+	game->repeat = false;
+	game->paused = false;
+	game->dropped = false;
+	game->moved_left = -1;
+	game->moved_right = -1;
+	game->moved_down = -1;
+	game->settings = 0;
+	init_state(game->state);
+}
+
+void free_game(struct Game* game) {
+
+	if (game) {
+
+		free_histotrie(game);
+		free(game);
+	}
+}
+
+void init_histotrie(struct Histotrie* histotrie) {
+
+	memset(histotrie->children, 0, TRIE_CHILDREN * sizeof(struct Histotrie*));
+}
+
+void print_histotrie(struct Histotrie* root) {
+
+	if (!root) return;
+
+	for (size_t c = 0; c < TRIE_CHILDREN; ++c) {
+
+		if (root->children[c]) {
+
+			print_histotrie(root->children[c]);
+		}
+	}
+}
+
+struct Histotrie* malloc_histotrie() {
+
+	struct Histotrie* ret = malloc(sizeof(struct Histotrie));
+	init_histotrie(ret);
+	return ret;
+}
+
+void free_children(struct Histotrie* root) {
+
+	if (!root) return;
+
+	for (size_t c = 0; c < TRIE_CHILDREN; ++c) {
+
+		if (root->children[c]) {
+
+			free_children(root->children[c]);
+		}
+	}
+
+	free(root);
+}
+
+void free_histotrie(struct Game* game) {
+
+	free_children(game->histotrie);
+}
+
+bool record_state(struct Histotrie* root, const Board board, const size_t index) {
+
+	if (index >= BOARD_LENGTH) return true;
+	if (board[index] == '\n') return record_state(root, board, index + 1);
+
+	Piece piece = board[index];
+	enum Square square = PIECE_MAP[piece];
+	size_t child = square == NO_PIECE ? TRIE_CHILDREN - 1 : square + NO_PIECE * IS_WHITE(piece);
+
+	if (root->children[child]) {
+
+		return record_state(root->children[child], board, index + 1);
+	}
+
+	root->children[child] = malloc(sizeof(struct Histotrie));
+	init_histotrie(root->children[child]);
+	record_state(root->children[child], board, index + 1);
+	return false;
+}
+
+bool chronicle(struct Game* game) {
+
+	if (!game->histotrie) return false;
+	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT)) return false;
+
+	const bool ret = record_state(game->histotrie, game->state, 0);
+	game->repeat = ret;
+	return ret;
+}
+
+void init_captures(State state) {
+
+	memcpy(state + BOARD_LENGTH, EMPTY_CAPTURES, CAPTURE_LENGTH * sizeof(char));
+}
+
+void init_board(Board board) {
+
+	for (size_t i = 0, r = 0; r < RANKS; ++r) {
+
+		for (size_t f = 0; f < FILES; ++f) {
+
+			board[i] = EMPTY;
+			++i;
+		}
+
+		++i;
+	}
+}
+
+void kill(State state, const size_t square, const unsigned short move) {
+
+	Piece piece = GET_SQUARE(state, square);
+	SET_CAPTURE(state, move, piece);
+	SET_SQUARE(state, square, EMPTY);
+}
+
+void capture(State state, Board piece_buffer, const size_t square, const unsigned short move) {
+
+	if (piece_buffer) {
+
+		piece_buffer[square] = GET_SQUARE(state, square);
+	}
+	else {
+
+		kill(state, square, move);
+	}
+}
+
+bool hit(struct Game* game, Board piece_buffer, struct MoveSet* move_set, const unsigned short rank, const unsigned short file, const unsigned short move) {
+
+	const short reverse = GET_PLAYER(game->state) == WHITE_PAWN && IS_SET(game->settings, WHITE_PAWN_HIT_UP) ? -1 : 1;
+	const unsigned short to_rank = rank + move_set->moves[move][0] * reverse;
+	const unsigned short to_file = file + move_set->moves[move][1];
+	size_t square = SQUARE_INDEX(to_rank, to_file);
+
+	if (move_set->repeat && CAN_STRIKE(game, square)) {
+
+		return hit(game, piece_buffer, move_set, to_rank, to_file, move);
+	}
+	else if(CAN_CAPTURE(game, square)) {
+
+		capture(game->state, piece_buffer, square, move);
+		return 1;
+	}
+
+	return 0;
+}
+
+unsigned short strike(struct Game* game, Board piece_buffer, struct MoveSet* move_set, unsigned short move) {
+
+	if (move >= move_set->count) return 0;
+
+	const unsigned short rank = GET_PLAYER_RANK(game->state);
+	const unsigned short file = GET_PLAYER_FILE(game->state);
+	const unsigned short ret = hit(game, piece_buffer, move_set, rank, file, move);
+	return ret + strike(game, piece_buffer, move_set, move + 1);
+}
+
+unsigned short attack(struct Game* game) {
+
+	Piece piece = GET_PLAYER(game->state);
+	enum Square piece_type = PIECE_MAP[piece];
+	struct MoveSet move_set = MOVES[piece_type];
+	init_captures(game->state);
+	return strike(game, NULL, &move_set, 0);
+}
+
+size_t drop_to(struct Game* game, const size_t from) {
+
+	size_t to = SQUARE_DOWN(from);
+
+	if (DOUBLE_BISHOP(game)) {
+		
+		to = SQUARE_DOWN(to);
+	}
+
+	if (CAN_MOVE(game, to)) {
+
+		return drop_to(game, to);
+	}
+
+	return from;
+}
+
+size_t resolve(struct Game* game) {
+
+	game->scored = 0;
+	size_t count = 0;
+
+	for (size_t i = 0; i < FILES; ++i) {
+
+		Piece piece = GET_CAPTURE(game->state, i);
+
+		if (IS_SET(game->settings, CHECKMATE) && PIECE_MAP[piece] == KING) {
+
+			SET_PLAYER(game->state, DEAD_PLAYER);
+		}
+		
+		if (piece != *EMPTY_CAPTURES) {
+
+			game->scored += PIECE_VALUE(piece);
+			++count;
+		}
+	}
+
+	count ? ++game->combo : (game->combo = 0);
+	game->scored *= game->combo * count;
+	game->score += game->scored;
+	return game->score;
+}
+
+bool move_player(struct Game* game, size_t to) {
+
+	if (CAN_MOVE(game, to)) {
+
+		SET_PLAYER_RANK(game->state, SQUARE_RANK(to));
+		SET_PLAYER_FILE(game->state, SQUARE_FILE(to));
+		return true;
+	}
+	else if (SQUARE_RANK(to) > GET_PLAYER_RANK(game->state)) {
+
+		SET_PLAYER(game->state, QUEEN_ME(game));
+		const unsigned short captures = attack(game);
+		LAND(game);
+		
+		if (captures) {
+
+			REVERSE_CURSOR(game->state);
+		}
+
+		chronicle(game);
+	}
+
+	return false;
+}
+
+time_t buy_move(struct Game* game, long int* moved) {
+
+	if (*moved < 0) return 0;
+	const long int steps = *moved / MOVE_RATE(game);
+	*moved -= MOVE_RATE(game) * steps;
+	assert(steps >= 0);
+	return (time_t)steps;
+}
+
+void exist(struct Game* game, const time_t falls) {
+
+	take_input(game);
+	fall(game, falls);
+}
+
+void drop(struct Game* game) {
+
+	const size_t from = PLAYER_SQUARE(game->state);
+	const size_t to = drop_to(game, from);
+	move_player(game, to);
+}
+
+time_t move_right(struct Game* game, time_t steps) {
+
+	if (steps <= 0) return steps;
+	MOVE_RIGHT(game);
+	move_right(game, steps - 1);
+	return steps;
+}
+
+time_t move_left(struct Game* game, time_t steps) {
+
+	if (steps <= 0) return steps;
+	MOVE_LEFT(game);
+	move_left(game, steps - 1);
+	return steps;
+}
+
+time_t move_down(struct Game* game, time_t steps) {
+
+	if (steps <= 0) return steps;
+	MOVE_DOWN(game);
+	move_down(game, steps - 1);
+	return steps;
+}
+
+time_t move_down_left(struct Game* game, time_t steps) {
+
+	if (steps <= 0) return steps;
+	MOVE_DOWN_LEFT(game);
+	move_down_left(game, steps - 1);
+	return steps;
+}
+
+time_t move_down_right(struct Game* game, time_t steps) {
+
+	if (steps <= 0) return steps;
+	MOVE_DOWN_RIGHT(game);
+	move_down_right(game, steps - 1);
+	return steps;
+}
+
+void fall(struct Game* game, time_t falls) {
+	
+	if (falls <= 0) return;
+	else FALL(game);
+	fall(game, falls - 1);
+}
+
+void take_input(struct Game* game) {
+
+	if (game->dropped) {
+
+		drop(game);
+		game->dropped = false;
+	}
+
+	time_t left = buy_move(game, &game->moved_left);
+	time_t right = buy_move(game, &game->moved_right);
+	time_t down = buy_move(game, &game->moved_down);
+
+	if (IS_SET(game->settings, DIAGONALS) && left && down && !right) {
+
+		move_down_left(game, min(left - right, down));
+	}
+	else if (IS_SET(game->settings, DIAGONALS) && !left && down && right) {
+
+		move_down_right(game, min(right - left, down));
+	}
+	else {
+
+		move_right(game, max(0, BISHOP_SPEED(G, right - left)));
+		move_left(game, max(0, BISHOP_SPEED(G, left - right)));
+		move_down(game, max(0, down));
+	}
+}
+
+void begin(struct Game* game) {
+
+	SPAWN(game);
+}
+
+void init_state(State state) {
+
+	memset(state, '\n', STATE_LENGTH * sizeof(char));
+	init_captures(state);
+	init_board(state);
+	INIT(state);
+}
