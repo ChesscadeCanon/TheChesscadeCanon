@@ -44,7 +44,7 @@ typedef char* State;
 #define LAST_RANK (RANKS - 1ull)
 #define MAX_CAPTURES 8ull
 #define LINE_LENGTH (FILES + 1ull)
-#define TWO_LINES (LINE_LENGTH * 2ull)
+#define FOUR_LINES (LINE_LENGTH * 4ull)
 #define BOARD_LENGTH (LINE_LENGTH * RANKS)
 #define CAPTURE_LENGTH 8ull
 #define DATA_LENGTH 15ull
@@ -100,7 +100,7 @@ enum Setting {
 	DEFAULT_SETTINGS = WHITE_PAWN_HIT_UP | WHITE_PAWN_SPAWN_HIGH | WHITE_PAWN_LAND_HIGH | PAWNS_PROMOTE | NO_CAPTURE_ON_REPEAT | DOUBLE_BISHOPS | CHECKMATE | DIAGONALS
 };
 
-extern const char DECK[2][9];
+extern const char DECKS[4][9];
 extern const char MAP[128];
 
 extern const enum Square PIECE_MAP[128];
@@ -131,7 +131,7 @@ struct Game {
 };
 
 time_t ease(struct Game*);
-const char* get_deck();
+const char* deck(struct Game*, size_t);
 size_t square_bit(size_t, size_t);
 void init_board(Board);
 void init_game(struct Game*);
@@ -144,8 +144,10 @@ void fall(struct Game*, time_t);
 void exist(struct Game* game, const time_t falls);
 void take_input(struct Game*);
 Piece next_piece(struct Game*);
+size_t forecast_rank(struct Game*);
+char forecast_piece(struct Game*);
 size_t attack(struct Game*, const bool, const bool, const bool);
-bool chronicle(struct Game*);
+size_t chronicle(struct Game*);
 struct Histotrie* malloc_histotrie();
 void free_histotrie(struct Game*);
 

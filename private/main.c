@@ -54,13 +54,16 @@ bool tick(struct Game* game, const time_t passed, CONTROL_FUNCTOR(control), MODE
 
 void play(struct Game* game, struct timeb* then, CONTROL_FUNCTOR(control), MODEL_FUNCTOR(model), VIEW_FUNCTOR(view)) {
 
-	struct timeb now;
-	ftime(&now);
-	const time_t passed = MILLISECONDS_DIFFERENCE((*then), (now));
+	while (true)
+	{
 
-	if (tick(game, passed, control, model, view)) return;
-	tock(game, then, &now);
-	play(game, then, control, model, view);
+		struct timeb now;
+		ftime(&now);
+		const time_t passed = MILLISECONDS_DIFFERENCE((*then), (now));
+
+		if (tick(game, passed, control, model, view)) return;
+		tock(game, then, &now);
+	}
 }
 
 void play_default(struct Game* game) {

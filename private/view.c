@@ -37,22 +37,24 @@ void print_cursor(State state) {
 	const bool wrapped = GET_WRAPPED(state);
 	const size_t rank = GET_CURSOR_RANK(state);
 	const size_t file = GET_CURSOR_FILE(state);
-	char next = DECK[rank][file];
+	char next = DECKS[rank][file];
 	next = wrapped ? IS_WHITE(next) ? 'K' : 'k' : next;
 #if OS_WINDOWS
-	char cursor[TWO_LINES + 1];
-	memset(cursor, '*', TWO_LINES);
-	cursor[LINE_LENGTH - 1] = '\n';
-	cursor[TWO_LINES - 1] = '\n';
-	cursor[TWO_LINES] = '\0';
+	char cursor[FOUR_LINES + 1] = {
+		'*', '*', '*', '*', '*', '*', '*', '*', '\n',
+		'*', '*', '*', '*', '*', '*', '*', '*', '\n',
+		'*', '*', '*', '*', '*', '*', '*', '*', '\n',
+		'*', '*', '*', '*', '*', '*', '*', '*', '\n',
+		'\0'
+	};
 #else
-	char cursor[TWO_LINES + 3];
-	memset(cursor, '*', TWO_LINES + 2);
-	cursor[LINE_LENGTH - 1] = '\n';
-	cursor[LINE_LENGTH] = '\r';
-	cursor[TWO_LINES] = '\n';
-	cursor[TWO_LINES + 1] = '\r';
-	cursor[TWO_LINES + 2] = '\0';
+	char cursor[FOUR_LINES + 5] = {
+		'*', '*', '*', '*', '*', '*', '*', '*', '\n', '\r',
+		'*', '*', '*', '*', '*', '*', '*', '*', '\n', '\r',
+		'*', '*', '*', '*', '*', '*', '*', '*', '\n', '\r',
+		'*', '*', '*', '*', '*', '*', '*', '*', '\n', '\r',
+		'\0'
+	};
 #endif
 	cursor[rank * (LINE_LENGTH + !OS_WINDOWS) + file] = next;
 	printf(cursor);

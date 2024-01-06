@@ -72,14 +72,33 @@ size_t forecast_captures(NOTAGAME g) {
 	return attack(game, false, true, false);
 }
 
+size_t attack_pattern(NOTAGAME g) {
+
+	BE_game;
+	return attack(game, false, false, true);
+}
+
+size_t get_forecast_rank(NOTAGAME g) {
+
+	BE_game;
+	return forecast_rank(game);
+}
+
+char get_forecast_piece(NOTAGAME g) {
+
+	BE_game;
+	return forecast_piece(game);
+}
+
 size_t get_square_bit(size_t rank, size_t file) {
 
 	return square_bit(rank, file);
 }
 
-const char* get_deck() {
+const char* get_deck(NOTAGAME g, size_t d) {
 
-	return deck();
+	BE_game;
+	return deck(game, d);
 }
 
 struct Game* malloc_init_default_game() {

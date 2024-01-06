@@ -39,14 +39,11 @@
 	: GET_PLAYER(G->state) \
 )
 #define KING_ME(S, P) (IS_WHITE(P) ? WHITE_KING : BLACK_KING)
-#define DRAW_NEXT(S) DECK[GET_CURSOR_RANK(S)][GET_CURSOR_FILE(S)]
+#define DRAW_NEXT(S) DECKS[GET_CURSOR_RANK(S)][GET_CURSOR_FILE(S)]
 #define SPAWN_RANK(G) (IS_SET(G->settings, WHITE_PAWN_SPAWN_HIGH) && DRAW_NEXT(G->state) == WHITE_PAWN ? 0 : GET_CURSOR_RANK(G->state))
 #define NEXT_PIECE(G) (\
 	EMPTY_SQUARE(G->state, SQUARE_INDEX(SPAWN_RANK(G), GET_CURSOR_FILE(G->state))) ?\
-		GET_WRAPPED(G->state) ?\
-			KING_ME(G->state, DRAW_NEXT(G->state)) \
-		:\
-			DRAW_NEXT(G->state) \
+		DRAW_NEXT(G->state) \
 	:\
 		DEAD_PLAYER \
 )
@@ -57,7 +54,7 @@
 	ON_BOARD(G, I) &&\
 	IS_PIECE(GET_SQUARE(G->state, I)) &&\
 	IS_WHITE(GET_SQUARE(G->state, I)) != IS_WHITE(GET_PLAYER(G->state)) &&\
-	!G->repeat \
+	(!G->repeat) \
 )
 #define NEXT_PLAYER(G) SET_PLAYER(G->state, NEXT_PIECE(G)) 
 #define SPAWN(G) (\
@@ -68,7 +65,21 @@
 #define PACMAN(G, I) (abs(SQUARE_FILE(I) - GET_PLAYER_FILE(G->state)) > 2)
 #define CAN_STRIKE(G, I) (ON_BOARD(G, I + RAISE_FLOOR(G)) && EMPTY_SQUARE(G->state, I))
 #define CAN_MOVE(G, I) (CAN_STRIKE(G, I) && !PACMAN(G, I))
+#define GRADE_CURSOR(S) (SET_CURSOR_RANK(S, !HAS_CAPTURED(S) + GET_WRAPPED(S) * 2))
+#define INCREMENT_CURSOR(S, V) (\
+	SET_CURSOR_FILE(S, GET_CURSOR_FILE(S) + (V)) &\
+	(abs(V) > 1 && SET_WRAPPED(S, 1)) \
+)
+#define UPDATE_CURSOR(S) (\
+	INCREMENT_CURSOR(S, \
+		(GET_CURSOR(S) > 0 && GET_CURSOR_FILE(S) < LAST_FILE) ||\
+		(GET_CURSOR(S) < 0 && GET_CURSOR_FILE(S) > 0) ?\
+		GET_CURSOR(S) : -GET_CURSOR(S) * LAST_FILE \
+	) &\
+	GRADE_CURSOR(S) \
+)
 #define LAND(G) (\
+	GRADE_CURSOR(G->state) &\
 	PLACE_PLAYER(G->state) &\
 	SPAWN(G) &\
 	SET_WRAPPED(G->state, 0) &\
@@ -79,22 +90,11 @@
 #define MOVE_LEFT(G) (move_player(G, PLAYER_LEFT(G)))
 #define MOVE_DOWN_RIGHT(G) (move_player(G, PLAYER_DOWN_RIGHT(G)))
 #define MOVE_DOWN_LEFT(G) (move_player(G, PLAYER_DOWN_LEFT(G)))
-#define INCREMENT_CURSOR(S, V) (\
-	SET_CURSOR_FILE(S, GET_CURSOR_FILE(S) + (V)) &\
-	(abs(V) > 1 && SET_WRAPPED(S, 1)) \
-)
-#define UPDATE_CURSOR(S) (\
-	INCREMENT_CURSOR(S, \
-		(GET_CURSOR(S) > 0 && GET_CURSOR_FILE(S) < LAST_FILE) ||\
-		(GET_CURSOR(S) < 0 && GET_CURSOR_FILE(S) > 0) ?\
-		GET_CURSOR(S) : -GET_CURSOR(S) * LAST_FILE \
-	)\
-)
 #define FALL(G) (MOVE_DOWN(G) && UPDATE_CURSOR(G->state))
 #define INIT(S) (\
-	SET_CURSOR(S, 1)&\
+	SET_CURSOR(S, -1)&\
 	SET_CURSOR_RANK(S, 1)&\
-	SET_CURSOR_FILE(S, 0)&\
+	SET_CURSOR_FILE(S, 7)&\
 	SET_WRAPPED(S, 0) & \
 	TERMINATE(S) \
 )
@@ -179,9 +179,11 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 	}
 };
 
-const char DECK[2][9] = {
-	"rNbQqBnR",
-	"PpPpPpPp"
+const char DECKS[4][9] = {
+	"RnBqQbNr",
+	"pPpPpPpP",
+	"KkKkKkKk",
+	"kKkKkKkK"
 };
 
 const size_t PIECE_SET =
@@ -260,9 +262,9 @@ time_t ease(struct Game* game) {
 	return EASE(game);
 }
 
-const char* get_deck() {
+const char* deck(struct Game* game, size_t d) {
 
-	return DECK[0];
+	return DECKS[d];
 }
 
 Piece next_piece(struct Game* game) {
@@ -273,6 +275,7 @@ Piece next_piece(struct Game* game) {
 struct Game* malloc_init_game(Settings settings) {
 
 	struct Game* game = malloc(sizeof(struct Game));
+	printf("malloc game\n");
 	assert(game);
 	init_game(game);
 	game->histotrie = malloc_histotrie();
@@ -327,6 +330,7 @@ void print_histotrie(struct Histotrie* root) {
 struct Histotrie* malloc_histotrie() {
 
 	struct Histotrie* ret = malloc(sizeof(struct Histotrie));
+	printf("malloc histotrie\n");
 	init_histotrie(ret);
 	return ret;
 }
@@ -351,9 +355,9 @@ void free_histotrie(struct Game* game) {
 	free_children(game->histotrie);
 }
 
-bool record_state(struct Histotrie* root, const Board board, const size_t index) {
+size_t record_state(struct Histotrie* root, const Board board, const size_t index) {
 
-	if (index >= BOARD_LENGTH) return true;
+	if (index >= BOARD_LENGTH) return 0;
 	if (board[index] == '\n') return record_state(root, board, index + 1);
 
 	Piece piece = board[index];
@@ -366,18 +370,19 @@ bool record_state(struct Histotrie* root, const Board board, const size_t index)
 	}
 
 	root->children[child] = malloc(sizeof(struct Histotrie));
+	printf("malloc histotrie child\n");
 	init_histotrie(root->children[child]);
-	record_state(root->children[child], board, index + 1);
-	return false;
+	return 1 + record_state(root->children[child], board, index + 1);
 }
 
-bool chronicle(struct Game* game) {
+size_t chronicle(struct Game* game) {
 
 	if (!game->histotrie) return false;
 	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT)) return false;
 
-	const bool ret = record_state(game->histotrie, game->state, 0);
-	game->repeat = ret;
+	const size_t ret = record_state(game->histotrie, game->state, 0);
+	printf("created %llu histotrie nodes\n", ret);
+	game->repeat = !ret;
 	return ret;
 }
 
@@ -423,18 +428,20 @@ size_t hit(struct Game* game, enum Square piece_type, const size_t rank, const s
 	const short reverse = piece_type == PAWN && IS_WHITE(GET_PLAYER(game->state)) && IS_SET(game->settings, WHITE_PAWN_HIT_UP) ? -1 : 1;
 	const size_t to_rank = rank + move_set.moves[move][0] * reverse;
 	const size_t to_file = file + move_set.moves[move][1];
-	size_t square = SQUARE_INDEX(to_rank, to_file);
+	const size_t square = SQUARE_INDEX(to_rank, to_file);
+	const bool open = CAN_STRIKE(game, square);
+	size_t ret = open && pattern ? SQUARE_BIT(square) : 0;
 
-	if (move_set.repeat && CAN_STRIKE(game, square)) {
+	if (move_set.repeat && open) {
 
-		return hit(game, piece_type, to_rank, to_file, move, execute, pattern);
+		ret |= hit(game, piece_type, to_rank, to_file, move, execute, pattern);
 	}
 	else if(CAN_CAPTURE(game, square)) {
 
-		return capture(game->state, square, move, execute);
+		ret |= capture(game->state, square, move, execute);
 	}
 
-	return 0;
+	return ret;
 }
 
 size_t strike(struct Game* game, const enum Square piece_type, const size_t rank, const size_t file, const size_t move, const bool execute, const bool pattern) {
@@ -474,9 +481,26 @@ size_t attack(struct Game* game, const bool execute, const bool forecast, const 
 		piece = QUEEN_ME(game, rank);
 	}
 
+	if (execute) {
+
+		init_captures(game->state);
+	}
+
 	enum Square piece_type = PIECE_MAP[piece];
-	init_captures(game->state);
 	return strike(game, piece_type, rank, file, 0, execute, pattern);
+}
+
+size_t forecast_rank(struct Game* game) {
+
+	const size_t rank = GET_PLAYER_RANK(game->state);
+	const size_t file = GET_PLAYER_FILE(game->state);
+	return SQUARE_RANK(drop_to(game, SQUARE_INDEX(rank, file)));
+}
+
+char forecast_piece(struct Game* game) {
+
+	const size_t rank = forecast_rank(game);
+	return QUEEN_ME(game, rank);
 }
 
 size_t resolve(struct Game* game) {

@@ -13,12 +13,14 @@ engine.get_state_length.restype = ctypes.c_ulonglong
 BLACK = ( 0, 0, 0)
 WHITE = ( 255, 255, 255)
 GREY = ( 127, 127, 127)
-SIZE = (576, 576)
+SIZE = (480, 576)
 RANKS = engine.get_ranks()
 FILES = engine.get_files()
 TRIE_CHILDREN = engine.get_trie_children()
 STATE_LENGTH = engine.get_state_length()
-SQUARE = min(SIZE[0] // (FILES + 1), SIZE[1] // (RANKS + 1))
+SQUARES_OFF_LEFT = 2
+SQUARES_OFF_TOP = 4
+SQUARE = min(SIZE[0] // (FILES + SQUARES_OFF_LEFT), SIZE[1] // (RANKS + SQUARES_OFF_TOP))
                                                  
 class Histotrie(ctypes.Structure):
     pass
@@ -64,9 +66,16 @@ engine.get_next_piece.argtypes = [ctypes.POINTER(Game)]
 engine.get_next_piece.restype = ctypes.c_wchar
 engine.forecast_captures.argtypes = [ctypes.POINTER(Game)]
 engine.forecast_captures.restype = ctypes.c_ulonglong
+engine.get_forecast_piece.argtypes = [ctypes.POINTER(Game)]
+engine.get_forecast_piece.restype = ctypes.c_wchar
+engine.get_forecast_rank.argtypes = [ctypes.POINTER(Game)]
+engine.get_forecast_rank.restype = ctypes.c_ulonglong
+engine.attack_pattern.argtypes = [ctypes.POINTER(Game)]
+engine.attack_pattern.restype = ctypes.c_ulonglong
 engine.get_square_bit.argtypes = [ctypes.c_ulonglong, ctypes.c_ulonglong]
 engine.get_square_bit.restype = ctypes.c_ulonglong
-engine.get_deck.restype = ctypes.c_wchar_p
+engine.get_deck.argtypes = [ctypes.POINTER(Game), ctypes.c_ulonglong]
+engine.get_deck.restype = ctypes.c_char_p
 
 screen = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Chesscade")
@@ -92,14 +101,21 @@ board_pieces = load_pieces(BOARD_PIECES_DIR)
 deck_pieces = load_pieces(DECK_PIECES_DIR)
 next_pieces = load_pieces(NEXT_PIECES_DIR)
 threatened_pieces = load_pieces(THREATENED_PIECES_DIR)
+shadow_pieces = load_pieces(SHADOW_PIECES_DIR)
 draw_piece = lambda P, p, x, y: p in P and screen.blit(P[p], (x, y))
-draw_piece_on_square = lambda P, p, r, f: draw_piece(P, p, (f + 1) * SQUARE, (r + 1) * SQUARE)
+draw_piece_on_square = lambda P, p, r, f: draw_piece(P, p, (f + SQUARES_OFF_LEFT) * SQUARE, (r + SQUARES_OFF_TOP) * SQUARE)
+draw_piece_on_deck = lambda P, p, r, f: draw_piece(P, p, (f + SQUARES_OFF_LEFT) * SQUARE, r * SQUARE)
 
-def draw_board():
+def draw_board(game):
     color = WHITE
-    for x in range(SQUARE, SIZE[0], SQUARE):
-        for y in range(SQUARE, SIZE[1], SQUARE):
-            pygame.draw.rect(screen, color, [x, y, SQUARE, SQUARE], 0)
+    pattern = engine.attack_pattern(game)
+    for f in range(FILES):
+        for r in range(RANKS):
+            i = r * FILES + f
+            b = 1 << i
+            x = (SQUARES_OFF_LEFT + f) * SQUARE
+            y = (SQUARES_OFF_TOP + r) * SQUARE
+            pygame.draw.rect(screen, GREY if b & pattern else color, [x, y, SQUARE, SQUARE], 0)
             color = BLACK if color == WHITE else WHITE
         color = BLACK if color == WHITE else WHITE
 
@@ -124,27 +140,21 @@ def draw_player(game):
     file = engine.get_player_file(game)
     draw_piece_on_square(board_pieces, player, rank, file)
 
-#const char DECK[2][9] = {
-#	"rNbQqBnR",
-#	"PpPpPpPp"
-#};
-
 def draw_next(game):
     cursor_rank = engine.get_cursor_rank(game)
     cursor_file = engine.get_cursor_file(game)
     next_piece = engine.get_next_piece(game)
-    nexts = ()
-    if next_piece in 'Pp':
-        nexts = 'PpPpPpPp'
-    elif next_piece in 'Kk':
-        if cursor_rank:
-            nexts = 'KkKkKkKk'
-        else:
-            nexts = 'kKkKkKkK'
-    else:
-        nexts = 'rNbQqBnR'
-    [draw_piece(deck_pieces, nexts[i], (i+1) * SQUARE, 0) for i in range(FILES)]
-    draw_piece_on_square(next_pieces, next_piece, -1, cursor_file)
+    for g in range(SQUARES_OFF_TOP):
+        deck = [chr(c) for c in engine.get_deck(game, g)]
+        draw_piece_on_deck(deck_pieces, deck[0], g, 0)
+        [draw_piece_on_deck(deck_pieces, deck[i], g, i) for i in range(FILES)]
+    draw_piece_on_deck(next_pieces, next_piece, cursor_rank, cursor_file)
+
+def draw_shadow(game):
+    piece = engine.get_forecast_piece(game)
+    rank = engine.get_forecast_rank(game)
+    file = engine.get_player_file(game)
+    draw_piece_on_square(shadow_pieces, piece, rank, file)
 
 def take_input(game, passed):
     keys=pygame.key.get_pressed()
@@ -181,10 +191,11 @@ def play():
         engine.increment_game(game, passed)
         carryOn = carryOn and not engine.game_over(game)
         screen.fill(GREY)
-        draw_board()
+        draw_board(game)
         draw_next(game)
         draw_pieces(game)
         draw_player(game)
+        draw_shadow(game)
         pygame.display.flip()
         clock.tick(60)
     engine.delete_game(game)
