@@ -102,6 +102,7 @@ deck_pieces = load_pieces(DECK_PIECES_DIR)
 next_pieces = load_pieces(NEXT_PIECES_DIR)
 threatened_pieces = load_pieces(THREATENED_PIECES_DIR)
 shadow_pieces = load_pieces(SHADOW_PIECES_DIR)
+player_pieces = load_pieces(PLAYER_PIECES_DIR)
 draw_piece = lambda P, p, x, y: p in P and screen.blit(P[p], (x, y))
 draw_piece_on_square = lambda P, p, r, f: draw_piece(P, p, (f + SQUARES_OFF_LEFT) * SQUARE, (r + SQUARES_OFF_TOP) * SQUARE)
 draw_piece_on_deck = lambda P, p, r, f: draw_piece(P, p, (f + SQUARES_OFF_LEFT) * SQUARE, r * SQUARE)
@@ -138,7 +139,7 @@ def draw_player(game):
     player = engine.get_player(game)
     rank = engine.get_player_rank(game)
     file = engine.get_player_file(game)
-    draw_piece_on_square(board_pieces, player, rank, file)
+    draw_piece_on_square(player_pieces, player, rank, file)
 
 def draw_next(game):
     cursor_rank = engine.get_cursor_rank(game)

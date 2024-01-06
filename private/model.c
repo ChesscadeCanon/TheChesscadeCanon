@@ -82,8 +82,7 @@
 	GRADE_CURSOR(G->state) &\
 	PLACE_PLAYER(G->state) &\
 	SPAWN(G) &\
-	SET_WRAPPED(G->state, 0) &\
-	resolve(G) \
+	SET_WRAPPED(G->state, 0) \
 )
 #define MOVE_DOWN(G) (move_player(G, PLAYER_DOWN(G)))
 #define MOVE_RIGHT(G) (move_player(G, PLAYER_RIGHT(G)))
@@ -503,7 +502,7 @@ char forecast_piece(struct Game* game) {
 	return QUEEN_ME(game, rank);
 }
 
-size_t resolve(struct Game* game) {
+size_t judge(struct Game* game) {
 
 	game->scored = 0;
 	size_t count = 0;
@@ -546,6 +545,7 @@ bool move_player(struct Game* game, size_t to) {
 		SET_PLAYER(game->state, QUEEN_ME(game, from_rank));
 		const size_t captures = attack(game, true, false, false);
 		LAND(game);
+		judge(game);
 		
 		if (captures) {
 
