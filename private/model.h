@@ -1,8 +1,14 @@
 #pragma once
 #include "config.h"
-#include <sys\timeb.h>
+#include <sys/timeb.h>
 #include <stdbool.h>
-#include <sys\timeb.h>
+
+#ifdef __unix__                    /* __unix__ is usually defined by compilers targeting Unix systems */
+#define max(A, B) (A > B ? A : B)
+#define min(A, B) (A < B ? A : B)
+#elif defined(_WIN32) || defined(WIN32)     /* _Win32 is usually defined by compilers targeting 32 or   64 bit Windows systems */
+#define OS_WINDOWS 1
+#endif
 
 typedef char* Board;
 typedef size_t Settings;
@@ -24,6 +30,7 @@ struct Game;
 typedef char Piece;
 typedef char* State;
 
+#define FPS 60
 #define EMPTY '_'
 #define DEAD_PLAYER '!'
 #define WHITE_PAWN 'P'

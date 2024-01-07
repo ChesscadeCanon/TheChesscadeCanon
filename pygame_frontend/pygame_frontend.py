@@ -1,4 +1,5 @@
 import ctypes
+import atexit
 import pygame
 from res import *
 
@@ -13,6 +14,8 @@ engine.get_state_length.restype = ctypes.c_ulonglong
 BLACK = ( 0, 0, 0)
 WHITE = ( 255, 255, 255)
 GREY = ( 127, 127, 127)
+DARK_GREY = (63, 63, 63)
+LIGHT_GREY = (171, 171, 171)
 SIZE = (480, 576)
 RANKS = engine.get_ranks()
 FILES = engine.get_files()
@@ -21,6 +24,7 @@ STATE_LENGTH = engine.get_state_length()
 SQUARES_OFF_LEFT = 2
 SQUARES_OFF_TOP = 4
 SQUARE = min(SIZE[0] // (FILES + SQUARES_OFF_LEFT), SIZE[1] // (RANKS + SQUARES_OFF_TOP))
+FONT_1 = pygame.font.Font('freesansbold.ttf', 16)
                                                  
 class Histotrie(ctypes.Structure):
     pass
@@ -116,7 +120,8 @@ def draw_board(game):
             b = 1 << i
             x = (SQUARES_OFF_LEFT + f) * SQUARE
             y = (SQUARES_OFF_TOP + r) * SQUARE
-            pygame.draw.rect(screen, GREY if b & pattern else color, [x, y, SQUARE, SQUARE], 0)
+            grey = LIGHT_GREY if color == WHITE else DARK_GREY
+            pygame.draw.rect(screen, grey if b & pattern else color, [x, y, SQUARE, SQUARE], 0)
             color = BLACK if color == WHITE else WHITE
         color = BLACK if color == WHITE else WHITE
 
@@ -157,6 +162,18 @@ def draw_shadow(game):
     file = engine.get_player_file(game)
     draw_piece_on_square(shadow_pieces, piece, rank, file)
 
+def draw_text(game):
+    readouts = ("Score", f"{game.contents.score}"), ("Scored", f"{game.contents.scored}"), ("Combo", f"{game.contents.combo}")
+    y = 0
+    for readout in readouts:
+        for part in readout:    
+            text = FONT_1.render(part, True, WHITE, BLACK)
+            rect = text.get_rect()
+            rect.topright = (SQUARE * SQUARES_OFF_LEFT, y)
+            screen.blit(text, rect)
+            y += text.get_rect().height
+        y += text.get_rect().height
+
 def take_input(game, passed):
     keys=pygame.key.get_pressed()
     
@@ -195,8 +212,9 @@ def play():
         draw_board(game)
         draw_next(game)
         draw_pieces(game)
-        draw_player(game)
         draw_shadow(game)
+        draw_player(game)
+        draw_text(game)
         pygame.display.flip()
         clock.tick(60)
     engine.delete_game(game)

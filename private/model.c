@@ -274,7 +274,7 @@ Piece next_piece(struct Game* game) {
 struct Game* malloc_init_game(Settings settings) {
 
 	struct Game* game = malloc(sizeof(struct Game));
-	printf("malloc game\n");
+	MEMLOG("malloc game\n");
 	assert(game);
 	init_game(game);
 	game->histotrie = malloc_histotrie();
@@ -304,6 +304,7 @@ void free_game(struct Game* game) {
 	if (game) {
 
 		free_histotrie(game);
+		MEMLOG("freed game\n");
 		free(game);
 	}
 }
@@ -329,29 +330,33 @@ void print_histotrie(struct Histotrie* root) {
 struct Histotrie* malloc_histotrie() {
 
 	struct Histotrie* ret = malloc(sizeof(struct Histotrie));
-	printf("malloc histotrie\n");
+	MEMLOG("malloc histotrie\n");
 	init_histotrie(ret);
 	return ret;
 }
 
-void free_children(struct Histotrie* root) {
+size_t free_children(struct Histotrie* root) {
 
-	if (!root) return;
+	if (!root) return 0;
+	size_t ret = 1;
 
 	for (size_t c = 0; c < TRIE_CHILDREN; ++c) {
 
 		if (root->children[c]) {
 
-			free_children(root->children[c]);
+			ret += free_children(root->children[c]);
 		}
 	}
 
 	free(root);
+	MEMLOG("freed histotrie node\n");
+	return ret;
 }
 
 void free_histotrie(struct Game* game) {
 
-	free_children(game->histotrie);
+	size_t count = free_children(game->histotrie);
+	MEMLOGF("freed %llu histotrie nodes\n", count);
 }
 
 size_t record_state(struct Histotrie* root, const Board board, const size_t index) {
@@ -369,7 +374,7 @@ size_t record_state(struct Histotrie* root, const Board board, const size_t inde
 	}
 
 	root->children[child] = malloc(sizeof(struct Histotrie));
-	printf("malloc histotrie child\n");
+	MEMLOG("malloc histotrie node\n");
 	init_histotrie(root->children[child]);
 	return 1 + record_state(root->children[child], board, index + 1);
 }
@@ -380,7 +385,7 @@ size_t chronicle(struct Game* game) {
 	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT)) return false;
 
 	const size_t ret = record_state(game->histotrie, game->state, 0);
-	printf("created %llu histotrie nodes\n", ret);
+	MEMLOGF("created %llu histotrie nodes\n", ret);
 	game->repeat = !ret;
 	return ret;
 }

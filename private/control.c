@@ -1,11 +1,13 @@
 #include "control.h"
 #include "model.h"
-#include <sys\timeb.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #if OS_WINDOWS
+#include <windows.h>
+#include <WinUser.h>
 #include <conio.h>
 #define KBHIT _kbhit
 #define GETCH _getch
@@ -16,6 +18,7 @@ void QUIT() {
 	exit(0);
 }
 #else
+#include <unistd.h>
 #include <ncurses.h>
 #include <sys/select.h>
 #include <termios.h>
@@ -47,9 +50,35 @@ int GETKEYSTATE(const int C) {
 	ungetch(c);
 	return ret;
 }
-#define max(A, B) (A > B ? A : B)
-#define min(A, B) (A < B ? A : B)
 #endif
+
+void control_move(struct Game* game, long int* moved, const char key, const time_t passed) {
+
+	if (GETKEYSTATE(key) < 0) {
+
+		const bool was_up = *moved < 0;
+		*moved = max(*moved, 0);
+		*moved += (long int)passed;
+	}
+	else {
+
+		*moved = -1;
+	}
+}
+
+void control_drop(struct Game* game) {
+
+	if (KBHIT()) {
+
+		const char key = GETCH();
+		switch (key) {
+		case DROP_KEY: if (!game->paused) game->dropped = true; break;
+		case QUIT_KEY: QUIT(); break;
+		case PAUSE_KEY: game->paused = !game->paused; break;
+		default: UNGETCH(key); break;
+		}
+	}
+}
 
 void key_control(struct Game* game, const time_t passed) {
 
@@ -60,31 +89,4 @@ void key_control(struct Game* game, const time_t passed) {
 	control_move(game, &(game->moved_down), DOWN_KEY, passed);
 }
 
-void control_drop(struct Game* game) {
-	
-	if (KBHIT()) {
-
-		const char key = GETCH();
-		switch (key) {
-		case DROP_KEY: if(!game->paused) game->dropped = true; break;
-		case QUIT_KEY: QUIT(); break;
-		case PAUSE_KEY: game->paused = !game->paused; break;
-		default: UNGETCH(key); break;
-		}
-	}
-}
-
-void control_move(struct Game* game, long int* moved, const char key, const time_t passed) {
-	
-	if (GETKEYSTATE(key) < 0) {
-
-		const bool was_up = *moved < 0;
-		*moved = max(*moved, 0);
-		*moved += (long int) passed;
-	}
-	else {
-
-		*moved = -1;
-	}
-}
 

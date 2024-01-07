@@ -1,9 +1,8 @@
 #pragma once
 
-typedef size_t NOTAGAME;
-
 extern "C" {
 #include "../private/model.h"
+    typedef size_t NOTAGAME;
     __declspec(dllexport) size_t get_ranks();
     __declspec(dllexport) size_t get_files();
     __declspec(dllexport) size_t get_state_length(); 
