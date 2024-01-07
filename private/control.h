@@ -1,6 +1,6 @@
 #pragma once
 
-#include <sys\timeb.h>
+#include <sys/timeb.h>
 
 #define DROP_KEY ' '
 #define QUIT_KEY 'q'

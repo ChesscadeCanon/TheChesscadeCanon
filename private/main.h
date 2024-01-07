@@ -1,5 +1,5 @@
 #pragma once
-#include <sys\timeb.h>
+#include <sys/timeb.h>
 #include <string.h>
 #include <stdlib.h>
 
