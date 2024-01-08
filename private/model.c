@@ -16,10 +16,7 @@
 #define SET_PLAYER_RANK(S, V) (S[PLAYER_RANK_INDEX] = '0' + (char)(V))
 #define SET_PLAYER_FILE(S, V) (S[PLAYER_FILE_INDEX] = '0' + (char)(V))
 #define SET_CAPTURE(S, C, V) (S[CAPTURE_INDEX + C] = V)
-#define SET_CURSOR(S, V) (S[CURSOR_INDEX] = V < 0 ? '0' : '1')
-#define SET_CURSOR_RANK(S, V) (S[CURSOR_RANK_INDEX] = '0' + (char)(V))
-#define SET_CURSOR_FILE(S, V) (S[CURSOR_FILE_INDEX] = '0' + (char)(V))
-#define REVERSE_CURSOR(S) SET_CURSOR(S, -1 * GET_CURSOR(S))
+#define REVERSE_CURSOR(G) (G->cursor *= -1)
 #define SQUARE_DOWN(I) (I + LINE_LENGTH)
 #define PLAYER_SQUARE(S) SQUARE_INDEX(GET_PLAYER_RANK(S), GET_PLAYER_FILE(S))
 #define DOUBLE_BISHOP(G) (PIECE_MAP[GET_PLAYER(G->state)] == BISHOP && IS_SET(G->settings, DOUBLE_BISHOPS))
@@ -38,11 +35,11 @@
 	: GET_PLAYER(G->state) \
 )
 #define KING_ME(S, P) (IS_WHITE(P) ? WHITE_KING : BLACK_KING)
-#define DRAW_NEXT(S) DECKS[GET_CURSOR_RANK(S)][GET_CURSOR_FILE(S)]
-#define SPAWN_RANK(G) (IS_SET(G->settings, WHITE_PAWN_SPAWN_HIGH) && DRAW_NEXT(G->state) == WHITE_PAWN ? 0 : GET_CURSOR_RANK(G->state))
+#define DRAW_NEXT(G) DECKS[G->cursor_rank][G->cursor_file]
+#define SPAWN_RANK(G) (IS_SET(G->settings, WHITE_PAWN_SPAWN_HIGH) && DRAW_NEXT(G) == WHITE_PAWN ? 0 : (G->cursor_rank))
 #define NEXT_PIECE(G) (\
-	EMPTY_SQUARE(G->state, SQUARE_INDEX(SPAWN_RANK(G), GET_CURSOR_FILE(G->state))) ?\
-		DRAW_NEXT(G->state) \
+	EMPTY_SQUARE(G->state, SQUARE_INDEX(SPAWN_RANK(G), G->cursor_file)) ?\
+		DRAW_NEXT(G) \
 	:\
 		DEAD_PLAYER \
 )
@@ -59,23 +56,20 @@
 #define SPAWN(G) (\
 	NEXT_PLAYER(G) &\
 	SET_PLAYER_RANK(G->state, SPAWN_RANK(G)) &\
-	SET_PLAYER_FILE(G->state, GET_CURSOR_FILE(G->state)) \
+	SET_PLAYER_FILE(G->state, G->cursor_file) \
 )
 #define PACMAN(G, I) (abs(SQUARE_FILE(I) - GET_PLAYER_FILE(G->state)) > 2)
 #define CAN_STRIKE(G, I) (ON_BOARD(G, I + RAISE_FLOOR(G)) && EMPTY_SQUARE(G->state, I))
 #define CAN_MOVE(G, I) (CAN_STRIKE(G, I) && !PACMAN(G, I))
-#define GRADE_CURSOR(G) (SET_CURSOR_RANK(G->state, !HAS_CAPTURED(G->state) + G->wrapped * 2))
+#define GRADE_CURSOR(G) (G->cursor_rank = !HAS_CAPTURED(G->state) + G->wrapped * 2)
 #define INCREMENT_CURSOR(G, V) (\
-	SET_CURSOR_FILE(G->state, GET_CURSOR_FILE(G->state) + (V)) &\
+	(G->cursor_file += (V)) &\
 	(abs(V) > 1 && (G->wrapped = true)) \
 )
-#define UPDATE_CURSOR(G) (\
-	INCREMENT_CURSOR(G, \
-		(GET_CURSOR(G->state) > 0 && GET_CURSOR_FILE(G->state) < LAST_FILE) ||\
-		(GET_CURSOR(G->state) < 0 && GET_CURSOR_FILE(G->state) > 0) ?\
-		GET_CURSOR(G->state) : -GET_CURSOR(G->state) * LAST_FILE \
-	) &\
-	GRADE_CURSOR(G) \
+#define CURSOR_INCREMENT(G) (\
+	(G->cursor > 0 && G->cursor_file < LAST_FILE) ||\
+	(G->cursor < 0 && G->cursor_file > 0) ?\
+	G->cursor : -G->cursor * LAST_FILE \
 )
 #define LAND(G) (\
 	GRADE_CURSOR(G) &\
@@ -88,13 +82,8 @@
 #define MOVE_LEFT(G) (move_player(G, PLAYER_LEFT(G)))
 #define MOVE_DOWN_RIGHT(G) (move_player(G, PLAYER_DOWN_RIGHT(G)))
 #define MOVE_DOWN_LEFT(G) (move_player(G, PLAYER_DOWN_LEFT(G)))
-#define FALL(G) (MOVE_DOWN(G) && UPDATE_CURSOR(G))
-#define INIT(S) (\
-	SET_CURSOR(S, -1)&\
-	SET_CURSOR_RANK(S, 1)&\
-	SET_CURSOR_FILE(S, 7)&\
-	TERMINATE(S) \
-)
+#define FALL(G) (MOVE_DOWN(G) && update_cursor(G))
+#define INIT(S) (TERMINATE(S))
 
 struct MoveSet {
 
@@ -225,6 +214,13 @@ const size_t PIECE_VALUES[SQUARE_COUNT] = {
 
 #define PIECE_VALUE(P) (PIECE_VALUES[PIECE_MAP[P]])
 
+unsigned short update_cursor(struct Game* game) {
+	short cursor_increment = CURSOR_INCREMENT(game);
+	INCREMENT_CURSOR(game, cursor_increment);
+	GRADE_CURSOR(game);
+	return game->cursor;
+}
+
 size_t square_bit(size_t rank, size_t file) {
 
 	return SQUARE_BIT(SQUARE_INDEX(rank, file));
@@ -289,8 +285,11 @@ void init_game(struct Game* game) {
 	game->fell = 0;
 	game->repeat = false;
 	game->paused = false;
-	game->dropped = false;
 	game->wrapped = false;
+	game->cursor = -1;
+	game->cursor_rank = 1;
+	game->cursor_file = LAST_FILE;
+	game->dropped = false;
 	game->moved_left = -1;
 	game->moved_right = -1;
 	game->moved_down = -1;
@@ -553,7 +552,7 @@ bool move_player(struct Game* game, size_t to) {
 		
 		if (captures) {
 
-			REVERSE_CURSOR(game->state);
+			REVERSE_CURSOR(game);
 		}
 
 		chronicle(game);

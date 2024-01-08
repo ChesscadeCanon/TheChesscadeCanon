@@ -35,8 +35,8 @@ void print_raw(struct Game* game) {
 void print_cursor(struct Game* game) {
 
 	const bool wrapped = game->wrapped;
-	const size_t rank = GET_CURSOR_RANK(game->state);
-	const size_t file = GET_CURSOR_FILE(game->state);
+	const size_t rank = game->cursor_rank;
+	const size_t file = game->cursor_file;
 	char next = DECKS[rank][file];
 	next = wrapped ? IS_WHITE(next) ? 'K' : 'k' : next;
 #if OS_WINDOWS

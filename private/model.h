@@ -62,9 +62,6 @@ typedef char* State;
 #define PLAYER_INDEX (STATE_LENGTH - 14)
 #define PLAYER_RANK_INDEX (STATE_LENGTH - 11)
 #define PLAYER_FILE_INDEX (STATE_LENGTH - 12)
-#define CURSOR_INDEX (STATE_LENGTH - 9)
-#define CURSOR_RANK_INDEX (STATE_LENGTH - 7)
-#define CURSOR_FILE_INDEX (STATE_LENGTH - 6)
 #define TERMINATOR_INDEX (STATE_LENGTH - 1)
 #define TERMINATE(S) (S[TERMINATOR_INDEX] = '\0')
 #define SET_SQUARE(S, I, V) (S[I] = V)
@@ -72,9 +69,6 @@ typedef char* State;
 #define GET_PLAYER(S) (S[PLAYER_INDEX])
 #define GET_PLAYER_RANK(S) (S[PLAYER_RANK_INDEX] - '0')
 #define GET_PLAYER_FILE(S) (S[PLAYER_FILE_INDEX] - '0')
-#define GET_CURSOR(S) (S[CURSOR_INDEX] - '0' ? 1 : -1)
-#define GET_CURSOR_RANK(S) (S[CURSOR_RANK_INDEX] - '0')
-#define GET_CURSOR_FILE(S) (S[CURSOR_FILE_INDEX] - '0')
 #define GET_CAPTURE(S, I) (S[CAPTURE_INDEX + I])
 #define SQUARE_INDEX(R, F) ((R) * LINE_LENGTH + (F))
 #define PLAYER_SQUARE(S) SQUARE_INDEX(GET_PLAYER_RANK(S), GET_PLAYER_FILE(S))
@@ -125,8 +119,11 @@ struct Game {
 	time_t time;
 	time_t fell;
 	bool paused;
-	bool dropped;
 	bool wrapped;
+	short cursor;
+	unsigned short cursor_rank;
+	unsigned short cursor_file;
+	bool dropped;
 	long int moved_left;
 	long int moved_right;
 	long int moved_down;

@@ -44,21 +44,6 @@ size_t get_player_file(struct Game* game) {
 	return GET_PLAYER_FILE(game->state);
 }
 
-Piece get_cursor(struct Game* game) {
-
-	return GET_CURSOR(game->state);
-}
-
-size_t get_cursor_rank(struct Game* game) {
-
-	return GET_CURSOR_RANK(game->state);
-}
-
-size_t get_cursor_file(struct Game* game) {
-
-	return GET_CURSOR_FILE(game->state);
-}
-
 Piece get_next_piece(struct Game* game) {
 
 	return next_piece(game);
