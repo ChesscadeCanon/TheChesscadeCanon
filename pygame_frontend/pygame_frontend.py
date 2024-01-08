@@ -38,6 +38,7 @@ class Game(ctypes.Structure):
         ("time", ctypes.c_ulonglong),
         ("fell", ctypes.c_ulonglong),
         ("paused", ctypes.c_bool),
+        ("wrapped", ctypes.c_bool),
         ("dropped", ctypes.c_bool),
         ("moved_left", ctypes.c_long),
         ("moved_right", ctypes.c_long),

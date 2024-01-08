@@ -20,7 +20,6 @@
 #define SET_CURSOR_RANK(S, V) (S[CURSOR_RANK_INDEX] = '0' + (char)(V))
 #define SET_CURSOR_FILE(S, V) (S[CURSOR_FILE_INDEX] = '0' + (char)(V))
 #define REVERSE_CURSOR(S) SET_CURSOR(S, -1 * GET_CURSOR(S))
-#define SET_WRAPPED(S, V) (S[WRAPPED_INDEX] = '0' + (V))
 #define SQUARE_DOWN(I) (I + LINE_LENGTH)
 #define PLAYER_SQUARE(S) SQUARE_INDEX(GET_PLAYER_RANK(S), GET_PLAYER_FILE(S))
 #define DOUBLE_BISHOP(G) (PIECE_MAP[GET_PLAYER(G->state)] == BISHOP && IS_SET(G->settings, DOUBLE_BISHOPS))
@@ -65,36 +64,35 @@
 #define PACMAN(G, I) (abs(SQUARE_FILE(I) - GET_PLAYER_FILE(G->state)) > 2)
 #define CAN_STRIKE(G, I) (ON_BOARD(G, I + RAISE_FLOOR(G)) && EMPTY_SQUARE(G->state, I))
 #define CAN_MOVE(G, I) (CAN_STRIKE(G, I) && !PACMAN(G, I))
-#define GRADE_CURSOR(S) (SET_CURSOR_RANK(S, !HAS_CAPTURED(S) + GET_WRAPPED(S) * 2))
-#define INCREMENT_CURSOR(S, V) (\
-	SET_CURSOR_FILE(S, GET_CURSOR_FILE(S) + (V)) &\
-	(abs(V) > 1 && SET_WRAPPED(S, 1)) \
+#define GRADE_CURSOR(G) (SET_CURSOR_RANK(G->state, !HAS_CAPTURED(G->state) + G->wrapped * 2))
+#define INCREMENT_CURSOR(G, V) (\
+	SET_CURSOR_FILE(G->state, GET_CURSOR_FILE(G->state) + (V)) &\
+	(abs(V) > 1 && (G->wrapped = true)) \
 )
-#define UPDATE_CURSOR(S) (\
-	INCREMENT_CURSOR(S, \
-		(GET_CURSOR(S) > 0 && GET_CURSOR_FILE(S) < LAST_FILE) ||\
-		(GET_CURSOR(S) < 0 && GET_CURSOR_FILE(S) > 0) ?\
-		GET_CURSOR(S) : -GET_CURSOR(S) * LAST_FILE \
+#define UPDATE_CURSOR(G) (\
+	INCREMENT_CURSOR(G, \
+		(GET_CURSOR(G->state) > 0 && GET_CURSOR_FILE(G->state) < LAST_FILE) ||\
+		(GET_CURSOR(G->state) < 0 && GET_CURSOR_FILE(G->state) > 0) ?\
+		GET_CURSOR(G->state) : -GET_CURSOR(G->state) * LAST_FILE \
 	) &\
-	GRADE_CURSOR(S) \
+	GRADE_CURSOR(G) \
 )
 #define LAND(G) (\
-	GRADE_CURSOR(G->state) &\
+	GRADE_CURSOR(G) &\
 	PLACE_PLAYER(G->state) &\
 	SPAWN(G) &\
-	SET_WRAPPED(G->state, 0) \
+	(G->wrapped = 0) \
 )
 #define MOVE_DOWN(G) (move_player(G, PLAYER_DOWN(G)))
 #define MOVE_RIGHT(G) (move_player(G, PLAYER_RIGHT(G)))
 #define MOVE_LEFT(G) (move_player(G, PLAYER_LEFT(G)))
 #define MOVE_DOWN_RIGHT(G) (move_player(G, PLAYER_DOWN_RIGHT(G)))
 #define MOVE_DOWN_LEFT(G) (move_player(G, PLAYER_DOWN_LEFT(G)))
-#define FALL(G) (MOVE_DOWN(G) && UPDATE_CURSOR(G->state))
+#define FALL(G) (MOVE_DOWN(G) && UPDATE_CURSOR(G))
 #define INIT(S) (\
 	SET_CURSOR(S, -1)&\
 	SET_CURSOR_RANK(S, 1)&\
 	SET_CURSOR_FILE(S, 7)&\
-	SET_WRAPPED(S, 0) & \
 	TERMINATE(S) \
 )
 
@@ -292,6 +290,7 @@ void init_game(struct Game* game) {
 	game->repeat = false;
 	game->paused = false;
 	game->dropped = false;
+	game->wrapped = false;
 	game->moved_left = -1;
 	game->moved_right = -1;
 	game->moved_down = -1;

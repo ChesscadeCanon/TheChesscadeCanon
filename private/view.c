@@ -32,11 +32,11 @@ void print_raw(struct Game* game) {
 	printf(game->state);
 }
 
-void print_cursor(State state) {
+void print_cursor(struct Game* game) {
 
-	const bool wrapped = GET_WRAPPED(state);
-	const size_t rank = GET_CURSOR_RANK(state);
-	const size_t file = GET_CURSOR_FILE(state);
+	const bool wrapped = game->wrapped;
+	const size_t rank = GET_CURSOR_RANK(game->state);
+	const size_t file = GET_CURSOR_FILE(game->state);
 	char next = DECKS[rank][file];
 	next = wrapped ? IS_WHITE(next) ? 'K' : 'k' : next;
 #if OS_WINDOWS
@@ -84,6 +84,6 @@ void print_pretty(struct Game* game) {
 	board[(r * (FILES + 2)) + f] = GET_PLAYER(game->state);
 #endif
 	print_info(game);
-	print_cursor(game->state);
+	print_cursor(game);
 	printf(board);
 }
