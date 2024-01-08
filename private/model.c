@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include <stdio.h>
 
-#define MOVE_RATE(G) 128
+#define MOVE_RATE(G) 64
 #define EMPTY_CAPTURES "********"
 #define EMPTY_SQUARE(S, I) (GET_SQUARE(S, I) == EMPTY)
 #define HAS_CAPTURED(S) (strncmp(EMPTY_CAPTURES, S + CAPTURE_INDEX, CAPTURE_LENGTH) != 0)
@@ -24,13 +24,13 @@
 #define SQUARE_DOWN(I) (I + LINE_LENGTH)
 #define PLAYER_SQUARE(S) SQUARE_INDEX(GET_PLAYER_RANK(S), GET_PLAYER_FILE(S))
 #define DOUBLE_BISHOP(G) (PIECE_MAP[GET_PLAYER(G->state)] == BISHOP && IS_SET(G->settings, DOUBLE_BISHOPS))
-#define BISHOP_SPEED(G, M) ((M) / (1 + DOUBLE_BISHOP(game)))
+#define BISHOP_SPEED(G, M) ((M) / (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_DOWN(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state) + (DOUBLE_BISHOP(G) + 1), GET_PLAYER_FILE(G->state))
 #define PLAYER_LEFT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state), GET_PLAYER_FILE(G->state) - (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_RIGHT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state), GET_PLAYER_FILE(G->state) + (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_DOWN_LEFT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state) + 1, GET_PLAYER_FILE(G->state) - 1)
 #define PLAYER_DOWN_RIGHT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state) + 1, GET_PLAYER_FILE(G->state) + 1)
-#define EASE(G) 1024 * (1 + DOUBLE_BISHOP(G))
+#define EASE(G) (1024 - min(G->combo * 64, 512)) * (1 + DOUBLE_BISHOP(G))
 #define QUEEN_ME(G, R) (\
 	IS_SET(G->settings, PAWNS_PROMOTE) ?\
 		GET_PLAYER(G->state) == WHITE_PAWN && (R) == 0 ? WHITE_QUEEN \
@@ -181,8 +181,8 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 const char DECKS[4][9] = {
 	"RnBqQbNr",
 	"pPpPpPpP",
-	"KkKkKkKk",
-	"kKkKkKkK"
+	"kkkkkkkk",
+	"KKKKKKKK"
 };
 
 const size_t PIECE_SET =
@@ -538,7 +538,7 @@ bool move_player(struct Game* game, size_t to) {
 
 	const size_t to_rank = SQUARE_RANK(to), to_file = SQUARE_FILE(to);
 	const size_t from_rank = GET_PLAYER_RANK(game->state), from_file = GET_PLAYER_FILE(game->state);
-
+	if (to_file != from_file) printf("moving player\n");
 	if (CAN_MOVE(game, to)) {
 
 		SET_PLAYER_RANK(game->state, to_rank);
@@ -563,11 +563,12 @@ bool move_player(struct Game* game, size_t to) {
 	return false;
 }
 
-time_t buy_move(struct Game* game, long int* moved) {
+time_t buy_move(struct Game* game, long int* moved, const unsigned short multiplier) {
 
 	if (*moved < 0) return 0;
-	const long int steps = *moved / MOVE_RATE(game);
-	*moved -= MOVE_RATE(game) * steps;
+	const long int rate = MOVE_RATE(game) * multiplier;
+	const long int steps = *moved / rate;
+	*moved -= rate * steps;
 	assert(steps >= 0);
 	return (time_t)steps;
 }
@@ -640,22 +641,25 @@ void take_input(struct Game* game) {
 		game->dropped = false;
 	}
 
-	time_t left = buy_move(game, &game->moved_left);
-	time_t right = buy_move(game, &game->moved_right);
-	time_t down = buy_move(game, &game->moved_down);
+	const bool moving_down = game->moved_down >= MOVE_RATE(game);
+	const bool moving_left = game->moved_left >= MOVE_RATE(game);
+	const bool moving_right = game->moved_right >= MOVE_RATE(game);
+	const bool diagonals = IS_SET(game->settings, DIAGONALS);
+	const bool diagonal = diagonals && moving_down && moving_left != moving_right;
+	const unsigned short multiplier = (!diagonal && DOUBLE_BISHOP(game)) + 1;
+	const time_t down = buy_move(game, &game->moved_down, multiplier);
+	const time_t left = buy_move(game, &game->moved_left, multiplier);
+	const time_t right = buy_move(game, &game->moved_right, multiplier);
 
-	if (IS_SET(game->settings, DIAGONALS) && left && down && !right) {
-
+	if (diagonals && left > 0 && down > 0 && right == 0) {
 		move_down_left(game, min(left - right, down));
 	}
-	else if (IS_SET(game->settings, DIAGONALS) && !left && down && right) {
-
+	else if (diagonals && left == 0 && down > 0 && right > 0) {
 		move_down_right(game, min(right - left, down));
 	}
-	else {
-
-		move_right(game, max(0, BISHOP_SPEED(G, right - left)));
-		move_left(game, max(0, BISHOP_SPEED(G, left - right)));
+	else if(left > 0 || right > 0 || down > 0) {
+		move_right(game, max(0, right - left));
+		move_left(game, max(0, left - right));
 		move_down(game, max(0, down));
 	}
 }

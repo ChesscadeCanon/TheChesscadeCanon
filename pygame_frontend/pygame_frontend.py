@@ -47,7 +47,7 @@ class Game(ctypes.Structure):
         ("settings", ctypes.c_ulonglong),
         ("repeat", ctypes.c_bool),
     ]
-    
+
 engine.malloc_init_default_game.restype = ctypes.POINTER(Game)
 engine.increment_game.argtypes = [ctypes.POINTER(Game), ctypes.c_ulonglong]
 engine.begin_game.argtypes = [ctypes.POINTER(Game)]
@@ -193,6 +193,7 @@ def take_input(game, passed):
         game.contents.moved_down = -1    
 
 def play():
+    ret = 0
     game = engine.malloc_init_default_game()
     engine.begin_game(game)
     carryOn = True
@@ -217,7 +218,18 @@ def play():
         draw_text(game)
         pygame.display.flip()
         clock.tick(60)
+    ret = game.contents.score
     engine.delete_game(game)
-    pygame.quit()
- 
-play()
+    return ret if engine.game_over(game) else -1
+high_score = 0
+while True:
+    score = play()
+    if score < 0:
+        break
+    if score > high_score:
+        high_score = score
+    print(score)
+print(high_score)
+pygame.quit()
+
+    

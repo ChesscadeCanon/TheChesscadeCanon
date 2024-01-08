@@ -1,5 +1,5 @@
 import platform
-SYSTEM = platform.system().tolower()
+SYSTEM = platform.system().lower()
 ENGINE_PATH = 'bin/ChesscadeLib.dll' if "windows" in SYSTEM else 'bin/ChesscadeLib.so' if "linux" in SYSTEM else 'bin/cygChesscadeLib.dll' if 'cygwin' in SYSTEM else ''
 assert(ENGINE_PATH, f"Not compatible with {platform.system()} systems.")
 BOARD_PIECES_DIR = "assets/grey_pieces/"
