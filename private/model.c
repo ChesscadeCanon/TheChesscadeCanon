@@ -61,21 +61,16 @@
 #define PACMAN(G, I) (abs(SQUARE_FILE(I) - GET_PLAYER_FILE(G->state)) > 2)
 #define CAN_STRIKE(G, I) (ON_BOARD(G, I + RAISE_FLOOR(G)) && EMPTY_SQUARE(G->state, I))
 #define CAN_MOVE(G, I) (CAN_STRIKE(G, I) && !PACMAN(G, I))
-#define GRADE_CURSOR(G) (G->cursor_rank = !HAS_CAPTURED(G->state) + G->wrapped * 2)
-#define INCREMENT_CURSOR(G, V) (\
-	(G->cursor_file += (V)) &\
-	(abs(V) > 1 && (G->wrapped = true)) \
-)
+#define CURSOR_WRAPPED(G) (G->cursor_rank > 1)
+#define CURSOR_GRADE(G, W) (!HAS_CAPTURED(G->state) + (W) * 2)
 #define CURSOR_INCREMENT(G) (\
 	(G->cursor > 0 && G->cursor_file < LAST_FILE) ||\
 	(G->cursor < 0 && G->cursor_file > 0) ?\
 	G->cursor : -G->cursor * LAST_FILE \
 )
 #define LAND(G) (\
-	GRADE_CURSOR(G) &\
 	PLACE_PLAYER(G->state) &\
-	SPAWN(G) &\
-	(G->wrapped = 0) \
+	SPAWN(G) \
 )
 #define MOVE_DOWN(G) (move_player(G, PLAYER_DOWN(G)))
 #define MOVE_RIGHT(G) (move_player(G, PLAYER_RIGHT(G)))
@@ -214,10 +209,16 @@ const size_t PIECE_VALUES[SQUARE_COUNT] = {
 
 #define PIECE_VALUE(P) (PIECE_VALUES[PIECE_MAP[P]])
 
+bool cursor_wrapped(struct Game* game) {
+
+	return CURSOR_WRAPPED(game);
+}
+
 unsigned short update_cursor(struct Game* game) {
-	short cursor_increment = CURSOR_INCREMENT(game);
-	INCREMENT_CURSOR(game, cursor_increment);
-	GRADE_CURSOR(game);
+
+	const short inc = CURSOR_INCREMENT(game);
+	game->cursor_file += inc;
+	game->cursor_rank = CURSOR_GRADE(game, abs(inc) > 1 || CURSOR_WRAPPED(game));
 	return game->cursor;
 }
 
@@ -285,7 +286,6 @@ void init_game(struct Game* game) {
 	game->fell = 0;
 	game->repeat = false;
 	game->paused = false;
-	game->wrapped = false;
 	game->cursor = -1;
 	game->cursor_rank = 1;
 	game->cursor_file = LAST_FILE;
@@ -548,6 +548,7 @@ bool move_player(struct Game* game, size_t to) {
 		SET_PLAYER(game->state, QUEEN_ME(game, from_rank));
 		const size_t captures = attack(game, true, false, false);
 		LAND(game);
+		game->cursor_rank = max(0, game->cursor_rank - (captures ? 1 : 0) - (game->cursor_rank > 1) * 2);
 		judge(game);
 		
 		if (captures) {

@@ -38,10 +38,9 @@ class Game(ctypes.Structure):
         ("time", ctypes.c_ulonglong),
         ("fell", ctypes.c_ulonglong),
         ("paused", ctypes.c_bool),
-        ("wrapped", ctypes.c_bool),
-        ("cursor_file", ctypes.c_bool),
-        ("cursor_rank", ctypes.c_bool),
-        ("cursor", ctypes.c_bool),
+        ("cursor", ctypes.c_short),
+        ("cursor_rank", ctypes.c_ushort),
+        ("cursor_file", ctypes.c_ushort),
         ("dropped", ctypes.c_bool),
         ("moved_left", ctypes.c_long),
         ("moved_right", ctypes.c_long),
@@ -64,12 +63,6 @@ engine.get_player_rank.argtypes = [ctypes.POINTER(Game)]
 engine.get_player_rank.restype = ctypes.c_ulonglong
 engine.get_player_file.argtypes = [ctypes.POINTER(Game)]
 engine.get_player_file.restype = ctypes.c_ulonglong
-engine.get_cursor.argtypes = [ctypes.POINTER(Game)]
-engine.get_cursor.restype = ctypes.c_wchar
-engine.get_cursor_rank.argtypes = [ctypes.POINTER(Game)]
-engine.get_cursor_rank.restype = ctypes.c_ulonglong
-engine.get_cursor_file.argtypes = [ctypes.POINTER(Game)]
-engine.get_cursor_file.restype = ctypes.c_ulonglong
 engine.get_next_piece.argtypes = [ctypes.POINTER(Game)]
 engine.get_next_piece.restype = ctypes.c_wchar
 engine.forecast_captures.argtypes = [ctypes.POINTER(Game)]
@@ -151,8 +144,8 @@ def draw_player(game):
     draw_piece_on_square(player_pieces, player, rank, file)
 
 def draw_next(game):
-    cursor_rank = engine.get_cursor_rank(game)
-    cursor_file = engine.get_cursor_file(game)
+    cursor_rank = game.contents.cursor_rank
+    cursor_file = game.contents.cursor_file
     next_piece = engine.get_next_piece(game)
     for g in range(SQUARES_OFF_TOP):
         deck = [chr(c) for c in engine.get_deck(game, g)]

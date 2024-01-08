@@ -10,9 +10,6 @@ extern "C" {
     __declspec(dllexport) Piece get_player(struct Game*);
     __declspec(dllexport) size_t get_player_rank(struct Game*);
     __declspec(dllexport) size_t get_player_file(struct Game*);
-    __declspec(dllexport) Piece get_cursor(struct Game*);
-    __declspec(dllexport) size_t get_cursor_rank(struct Game*);
-    __declspec(dllexport) size_t get_cursor_file(struct Game*);
     __declspec(dllexport) Piece get_next_piece(struct Game*);
     __declspec(dllexport) size_t forecast_captures(struct Game*);
     __declspec(dllexport) size_t attack_pattern(struct Game*);

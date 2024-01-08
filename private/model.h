@@ -119,7 +119,6 @@ struct Game {
 	time_t time;
 	time_t fell;
 	bool paused;
-	bool wrapped;
 	short cursor;
 	unsigned short cursor_rank;
 	unsigned short cursor_file;
@@ -153,4 +152,4 @@ size_t attack(struct Game*, const bool, const bool, const bool);
 size_t chronicle(struct Game*);
 struct Histotrie* malloc_histotrie();
 void free_histotrie(struct Game*);
-
+bool cursor_wrapped(struct Game*);

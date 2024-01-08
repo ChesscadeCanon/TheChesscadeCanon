@@ -34,7 +34,7 @@ void print_raw(struct Game* game) {
 
 void print_cursor(struct Game* game) {
 
-	const bool wrapped = game->wrapped;
+	const bool wrapped = cursor_wrapped(game);
 	const size_t rank = game->cursor_rank;
 	const size_t file = game->cursor_file;
 	char next = DECKS[rank][file];
