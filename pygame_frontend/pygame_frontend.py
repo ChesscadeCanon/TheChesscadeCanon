@@ -38,6 +38,9 @@ class Game(ctypes.Structure):
         ("time", ctypes.c_ulonglong),
         ("fell", ctypes.c_ulonglong),
         ("paused", ctypes.c_bool),
+        ("player", ctypes.c_char),
+        ("player_rank", ctypes.c_ushort),
+        ("player_file", ctypes.c_ushort),
         ("cursor", ctypes.c_short),
         ("cursor_rank", ctypes.c_ushort),
         ("cursor_file", ctypes.c_ushort),
@@ -57,12 +60,6 @@ engine.begin_game.argtypes = [ctypes.POINTER(Game)]
 engine.game_over.argtypes = [ctypes.POINTER(Game)]
 engine.game_over.restype = ctypes.c_bool
 engine.delete_game.argtypes = [ctypes.POINTER(Game)]
-engine.get_player.argtypes = [ctypes.POINTER(Game)]
-engine.get_player.restype = ctypes.c_wchar
-engine.get_player_rank.argtypes = [ctypes.POINTER(Game)]
-engine.get_player_rank.restype = ctypes.c_ulonglong
-engine.get_player_file.argtypes = [ctypes.POINTER(Game)]
-engine.get_player_file.restype = ctypes.c_ulonglong
 engine.get_next_piece.argtypes = [ctypes.POINTER(Game)]
 engine.get_next_piece.restype = ctypes.c_wchar
 engine.forecast_captures.argtypes = [ctypes.POINTER(Game)]
@@ -138,9 +135,9 @@ def draw_pieces(game):
             index += 1
 
 def draw_player(game):
-    player = engine.get_player(game)
-    rank = engine.get_player_rank(game)
-    file = engine.get_player_file(game)
+    player = game.contents.player.decode('ascii')
+    rank = game.contents.player_rank
+    file = game.contents.player_file
     draw_piece_on_square(player_pieces, player, rank, file)
 
 def draw_next(game):
@@ -156,7 +153,7 @@ def draw_next(game):
 def draw_shadow(game):
     piece = engine.get_forecast_piece(game)
     rank = engine.get_forecast_rank(game)
-    file = engine.get_player_file(game)
+    file = game.contents.player_file
     draw_piece_on_square(shadow_pieces, piece, rank, file)
 
 def draw_text(game):

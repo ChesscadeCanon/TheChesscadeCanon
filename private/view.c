@@ -62,9 +62,9 @@ void print_cursor(struct Game* game) {
 
 void print_pretty(struct Game* game) {
 #if OS_WINDOWS
-	char board[STATE_LENGTH];
+	char board[STATE_LENGTH] = {[STATE_LENGTH - 1] = '\0'};
 	memcpy(board, game->state, STATE_LENGTH * sizeof(char));
-	PLACE_PLAYER(board);
+	SET_SQUARE(board, PLAYER_SQUARE(game), game->player);
 #else
 	char board[CURSES_STATE_LENGTH];
 	size_t to_index = 0, from_index = 0;
@@ -85,5 +85,5 @@ void print_pretty(struct Game* game) {
 #endif
 	print_info(game);
 	print_cursor(game);
-	printf(board);
+	printf((const char*)board);
 }

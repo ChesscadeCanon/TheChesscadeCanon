@@ -29,21 +29,6 @@ size_t get_trie_children() {
 	return TRIE_CHILDREN;
 }
 
-Piece get_player(struct Game* game) {
-
-	return GET_PLAYER(game->state);
-}
-
-size_t get_player_rank(struct Game* game) {
-
-	return GET_PLAYER_RANK(game->state);
-}
-
-size_t get_player_file(struct Game* game) {
-
-	return GET_PLAYER_FILE(game->state);
-}
-
 Piece get_next_piece(struct Game* game) {
 
 	return next_piece(game);
@@ -93,7 +78,7 @@ void begin_game(struct Game* game) {
 void increment_game(struct Game* game, time_t passed) {
 
 	const time_t falls = COUNT_INTERVALS(game->fell, game->time, ease(game));
-	if (GAME_OVER(game->state)) return;
+	if (GAME_OVER(game)) return;
 	game->time += passed;
 	exist(game, falls);
 	if (falls > 0) game->fell = game->time;
@@ -101,7 +86,7 @@ void increment_game(struct Game* game, time_t passed) {
 
 bool game_over(struct Game* game) {
 
-	return GAME_OVER(game->state);
+	return GAME_OVER(game);
 }
 
 void delete_game(struct Game* game) {

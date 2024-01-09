@@ -9,30 +9,30 @@
 #define EMPTY_CAPTURES "********"
 #define EMPTY_SQUARE(S, I) (GET_SQUARE(S, I) == EMPTY)
 #define HAS_CAPTURED(S) (strncmp(EMPTY_CAPTURES, S + CAPTURE_INDEX, CAPTURE_LENGTH) != 0)
-#define SQUARE_RANK(I) (I / LINE_LENGTH)
-#define SQUARE_FILE(I) (I % LINE_LENGTH)
+#define SQUARE_RANK(I) ((unsigned short)(I / LINE_LENGTH))
+#define SQUARE_FILE(I) ((unsigned short)(I % LINE_LENGTH))
 #define SQUARE_BIT(I) (1ull << (SQUARE_RANK(I) * FILES + SQUARE_FILE(I)))
-#define SET_PLAYER(S, V) (S[PLAYER_INDEX] = V)
-#define SET_PLAYER_RANK(S, V) (S[PLAYER_RANK_INDEX] = '0' + (char)(V))
-#define SET_PLAYER_FILE(S, V) (S[PLAYER_FILE_INDEX] = '0' + (char)(V))
+//#define SET_PLAYER(S, V) (S[PLAYER_INDEX] = V)
+//#define SET_PLAYER_RANK(S, V) (S[PLAYER_RANK_INDEX] = '0' + (char)(V))
+//#define SET_PLAYER_FILE(S, V) (S[PLAYER_FILE_INDEX] = '0' + (char)(V))
 #define SET_CAPTURE(S, C, V) (S[CAPTURE_INDEX + C] = V)
 #define REVERSE_CURSOR(G) (G->cursor *= -1)
 #define SQUARE_DOWN(I) (I + LINE_LENGTH)
-#define PLAYER_SQUARE(S) SQUARE_INDEX(GET_PLAYER_RANK(S), GET_PLAYER_FILE(S))
-#define DOUBLE_BISHOP(G) (PIECE_MAP[GET_PLAYER(G->state)] == BISHOP && IS_SET(G->settings, DOUBLE_BISHOPS))
+#define PLAYER_SQUARE(G) SQUARE_INDEX(G->player_rank, G->player_file)
+#define DOUBLE_BISHOP(G) (PIECE_MAP[G->player] == BISHOP && IS_SET(G->settings, DOUBLE_BISHOPS))
 #define BISHOP_SPEED(G, M) ((M) / (1 + DOUBLE_BISHOP(G)))
-#define PLAYER_DOWN(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state) + (DOUBLE_BISHOP(G) + 1), GET_PLAYER_FILE(G->state))
-#define PLAYER_LEFT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state), GET_PLAYER_FILE(G->state) - (1 + DOUBLE_BISHOP(G)))
-#define PLAYER_RIGHT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state), GET_PLAYER_FILE(G->state) + (1 + DOUBLE_BISHOP(G)))
-#define PLAYER_DOWN_LEFT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state) + 1, GET_PLAYER_FILE(G->state) - 1)
-#define PLAYER_DOWN_RIGHT(G) SQUARE_INDEX(GET_PLAYER_RANK(G->state) + 1, GET_PLAYER_FILE(G->state) + 1)
+#define PLAYER_DOWN(G) SQUARE_INDEX(G->player_rank + (DOUBLE_BISHOP(G) + 1), G->player_file)
+#define PLAYER_LEFT(G) SQUARE_INDEX(G->player_rank, G->player_file - (1 + DOUBLE_BISHOP(G)))
+#define PLAYER_RIGHT(G) SQUARE_INDEX(G->player_rank, G->player_file + (1 + DOUBLE_BISHOP(G)))
+#define PLAYER_DOWN_LEFT(G) SQUARE_INDEX(G->player_rank + 1, G->player_file - 1)
+#define PLAYER_DOWN_RIGHT(G) SQUARE_INDEX(G->player_rank + 1, G->player_file + 1)
 #define EASE(G) (1024 - min(G->combo * 64, 512)) * (1 + DOUBLE_BISHOP(G))
 #define QUEEN_ME(G, R) (\
 	IS_SET(G->settings, PAWNS_PROMOTE) ?\
-		GET_PLAYER(G->state) == WHITE_PAWN && (R) == 0 ? WHITE_QUEEN \
-		: ((GET_PLAYER(G->state) == BLACK_PAWN && (R) == LAST_RANK) ? BLACK_QUEEN \
-		: GET_PLAYER(G->state)) \
-	: GET_PLAYER(G->state) \
+		G->player == WHITE_PAWN && (R) == 0 ? WHITE_QUEEN \
+		: ((G->player == BLACK_PAWN && (R) == LAST_RANK) ? BLACK_QUEEN \
+		: G->player) \
+	: G->player \
 )
 #define KING_ME(S, P) (IS_WHITE(P) ? WHITE_KING : BLACK_KING)
 #define DRAW_NEXT(G) DECKS[G->cursor_rank][G->cursor_file]
@@ -44,21 +44,21 @@
 		DEAD_PLAYER \
 )
 #define IN_BOUNDS(V, L, H) (V >= L && V < H)
-#define RAISE_FLOOR(G) (IS_SET(G->settings, WHITE_PAWN_LAND_HIGH) && (GET_PLAYER(G->state) == WHITE_PAWN) ? LINE_LENGTH : 0)
+#define RAISE_FLOOR(G) (IS_SET(G->settings, WHITE_PAWN_LAND_HIGH) && (G->player == WHITE_PAWN) ? LINE_LENGTH : 0)
 #define ON_BOARD(G, I) (IN_BOUNDS(I, 0, BOARD_LENGTH) && G->state[I] != '\n')
 #define CAN_CAPTURE(G, I) (\
 	ON_BOARD(G, I) &&\
 	IS_PIECE(GET_SQUARE(G->state, I)) &&\
-	IS_WHITE(GET_SQUARE(G->state, I)) != IS_WHITE(GET_PLAYER(G->state)) &&\
+	IS_WHITE(GET_SQUARE(G->state, I)) != IS_WHITE(G->player) &&\
 	(!G->repeat) \
 )
-#define NEXT_PLAYER(G) SET_PLAYER(G->state, NEXT_PIECE(G)) 
+#define NEXT_PLAYER(G) (G->player = NEXT_PIECE(G)) 
 #define SPAWN(G) (\
 	NEXT_PLAYER(G) &\
-	SET_PLAYER_RANK(G->state, SPAWN_RANK(G)) &\
-	SET_PLAYER_FILE(G->state, G->cursor_file) \
+	(G->player_rank = SPAWN_RANK(G)) &\
+	(G->player_file = G->cursor_file) \
 )
-#define PACMAN(G, I) (abs(SQUARE_FILE(I) - GET_PLAYER_FILE(G->state)) > 2)
+#define PACMAN(G, I) (abs(SQUARE_FILE(I) - (G->player_file)) > 2)
 #define CAN_STRIKE(G, I) (ON_BOARD(G, I + RAISE_FLOOR(G)) && EMPTY_SQUARE(G->state, I))
 #define CAN_MOVE(G, I) (CAN_STRIKE(G, I) && !PACMAN(G, I))
 #define CURSOR_WRAPPED(G) (G->cursor_rank > 1)
@@ -69,7 +69,7 @@
 	G->cursor : -G->cursor * LAST_FILE \
 )
 #define LAND(G) (\
-	PLACE_PLAYER(G->state) &\
+	PLACE_PLAYER(G) &\
 	SPAWN(G) \
 )
 #define MOVE_DOWN(G) (move_player(G, PLAYER_DOWN(G)))
@@ -286,6 +286,9 @@ void init_game(struct Game* game) {
 	game->fell = 0;
 	game->repeat = false;
 	game->paused = false;
+	game->player = 'W';
+	game->player_rank = 1;
+	game->player_file = 7;
 	game->cursor = -1;
 	game->cursor_rank = 1;
 	game->cursor_file = LAST_FILE;
@@ -427,7 +430,7 @@ size_t capture(State state, const size_t square, const size_t move, const bool e
 size_t hit(struct Game* game, enum Square piece_type, const size_t rank, const size_t file, const size_t move, const bool execute, const bool pattern) {
 
 	struct MoveSet move_set = MOVES[piece_type];
-	const short reverse = piece_type == PAWN && IS_WHITE(GET_PLAYER(game->state)) && IS_SET(game->settings, WHITE_PAWN_HIT_UP) ? -1 : 1;
+	const short reverse = piece_type == PAWN && IS_WHITE(game->player) && IS_SET(game->settings, WHITE_PAWN_HIT_UP) ? -1 : 1;
 	const size_t to_rank = rank + move_set.moves[move][0] * reverse;
 	const size_t to_file = file + move_set.moves[move][1];
 	const size_t square = SQUARE_INDEX(to_rank, to_file);
@@ -473,9 +476,9 @@ size_t drop_to(struct Game* game, const size_t from) {
 
 size_t attack(struct Game* game, const bool execute, const bool forecast, const bool pattern) {
 
-	Piece piece = GET_PLAYER(game->state);
-	size_t rank = GET_PLAYER_RANK(game->state);
-	const size_t file = GET_PLAYER_FILE(game->state);
+	Piece piece = game->player;
+	size_t rank = game->player_rank;
+	const size_t file = game->player_file;
 
 	if (forecast) {
 
@@ -494,8 +497,8 @@ size_t attack(struct Game* game, const bool execute, const bool forecast, const 
 
 size_t forecast_rank(struct Game* game) {
 
-	const size_t rank = GET_PLAYER_RANK(game->state);
-	const size_t file = GET_PLAYER_FILE(game->state);
+	const size_t rank = game->player_rank;
+	const size_t file = game->player_file;
 	return SQUARE_RANK(drop_to(game, SQUARE_INDEX(rank, file)));
 }
 
@@ -516,7 +519,7 @@ size_t judge(struct Game* game) {
 
 		if (IS_SET(game->settings, CHECKMATE) && PIECE_MAP[piece] == KING) {
 
-			SET_PLAYER(game->state, DEAD_PLAYER);
+			game->player = DEAD_PLAYER;
 		}
 		
 		if (piece != *EMPTY_CAPTURES) {
@@ -534,18 +537,18 @@ size_t judge(struct Game* game) {
 
 bool move_player(struct Game* game, size_t to) {
 
-	const size_t to_rank = SQUARE_RANK(to), to_file = SQUARE_FILE(to);
-	const size_t from_rank = GET_PLAYER_RANK(game->state), from_file = GET_PLAYER_FILE(game->state);
+	const unsigned short to_rank = SQUARE_RANK(to), to_file = SQUARE_FILE(to);
+	const unsigned short from_rank = game->player_rank, from_file = game->player_file;
 	if (to_file != from_file) printf("moving player\n");
 	if (CAN_MOVE(game, to)) {
 
-		SET_PLAYER_RANK(game->state, to_rank);
-		SET_PLAYER_FILE(game->state, to_file);
+		game->player_rank = to_rank;
+		game->player_file = to_file;
 		return true;
 	}
 	else if (to_rank > from_rank) {
 
-		SET_PLAYER(game->state, QUEEN_ME(game, from_rank));
+		game->player = QUEEN_ME(game, from_rank);
 		const size_t captures = attack(game, true, false, false);
 		LAND(game);
 		game->cursor_rank = max(0, game->cursor_rank - (captures ? 1 : 0) - (game->cursor_rank > 1) * 2);
@@ -580,7 +583,7 @@ void exist(struct Game* game, const time_t falls) {
 
 void drop(struct Game* game) {
 
-	const size_t from = PLAYER_SQUARE(game->state);
+	const size_t from = PLAYER_SQUARE(game);
 	const size_t to = drop_to(game, from);
 	move_player(game, to);
 }

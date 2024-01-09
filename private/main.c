@@ -45,7 +45,7 @@ bool tick(struct Game* game, const time_t passed, CONTROL_FUNCTOR(control), MODE
 	game->time += passed * !game->paused;
 	control(game, passed);
 	if (!game->paused) model(game, falls);
-	if (GAME_OVER(game->state)) return true;
+	if (GAME_OVER(game)) return true;
 	view(game);
 	if (falls > 0) game->fell = game->time;
 

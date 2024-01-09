@@ -59,21 +59,21 @@ typedef char* State;
 #define NEWLINE_COUNT 17ull
 #define CURSES_STATE_LENGTH (STATE_LENGTH + NEWLINE_COUNT)
 #define CAPTURE_INDEX BOARD_LENGTH
-#define PLAYER_INDEX (STATE_LENGTH - 14)
-#define PLAYER_RANK_INDEX (STATE_LENGTH - 11)
-#define PLAYER_FILE_INDEX (STATE_LENGTH - 12)
+//#define PLAYER_INDEX (STATE_LENGTH - 14)
+//#define PLAYER_RANK_INDEX (STATE_LENGTH - 11)
+//#define PLAYER_FILE_INDEX (STATE_LENGTH - 12)
 #define TERMINATOR_INDEX (STATE_LENGTH - 1)
 #define TERMINATE(S) (S[TERMINATOR_INDEX] = '\0')
 #define SET_SQUARE(S, I, V) (S[I] = V)
 #define GET_SQUARE(S, I) S[I]
-#define GET_PLAYER(S) (S[PLAYER_INDEX])
-#define GET_PLAYER_RANK(S) (S[PLAYER_RANK_INDEX] - '0')
-#define GET_PLAYER_FILE(S) (S[PLAYER_FILE_INDEX] - '0')
+//#define GET_PLAYER(S) (S[PLAYER_INDEX])
+//#define GET_PLAYER_RANK(S) (S[PLAYER_RANK_INDEX] - '0')
+//#define GET_PLAYER_FILE(S) (S[PLAYER_FILE_INDEX] - '0')
 #define GET_CAPTURE(S, I) (S[CAPTURE_INDEX + I])
 #define SQUARE_INDEX(R, F) ((R) * LINE_LENGTH + (F))
-#define PLAYER_SQUARE(S) SQUARE_INDEX(GET_PLAYER_RANK(S), GET_PLAYER_FILE(S))
-#define PLACE_PLAYER(S) SET_SQUARE(S, PLAYER_SQUARE(S), GET_PLAYER(S))
-#define GAME_OVER(S) (GET_PLAYER(S) == DEAD_PLAYER)
+#define PLAYER_SQUARE(G) SQUARE_INDEX(G->player_rank, G->player_file)
+#define PLACE_PLAYER(G) SET_SQUARE(G->state, PLAYER_SQUARE(G), G->player)
+#define GAME_OVER(G) (G->player == DEAD_PLAYER)
 #define IS_WHITE(P) (P <= 'Z')
 #define SET(B, V) (B |= V)
 #define IS_SET(B, V) (B & V)
@@ -119,6 +119,9 @@ struct Game {
 	time_t time;
 	time_t fell;
 	bool paused;
+	char player;
+	unsigned short player_rank;
+	unsigned short player_file;
 	short cursor;
 	unsigned short cursor_rank;
 	unsigned short cursor_file;
