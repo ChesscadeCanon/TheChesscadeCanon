@@ -81,8 +81,8 @@ void print_pretty(struct Game* game) {
 
 		board[to_index++] = game->state[from_index++];
 	}
-	const size_t r = GET_PLAYER_RANK(game->state), f = GET_PLAYER_FILE(game->state);
-	board[(r * (FILES + 2)) + f] = GET_PLAYER(game->state);
+	const size_t r = game->player_rank, f = game->player_file;
+	board[(r * (FILES + 2)) + f] = game->player;
 #endif
 	_print_info(game);
 	_print_cursor(game);

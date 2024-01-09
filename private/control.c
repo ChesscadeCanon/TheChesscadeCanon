@@ -42,17 +42,29 @@ void _control_drop(struct Game* game) {
 		const char key = GETCH();
 		switch (key) {
 		case DROP_KEY: if (!game->paused) game->dropped = true; break;
+		default: break;
+		}
+	}
+}
+
+void _control_game(struct Game* game) {
+
+	if (KBHIT()) {
+
+		const char key = GETCH();
+		switch (key) {
 		case QUIT_KEY: QUIT(); break;
 		case PAUSE_KEY: game->paused = !game->paused; break;
-		default: UNGETCH(key); break;
+		default: break;
 		}
 	}
 }
 
 void key_control(struct Game* game, const time_t passed) {
 
-	_control_drop(game);
+	_control_game(game);
 	if(game->paused) return;
+	_control_drop(game);
 	_control_move(game, &(game->moved_right), RIGHT_KEY, passed);
 	_control_move(game, &(game->moved_left), LEFT_KEY, passed);
 	_control_move(game, &(game->moved_down), DOWN_KEY, passed);
