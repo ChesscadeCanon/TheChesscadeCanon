@@ -13,7 +13,7 @@ extern "C" {
     __declspec(dllexport) size_t get_forecast_rank(struct Game*);
     __declspec(dllexport) char get_forecast_piece(struct Game*);
     __declspec(dllexport) size_t get_square_bit(size_t, size_t);
-    __declspec(dllexport) const char* get_deck(struct Game*, size_t);
+    __declspec(dllexport) const char* get_deck(size_t);
     __declspec(dllexport) struct Game* malloc_init_default_game();
     __declspec(dllexport) void begin_game(struct Game*);
     __declspec(dllexport) void increment_game(struct Game*, time_t);

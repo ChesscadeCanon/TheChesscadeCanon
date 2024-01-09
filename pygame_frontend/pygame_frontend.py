@@ -57,8 +57,8 @@ class Game(ctypes.Structure):
 engine.malloc_init_default_game.restype = ctypes.POINTER(Game)
 engine.increment_game.argtypes = [ctypes.POINTER(Game), ctypes.c_ulonglong]
 engine.begin_game.argtypes = [ctypes.POINTER(Game)]
-engine.game_over.argtypes = [ctypes.POINTER(Game)]
-engine.game_over.restype = ctypes.c_bool
+engine.is_game_over.argtypes = [ctypes.POINTER(Game)]
+engine.is_game_over.restype = ctypes.c_bool
 engine.delete_game.argtypes = [ctypes.POINTER(Game)]
 engine.get_next_piece.argtypes = [ctypes.POINTER(Game)]
 engine.get_next_piece.restype = ctypes.c_wchar
@@ -72,7 +72,7 @@ engine.attack_pattern.argtypes = [ctypes.POINTER(Game)]
 engine.attack_pattern.restype = ctypes.c_ulonglong
 engine.get_square_bit.argtypes = [ctypes.c_ulonglong, ctypes.c_ulonglong]
 engine.get_square_bit.restype = ctypes.c_ulonglong
-engine.get_deck.argtypes = [ctypes.POINTER(Game), ctypes.c_ulonglong]
+engine.get_deck.argtypes = [ctypes.c_ulonglong]
 engine.get_deck.restype = ctypes.c_char_p
 
 screen = pygame.display.set_mode(SIZE)
@@ -145,7 +145,7 @@ def draw_next(game):
     cursor_file = game.contents.cursor_file
     next_piece = engine.get_next_piece(game)
     for g in range(SQUARES_OFF_TOP):
-        deck = [chr(c) for c in engine.get_deck(game, g)]
+        deck = [chr(c) for c in engine.get_deck(g)]
         draw_piece_on_deck(deck_pieces, deck[0], g, 0)
         [draw_piece_on_deck(deck_pieces, deck[i], g, i) for i in range(FILES)]
     draw_piece_on_deck(next_pieces, next_piece, cursor_rank, cursor_file)
@@ -202,7 +202,7 @@ def play():
         passed = clock.tick(30)
         take_input(game, passed)
         engine.increment_game(game, passed)
-        carryOn = carryOn and not engine.game_over(game)
+        carryOn = carryOn and not engine.is_game_over(game)
         screen.fill(GREY)
         draw_board(game)
         draw_next(game)
@@ -214,7 +214,7 @@ def play():
         clock.tick(60)
     ret = game.contents.score
     engine.delete_game(game)
-    return ret if engine.game_over(game) else -1
+    return ret if engine.is_game_over(game) else -1
 high_score = 0
 while True:
     score = play()
