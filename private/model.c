@@ -1,4 +1,6 @@
-#include "Model.h"
+#include "platform.h"
+#include "model.h"
+#include "config.h"
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -6,15 +8,17 @@
 #include <stdio.h>
 
 #define MOVE_RATE(G) 64
+#define FPS 60
+#define EMPTY '_'
+#define GET_SQUARE(S, I) S[I]
+#define GET_CAPTURE(S, I) (S[CAPTURE_INDEX + I])
+#define PLACE_PLAYER(G) SET_SQUARE(G->state, PLAYER_SQUARE(G), G->player)
 #define EMPTY_CAPTURES "********"
 #define EMPTY_SQUARE(S, I) (GET_SQUARE(S, I) == EMPTY)
 #define HAS_CAPTURED(S) (strncmp(EMPTY_CAPTURES, S + CAPTURE_INDEX, CAPTURE_LENGTH) != 0)
 #define SQUARE_RANK(I) ((unsigned short)(I / LINE_LENGTH))
 #define SQUARE_FILE(I) ((unsigned short)(I % LINE_LENGTH))
 #define SQUARE_BIT(I) (1ull << (SQUARE_RANK(I) * FILES + SQUARE_FILE(I)))
-//#define SET_PLAYER(S, V) (S[PLAYER_INDEX] = V)
-//#define SET_PLAYER_RANK(S, V) (S[PLAYER_RANK_INDEX] = '0' + (char)(V))
-//#define SET_PLAYER_FILE(S, V) (S[PLAYER_FILE_INDEX] = '0' + (char)(V))
 #define SET_CAPTURE(S, C, V) (S[CAPTURE_INDEX + C] = V)
 #define REVERSE_CURSOR(G) (G->cursor *= -1)
 #define SQUARE_DOWN(I) (I + LINE_LENGTH)
@@ -72,13 +76,27 @@
 	PLACE_PLAYER(G) &\
 	SPAWN(G) \
 )
-#define MOVE_DOWN(G) (move_player(G, PLAYER_DOWN(G)))
-#define MOVE_RIGHT(G) (move_player(G, PLAYER_RIGHT(G)))
-#define MOVE_LEFT(G) (move_player(G, PLAYER_LEFT(G)))
-#define MOVE_DOWN_RIGHT(G) (move_player(G, PLAYER_DOWN_RIGHT(G)))
-#define MOVE_DOWN_LEFT(G) (move_player(G, PLAYER_DOWN_LEFT(G)))
-#define FALL(G) (MOVE_DOWN(G) && update_cursor(G))
+#define MOVE_DOWN(G) (_move_player(G, PLAYER_DOWN(G)))
+#define MOVE_RIGHT(G) (_move_player(G, PLAYER_RIGHT(G)))
+#define MOVE_LEFT(G) (_move_player(G, PLAYER_LEFT(G)))
+#define MOVE_DOWN_RIGHT(G) (_move_player(G, PLAYER_DOWN_RIGHT(G)))
+#define MOVE_DOWN_LEFT(G) (_move_player(G, PLAYER_DOWN_LEFT(G)))
+#define FALL(G) (MOVE_DOWN(G) && _update_cursor(G))
 #define INIT(S) (TERMINATE(S))
+#define GAME_OVER(G) (G->player == DEAD_PLAYER)
+#define LAST_FILE (FILES - 1ull)
+#define LAST_RANK (RANKS - 1ull)
+
+enum Square {
+	PAWN,
+	BISHOP,
+	ROOK,
+	KNIGHT,
+	QUEEN,
+	KING,
+	NO_PIECE,
+	SQUARE_COUNT
+};
 
 struct MoveSet {
 
@@ -209,12 +227,7 @@ const size_t PIECE_VALUES[SQUARE_COUNT] = {
 
 #define PIECE_VALUE(P) (PIECE_VALUES[PIECE_MAP[P]])
 
-bool cursor_wrapped(struct Game* game) {
-
-	return CURSOR_WRAPPED(game);
-}
-
-unsigned short update_cursor(struct Game* game) {
+unsigned short _update_cursor(struct Game* game) {
 
 	const short inc = CURSOR_INCREMENT(game);
 	game->cursor_file += inc;
@@ -222,12 +235,7 @@ unsigned short update_cursor(struct Game* game) {
 	return game->cursor;
 }
 
-size_t square_bit(size_t rank, size_t file) {
-
-	return SQUARE_BIT(SQUARE_INDEX(rank, file));
-}
-
-size_t bit_index(size_t bit) {
+size_t _bit_index(size_t bit) {
 
 	size_t i = 0, b = 1;
 
@@ -241,43 +249,333 @@ size_t bit_index(size_t bit) {
 	return i >= 64 ? 0 : i;
 }
 
-size_t bit_rank(size_t bit) {
+size_t _bit_rank(size_t bit) {
 
-	return bit_index(bit) / FILES;
+	return _bit_index(bit) / FILES;
 }
 
-size_t bit_file(size_t bit) {
+size_t _bit_file(size_t bit) {
 
-	return bit_index(bit) % FILES;
+	return _bit_index(bit) % FILES;
 }
 
-time_t ease(struct Game* game) {
+size_t _free_children(struct Histotrie* root) {
 
-	return EASE(game);
+	if (!root) return 0;
+	size_t ret = 1;
+
+	for (size_t c = 0; c < TRIE_CHILDREN; ++c) {
+
+		if (root->children[c]) {
+
+			ret += _free_children(root->children[c]);
+		}
+	}
+
+	free(root);
+	MEMLOG("freed histotrie node\n");
+	return ret;
 }
 
-const char* deck(struct Game* game, size_t d) {
+void _free_histotrie(struct Game* game) {
 
-	return DECKS[d];
+	size_t count = _free_children(game->histotrie);
+	MEMLOGF("freed %llu histotrie nodes\n", count);
 }
 
-Piece next_piece(struct Game* game) {
+void _init_histotrie(struct Histotrie* histotrie) {
 
-	return NEXT_PIECE(game);
+	memset(histotrie->children, 0, TRIE_CHILDREN * sizeof(struct Histotrie*));
 }
 
-struct Game* malloc_init_game(Settings settings) {
+struct Histotrie* _malloc_histotrie() {
 
-	struct Game* game = malloc(sizeof(struct Game));
-	MEMLOG("malloc game\n");
-	assert(game);
-	init_game(game);
-	game->histotrie = malloc_histotrie();
-	game->settings = settings;
-	return game;
+	struct Histotrie* ret = malloc(sizeof(struct Histotrie));
+	MEMLOG("malloc histotrie\n");
+	_init_histotrie(ret);
+	return ret;
 }
 
-void init_game(struct Game* game) {
+size_t _record_state(struct Histotrie* root, const Board board, const size_t index) {
+
+	if (index >= BOARD_LENGTH) return 0;
+	if (board[index] == '\n') return _record_state(root, board, index + 1);
+
+	Piece piece = board[index];
+	enum Square square = PIECE_MAP[piece];
+	size_t child = square == NO_PIECE ? TRIE_CHILDREN - 1 : square + NO_PIECE * IS_WHITE(piece);
+
+	if (root->children[child]) {
+
+		return _record_state(root->children[child], board, index + 1);
+	}
+
+	root->children[child] = malloc(sizeof(struct Histotrie));
+	MEMLOG("malloc histotrie node\n");
+	_init_histotrie(root->children[child]);
+	return 1 + _record_state(root->children[child], board, index + 1);
+}
+
+size_t _chronicle(struct Game* game) {
+
+	if (!game->histotrie) return false;
+	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT)) return false;
+
+	const size_t ret = _record_state(game->histotrie, game->state, 0);
+	MEMLOGF("created %llu histotrie nodes\n", ret);
+	game->repeat = !ret;
+	return ret;
+}
+
+void _init_captures(State state) {
+
+	memcpy(state + BOARD_LENGTH, EMPTY_CAPTURES, CAPTURE_LENGTH * sizeof(char));
+}
+
+void _init_board(Board board) {
+
+	for (size_t i = 0, r = 0; r < RANKS; ++r) {
+
+		for (size_t f = 0; f < FILES; ++f) {
+
+			board[i] = EMPTY;
+			++i;
+		}
+
+		++i;
+	}
+}
+
+void _kill(State state, const size_t square, const size_t move) {
+
+	Piece piece = GET_SQUARE(state, square);
+	SET_CAPTURE(state, move, piece);
+	SET_SQUARE(state, square, EMPTY);
+}
+
+size_t _capture(State state, const size_t square, const size_t move, const bool execute) {
+
+	if (execute) {
+
+		_kill(state, square, move);
+	}
+
+	return SQUARE_BIT(square);
+}
+
+size_t _hit(struct Game* game, enum Square piece_type, const size_t rank, const size_t file, const size_t move, const bool execute, const bool pattern) {
+
+	struct MoveSet move_set = MOVES[piece_type];
+	const short reverse = piece_type == PAWN && IS_WHITE(game->player) && IS_SET(game->settings, WHITE_PAWN_HIT_UP) ? -1 : 1;
+	const size_t to_rank = rank + move_set.moves[move][0] * reverse;
+	const size_t to_file = file + move_set.moves[move][1];
+	const size_t square = SQUARE_INDEX(to_rank, to_file);
+	const bool open = CAN_STRIKE(game, square);
+	size_t ret = open && pattern ? SQUARE_BIT(square) : 0;
+
+	if (move_set.repeat && open) {
+
+		ret |= _hit(game, piece_type, to_rank, to_file, move, execute, pattern);
+	}
+	else if (CAN_CAPTURE(game, square)) {
+
+		ret |= _capture(game->state, square, move, execute);
+	}
+
+	return ret;
+}
+
+size_t _strike(struct Game* game, const enum Square piece_type, const size_t rank, const size_t file, const size_t move, const bool execute, const bool pattern) {
+
+	const struct MoveSet move_set = MOVES[piece_type];
+	if (move >= move_set.count) return 0;
+	const size_t ret = _hit(game, piece_type, rank, file, move, execute, pattern);
+	return ret | _strike(game, piece_type, rank, file, move + 1, execute, pattern);
+}
+
+size_t _drop_to(struct Game* game, const size_t from) {
+
+	size_t to = SQUARE_DOWN(from);
+
+	if (DOUBLE_BISHOP(game)) {
+
+		to = SQUARE_DOWN(to);
+	}
+
+	if (CAN_MOVE(game, to)) {
+
+		return _drop_to(game, to);
+	}
+
+	return from;
+}
+
+size_t _judge(struct Game* game) {
+
+	game->scored = 0;
+	size_t count = 0;
+
+	for (size_t i = 0; i < FILES; ++i) {
+
+		Piece piece = GET_CAPTURE(game->state, i);
+
+		if (IS_SET(game->settings, CHECKMATE) && PIECE_MAP[piece] == KING) {
+
+			game->player = DEAD_PLAYER;
+		}
+
+		if (piece != *EMPTY_CAPTURES) {
+
+			game->scored += PIECE_VALUE(piece);
+			++count;
+		}
+	}
+
+	count ? ++game->combo : (game->combo = 0);
+	game->scored *= game->combo * count;
+	game->score += game->scored;
+	return game->score;
+}
+
+void _resolve(struct Game* game) {
+
+	const unsigned short from_rank = game->player_rank, from_file = game->player_file;
+	game->player = QUEEN_ME(game, from_rank);
+	const size_t captures = attack(game, true, false, false);
+	LAND(game);
+	game->cursor_rank = max(0, game->cursor_rank - (captures ? 1 : 0) - (game->cursor_rank > 1) * 2);
+	_judge(game);
+
+	if (captures) {
+
+		REVERSE_CURSOR(game);
+	}
+
+	_chronicle(game);
+}
+
+bool _move_player(struct Game* game, size_t to) {
+
+	const unsigned short to_rank = SQUARE_RANK(to), to_file = SQUARE_FILE(to);
+
+	if (CAN_MOVE(game, to)) {
+
+		game->player_rank = to_rank;
+		game->player_file = to_file;
+		return true;
+	}
+	else if (to_rank > game->player_rank) {
+
+		_resolve(game);
+	}
+
+	return false;
+}
+
+time_t _buy_move(struct Game* game, long int* moved, const unsigned short multiplier) {
+
+	if (*moved < 0) return 0;
+	const long int rate = MOVE_RATE(game) * multiplier;
+	const long int steps = *moved / rate;
+	*moved -= rate * steps;
+	assert(steps >= 0);
+	return (time_t)steps;
+}
+
+void _drop(struct Game* game) {
+
+	const size_t from = PLAYER_SQUARE(game);
+	const size_t to = _drop_to(game, from);
+	_move_player(game, to);
+}
+
+time_t _move_right(struct Game* game, time_t steps) {
+
+	if (steps <= 0) return steps;
+	MOVE_RIGHT(game);
+	_move_right(game, steps - 1);
+	return steps;
+}
+
+time_t _move_left(struct Game* game, time_t steps) {
+
+	if (steps <= 0) return steps;
+	MOVE_LEFT(game);
+	_move_left(game, steps - 1);
+	return steps;
+}
+
+time_t _move_down(struct Game* game, time_t steps) {
+
+	if (steps <= 0) return steps;
+	MOVE_DOWN(game);
+	_move_down(game, steps - 1);
+	return steps;
+}
+
+time_t _move_down_left(struct Game* game, time_t steps) {
+
+	if (steps <= 0) return steps;
+	MOVE_DOWN_LEFT(game);
+	_move_down_left(game, steps - 1);
+	return steps;
+}
+
+time_t _move_down_right(struct Game* game, time_t steps) {
+
+	if (steps <= 0) return steps;
+	MOVE_DOWN_RIGHT(game);
+	_move_down_right(game, steps - 1);
+	return steps;
+}
+
+void _fall(struct Game* game, time_t falls) {
+
+	if (falls <= 0) return;
+	else FALL(game);
+	_fall(game, falls - 1);
+}
+
+void _take_input(struct Game* game) {
+
+	if (game->dropped) {
+
+		_drop(game);
+		game->dropped = false;
+	}
+
+	const bool moving_down = game->moved_down >= MOVE_RATE(game);
+	const bool moving_left = game->moved_left >= MOVE_RATE(game);
+	const bool moving_right = game->moved_right >= MOVE_RATE(game);
+	const bool diagonals = IS_SET(game->settings, DIAGONALS);
+	const bool diagonal = diagonals && moving_down && moving_left != moving_right;
+	const unsigned short multiplier = (!diagonal && DOUBLE_BISHOP(game)) + 1;
+	const time_t down = _buy_move(game, &game->moved_down, multiplier);
+	const time_t left = _buy_move(game, &game->moved_left, multiplier);
+	const time_t right = _buy_move(game, &game->moved_right, multiplier);
+
+	if (diagonals && left > 0 && down > 0 && right == 0) {
+		_move_down_left(game, min(left - right, down));
+	}
+	else if (diagonals && left == 0 && down > 0 && right > 0) {
+		_move_down_right(game, min(right - left, down));
+	}
+	else if (left > 0 || right > 0 || down > 0) {
+		_move_right(game, max(0, right - left));
+		_move_left(game, max(0, left - right));
+		_move_down(game, max(0, down));
+	}
+}
+
+void _init_state(State state) {
+
+	memset(state, '\n', STATE_LENGTH * sizeof(char));
+	_init_captures(state);
+	_init_board(state);
+	INIT(state);
+}
+
+void _init_game(struct Game* game) {
 
 	game->score = 0;
 	game->combo = 0;
@@ -297,181 +595,47 @@ void init_game(struct Game* game) {
 	game->moved_right = -1;
 	game->moved_down = -1;
 	game->settings = 0;
-	init_state(game->state);
+	_init_state(game->state);
+}
+
+bool game_over(struct Game* game) {
+
+	return GAME_OVER(game);
+}
+
+bool cursor_wrapped(struct Game* game) {
+
+	return CURSOR_WRAPPED(game);
+}
+
+size_t square_bit(size_t rank, size_t file) {
+
+	return SQUARE_BIT(SQUARE_INDEX(rank, file));
+}
+
+time_t ease(struct Game* game) {
+
+	return EASE(game);
+}
+
+const char* deck(size_t d) {
+
+	return DECKS[d];
+}
+
+Piece next_piece(struct Game* game) {
+
+	return NEXT_PIECE(game);
 }
 
 void free_game(struct Game* game) {
 
 	if (game) {
 
-		free_histotrie(game);
+		_free_histotrie(game);
 		MEMLOG("freed game\n");
 		free(game);
 	}
-}
-
-void init_histotrie(struct Histotrie* histotrie) {
-
-	memset(histotrie->children, 0, TRIE_CHILDREN * sizeof(struct Histotrie*));
-}
-
-void print_histotrie(struct Histotrie* root) {
-
-	if (!root) return;
-
-	for (size_t c = 0; c < TRIE_CHILDREN; ++c) {
-
-		if (root->children[c]) {
-
-			print_histotrie(root->children[c]);
-		}
-	}
-}
-
-struct Histotrie* malloc_histotrie() {
-
-	struct Histotrie* ret = malloc(sizeof(struct Histotrie));
-	MEMLOG("malloc histotrie\n");
-	init_histotrie(ret);
-	return ret;
-}
-
-size_t free_children(struct Histotrie* root) {
-
-	if (!root) return 0;
-	size_t ret = 1;
-
-	for (size_t c = 0; c < TRIE_CHILDREN; ++c) {
-
-		if (root->children[c]) {
-
-			ret += free_children(root->children[c]);
-		}
-	}
-
-	free(root);
-	MEMLOG("freed histotrie node\n");
-	return ret;
-}
-
-void free_histotrie(struct Game* game) {
-
-	size_t count = free_children(game->histotrie);
-	MEMLOGF("freed %llu histotrie nodes\n", count);
-}
-
-size_t record_state(struct Histotrie* root, const Board board, const size_t index) {
-
-	if (index >= BOARD_LENGTH) return 0;
-	if (board[index] == '\n') return record_state(root, board, index + 1);
-
-	Piece piece = board[index];
-	enum Square square = PIECE_MAP[piece];
-	size_t child = square == NO_PIECE ? TRIE_CHILDREN - 1 : square + NO_PIECE * IS_WHITE(piece);
-
-	if (root->children[child]) {
-
-		return record_state(root->children[child], board, index + 1);
-	}
-
-	root->children[child] = malloc(sizeof(struct Histotrie));
-	MEMLOG("malloc histotrie node\n");
-	init_histotrie(root->children[child]);
-	return 1 + record_state(root->children[child], board, index + 1);
-}
-
-size_t chronicle(struct Game* game) {
-
-	if (!game->histotrie) return false;
-	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT)) return false;
-
-	const size_t ret = record_state(game->histotrie, game->state, 0);
-	MEMLOGF("created %llu histotrie nodes\n", ret);
-	game->repeat = !ret;
-	return ret;
-}
-
-void init_captures(State state) {
-
-	memcpy(state + BOARD_LENGTH, EMPTY_CAPTURES, CAPTURE_LENGTH * sizeof(char));
-}
-
-void init_board(Board board) {
-
-	for (size_t i = 0, r = 0; r < RANKS; ++r) {
-
-		for (size_t f = 0; f < FILES; ++f) {
-
-			board[i] = EMPTY;
-			++i;
-		}
-
-		++i;
-	}
-}
-
-void kill(State state, const size_t square, const size_t move) {
-
-	Piece piece = GET_SQUARE(state, square);
-	SET_CAPTURE(state, move, piece);
-	SET_SQUARE(state, square, EMPTY);
-}
-
-size_t capture(State state, const size_t square, const size_t move, const bool execute) {
-
-	if (execute) {
-
-		kill(state, square, move);
-	}
-
-	return SQUARE_BIT(square);
-}
-
-size_t hit(struct Game* game, enum Square piece_type, const size_t rank, const size_t file, const size_t move, const bool execute, const bool pattern) {
-
-	struct MoveSet move_set = MOVES[piece_type];
-	const short reverse = piece_type == PAWN && IS_WHITE(game->player) && IS_SET(game->settings, WHITE_PAWN_HIT_UP) ? -1 : 1;
-	const size_t to_rank = rank + move_set.moves[move][0] * reverse;
-	const size_t to_file = file + move_set.moves[move][1];
-	const size_t square = SQUARE_INDEX(to_rank, to_file);
-	const bool open = CAN_STRIKE(game, square);
-	size_t ret = open && pattern ? SQUARE_BIT(square) : 0;
-
-	if (move_set.repeat && open) {
-
-		ret |= hit(game, piece_type, to_rank, to_file, move, execute, pattern);
-	}
-	else if(CAN_CAPTURE(game, square)) {
-
-		ret |= capture(game->state, square, move, execute);
-	}
-
-	return ret;
-}
-
-size_t strike(struct Game* game, const enum Square piece_type, const size_t rank, const size_t file, const size_t move, const bool execute, const bool pattern) {
-
-	const struct MoveSet move_set = MOVES[piece_type];
-	if (move >= move_set.count) return 0;
-	const size_t ret = hit(game, piece_type, rank, file, move, execute, pattern);
-	return ret | strike(game, piece_type, rank, file, move + 1, execute, pattern);
-}
-
-size_t drop_to(struct Game* game, const size_t from) {
-
-	size_t to = SQUARE_DOWN(from);
-
-	if (DOUBLE_BISHOP(game)) {
-
-		to = SQUARE_DOWN(to);
-	}
-
-	if (CAN_MOVE(game, to)) {
-
-		return drop_to(game, to);
-	}
-
-	return from;
 }
 
 size_t attack(struct Game* game, const bool execute, const bool forecast, const bool pattern) {
@@ -482,24 +646,24 @@ size_t attack(struct Game* game, const bool execute, const bool forecast, const 
 
 	if (forecast) {
 
-		rank = SQUARE_RANK(drop_to(game, SQUARE_INDEX(rank, file)));
+		rank = SQUARE_RANK(_drop_to(game, SQUARE_INDEX(rank, file)));
 		piece = QUEEN_ME(game, rank);
 	}
 
 	if (execute) {
 
-		init_captures(game->state);
+		_init_captures(game->state);
 	}
 
 	enum Square piece_type = PIECE_MAP[piece];
-	return strike(game, piece_type, rank, file, 0, execute, pattern);
+	return _strike(game, piece_type, rank, file, 0, execute, pattern);
 }
 
 size_t forecast_rank(struct Game* game) {
 
 	const size_t rank = game->player_rank;
 	const size_t file = game->player_file;
-	return SQUARE_RANK(drop_to(game, SQUARE_INDEX(rank, file)));
+	return SQUARE_RANK(_drop_to(game, SQUARE_INDEX(rank, file)));
 }
 
 char forecast_piece(struct Game* game) {
@@ -508,162 +672,10 @@ char forecast_piece(struct Game* game) {
 	return QUEEN_ME(game, rank);
 }
 
-size_t judge(struct Game* game) {
-
-	game->scored = 0;
-	size_t count = 0;
-
-	for (size_t i = 0; i < FILES; ++i) {
-
-		Piece piece = GET_CAPTURE(game->state, i);
-
-		if (IS_SET(game->settings, CHECKMATE) && PIECE_MAP[piece] == KING) {
-
-			game->player = DEAD_PLAYER;
-		}
-		
-		if (piece != *EMPTY_CAPTURES) {
-
-			game->scored += PIECE_VALUE(piece);
-			++count;
-		}
-	}
-
-	count ? ++game->combo : (game->combo = 0);
-	game->scored *= game->combo * count;
-	game->score += game->scored;
-	return game->score;
-}
-
-bool move_player(struct Game* game, size_t to) {
-
-	const unsigned short to_rank = SQUARE_RANK(to), to_file = SQUARE_FILE(to);
-	const unsigned short from_rank = game->player_rank, from_file = game->player_file;
-	if (to_file != from_file) printf("moving player\n");
-	if (CAN_MOVE(game, to)) {
-
-		game->player_rank = to_rank;
-		game->player_file = to_file;
-		return true;
-	}
-	else if (to_rank > from_rank) {
-
-		game->player = QUEEN_ME(game, from_rank);
-		const size_t captures = attack(game, true, false, false);
-		LAND(game);
-		game->cursor_rank = max(0, game->cursor_rank - (captures ? 1 : 0) - (game->cursor_rank > 1) * 2);
-		judge(game);
-		
-		if (captures) {
-
-			REVERSE_CURSOR(game);
-		}
-
-		chronicle(game);
-	}
-
-	return false;
-}
-
-time_t buy_move(struct Game* game, long int* moved, const unsigned short multiplier) {
-
-	if (*moved < 0) return 0;
-	const long int rate = MOVE_RATE(game) * multiplier;
-	const long int steps = *moved / rate;
-	*moved -= rate * steps;
-	assert(steps >= 0);
-	return (time_t)steps;
-}
-
 void exist(struct Game* game, const time_t falls) {
 
-	take_input(game);
-	fall(game, falls);
-}
-
-void drop(struct Game* game) {
-
-	const size_t from = PLAYER_SQUARE(game);
-	const size_t to = drop_to(game, from);
-	move_player(game, to);
-}
-
-time_t move_right(struct Game* game, time_t steps) {
-
-	if (steps <= 0) return steps;
-	MOVE_RIGHT(game);
-	move_right(game, steps - 1);
-	return steps;
-}
-
-time_t move_left(struct Game* game, time_t steps) {
-
-	if (steps <= 0) return steps;
-	MOVE_LEFT(game);
-	move_left(game, steps - 1);
-	return steps;
-}
-
-time_t move_down(struct Game* game, time_t steps) {
-
-	if (steps <= 0) return steps;
-	MOVE_DOWN(game);
-	move_down(game, steps - 1);
-	return steps;
-}
-
-time_t move_down_left(struct Game* game, time_t steps) {
-
-	if (steps <= 0) return steps;
-	MOVE_DOWN_LEFT(game);
-	move_down_left(game, steps - 1);
-	return steps;
-}
-
-time_t move_down_right(struct Game* game, time_t steps) {
-
-	if (steps <= 0) return steps;
-	MOVE_DOWN_RIGHT(game);
-	move_down_right(game, steps - 1);
-	return steps;
-}
-
-void fall(struct Game* game, time_t falls) {
-	
-	if (falls <= 0) return;
-	else FALL(game);
-	fall(game, falls - 1);
-}
-
-void take_input(struct Game* game) {
-
-	if (game->dropped) {
-
-		drop(game);
-		game->dropped = false;
-	}
-
-	const bool moving_down = game->moved_down >= MOVE_RATE(game);
-	const bool moving_left = game->moved_left >= MOVE_RATE(game);
-	const bool moving_right = game->moved_right >= MOVE_RATE(game);
-	const bool diagonals = IS_SET(game->settings, DIAGONALS);
-	const bool diagonal = diagonals && moving_down && moving_left != moving_right;
-	const unsigned short multiplier = (!diagonal && DOUBLE_BISHOP(game)) + 1;
-	const time_t down = buy_move(game, &game->moved_down, multiplier);
-	const time_t left = buy_move(game, &game->moved_left, multiplier);
-	const time_t right = buy_move(game, &game->moved_right, multiplier);
-
-	if (diagonals && left > 0 && down > 0 && right == 0) {
-		move_down_left(game, min(left - right, down));
-	}
-	else if (diagonals && left == 0 && down > 0 && right > 0) {
-		move_down_right(game, min(right - left, down));
-	}
-	else if(left > 0 || right > 0 || down > 0) {
-		move_right(game, max(0, right - left));
-		move_left(game, max(0, left - right));
-		move_down(game, max(0, down));
-	}
+	_take_input(game);
+	_fall(game, falls);
 }
 
 void begin(struct Game* game) {
@@ -671,10 +683,13 @@ void begin(struct Game* game) {
 	SPAWN(game);
 }
 
-void init_state(State state) {
+struct Game* malloc_init_game(Settings settings) {
 
-	memset(state, '\n', STATE_LENGTH * sizeof(char));
-	init_captures(state);
-	init_board(state);
-	INIT(state);
+	struct Game* game = malloc(sizeof(struct Game));
+	MEMLOG("malloc game\n");
+	assert(game);
+	_init_game(game);
+	game->histotrie = _malloc_histotrie();
+	game->settings = settings;
+	return game;
 }

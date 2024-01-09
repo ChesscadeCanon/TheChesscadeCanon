@@ -59,9 +59,9 @@ size_t get_square_bit(size_t rank, size_t file) {
 	return square_bit(rank, file);
 }
 
-const char* get_deck(struct Game* game, size_t d) {
+const char* get_deck(size_t d) {
 
-	return deck(game, d);
+	return deck(d);
 }
 
 struct Game* malloc_init_default_game() {
@@ -78,15 +78,15 @@ void begin_game(struct Game* game) {
 void increment_game(struct Game* game, time_t passed) {
 
 	const time_t falls = COUNT_INTERVALS(game->fell, game->time, ease(game));
-	if (GAME_OVER(game)) return;
+	if (game_over(game)) return;
 	game->time += passed;
 	exist(game, falls);
 	if (falls > 0) game->fell = game->time;
 }
 
-bool game_over(struct Game* game) {
+bool is_game_over(struct Game* game) {
 
-	return GAME_OVER(game);
+	return game_over(game);
 }
 
 void delete_game(struct Game* game) {

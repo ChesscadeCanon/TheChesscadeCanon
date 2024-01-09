@@ -1,8 +1,6 @@
 #pragma once
 #include <sys/timeb.h>
 #include <string.h>
-#include <stdlib.h>
-
 #ifdef __unix__                    /* __unix__ is usually defined by compilers targeting Unix systems */
 
 #define OS_WINDOWS 0
@@ -19,9 +17,3 @@
 #include <WinUser.h>
 #include <conio.h>
 #endif
-
-#define VIEW_FUNCTOR(VAR) void (*VAR)(struct Game*)
-#define MODEL_FUNCTOR(VAR) void (*VAR)(struct Game*, const time_t)
-#define CONTROL_FUNCTOR(VAR) void (*VAR)(struct Game*, const time_t)
-
-struct InputBuffer;

@@ -1,37 +1,13 @@
 #pragma once
-#include "config.h"
 #include <sys/timeb.h>
 #include <stdbool.h>
 
-#ifdef __unix__                    /* __unix__ is usually defined by compilers targeting Unix systems */
-#define max(A, B) (A > B ? A : B)
-#define min(A, B) (A < B ? A : B)
-#elif defined(_WIN32) || defined(WIN32)     /* _Win32 is usually defined by compilers targeting 32 or   64 bit Windows systems */
-#define OS_WINDOWS 1
-#endif
-
 typedef char* Board;
 typedef size_t Settings;
-
-enum Square {
-	PAWN,
-	BISHOP,
-	ROOK,
-	KNIGHT,
-	QUEEN,
-	KING,
-	NO_PIECE,
-	SQUARE_COUNT
-};
-
-struct Histotrie;
-struct Game;
-
 typedef char Piece;
 typedef char* State;
 
 #define FPS 60
-#define EMPTY '_'
 #define DEAD_PLAYER '!'
 #define WHITE_PAWN 'P'
 #define BLACK_PAWN 'p'
@@ -47,34 +23,19 @@ typedef char* State;
 #define BLACK_BISHOP 'b'
 #define FILES 8ull
 #define RANKS 8ull
-#define LAST_FILE (FILES - 1ull)
-#define LAST_RANK (RANKS - 1ull)
-#define MAX_CAPTURES 8ull
+#define SET_SQUARE(S, I, V) (S[I] = V)
+#define PLAYER_SQUARE(G) SQUARE_INDEX(G->player_rank, G->player_file)
+#define IS_WHITE(P) (P <= 'Z')
+#define SQUARE_INDEX(R, F) ((R) * LINE_LENGTH + (F))
 #define LINE_LENGTH (FILES + 1ull)
 #define FOUR_LINES (LINE_LENGTH * 4ull)
 #define BOARD_LENGTH (LINE_LENGTH * RANKS)
 #define CAPTURE_LENGTH 8ull
-#define DATA_LENGTH 15ull
-#define STATE_LENGTH (BOARD_LENGTH + CAPTURE_LENGTH + DATA_LENGTH)
-#define NEWLINE_COUNT 17ull
-#define CURSES_STATE_LENGTH (STATE_LENGTH + NEWLINE_COUNT)
-#define CAPTURE_INDEX BOARD_LENGTH
-//#define PLAYER_INDEX (STATE_LENGTH - 14)
-//#define PLAYER_RANK_INDEX (STATE_LENGTH - 11)
-//#define PLAYER_FILE_INDEX (STATE_LENGTH - 12)
+#define END_LENGTH 2ull
+#define STATE_LENGTH (BOARD_LENGTH + CAPTURE_LENGTH + END_LENGTH)
 #define TERMINATOR_INDEX (STATE_LENGTH - 1)
 #define TERMINATE(S) (S[TERMINATOR_INDEX] = '\0')
-#define SET_SQUARE(S, I, V) (S[I] = V)
-#define GET_SQUARE(S, I) S[I]
-//#define GET_PLAYER(S) (S[PLAYER_INDEX])
-//#define GET_PLAYER_RANK(S) (S[PLAYER_RANK_INDEX] - '0')
-//#define GET_PLAYER_FILE(S) (S[PLAYER_FILE_INDEX] - '0')
-#define GET_CAPTURE(S, I) (S[CAPTURE_INDEX + I])
-#define SQUARE_INDEX(R, F) ((R) * LINE_LENGTH + (F))
-#define PLAYER_SQUARE(G) SQUARE_INDEX(G->player_rank, G->player_file)
-#define PLACE_PLAYER(G) SET_SQUARE(G->state, PLAYER_SQUARE(G), G->player)
-#define GAME_OVER(G) (G->player == DEAD_PLAYER)
-#define IS_WHITE(P) (P <= 'Z')
+#define CAPTURE_INDEX BOARD_LENGTH
 #define SET(B, V) (B |= V)
 #define IS_SET(B, V) (B & V)
 #define COUNT_INTERVALS(A, Z, N) (((Z) - (A)) / (N))
@@ -98,11 +59,6 @@ enum Setting {
 	DIAGONALS = 1 << 7,
 	DEFAULT_SETTINGS = WHITE_PAWN_HIT_UP | WHITE_PAWN_SPAWN_HIGH | WHITE_PAWN_LAND_HIGH | PAWNS_PROMOTE | NO_CAPTURE_ON_REPEAT | DOUBLE_BISHOPS | CHECKMATE | DIAGONALS
 };
-
-extern const char DECKS[4][9];
-extern const char MAP[128];
-
-extern const enum Square PIECE_MAP[128];
 
 #define TRIE_CHILDREN 13
 
@@ -136,23 +92,15 @@ struct Game {
 };
 
 time_t ease(struct Game*);
-const char* deck(struct Game*, size_t);
+const char* deck(size_t);
 size_t square_bit(size_t, size_t);
-void init_board(Board);
-void init_game(struct Game*);
 struct Game* malloc_init_game(Settings);
 void free_game(struct Game*);
-void init_state(State);
 void begin(struct Game*);
-void drop(struct Game*);
-void fall(struct Game*, time_t);
 void exist(struct Game* game, const time_t falls);
-void take_input(struct Game*);
 Piece next_piece(struct Game*);
 size_t forecast_rank(struct Game*);
 char forecast_piece(struct Game*);
 size_t attack(struct Game*, const bool, const bool, const bool);
-size_t chronicle(struct Game*);
-struct Histotrie* malloc_histotrie();
-void free_histotrie(struct Game*);
 bool cursor_wrapped(struct Game*);
+bool game_over(struct Game*);

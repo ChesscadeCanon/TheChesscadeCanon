@@ -1,9 +1,14 @@
-#include "main.h"
+#include "platform.h"
 #include "model.h"
 #include "control.h"
 #include "view.h"
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
+
+#define VIEW_FUNCTOR(VAR) void (*VAR)(struct Game*)
+#define MODEL_FUNCTOR(VAR) void (*VAR)(struct Game*, const time_t)
+#define CONTROL_FUNCTOR(VAR) void (*VAR)(struct Game*, const time_t)
 
 void default_view(struct Game* game) {
 
@@ -45,7 +50,7 @@ bool tick(struct Game* game, const time_t passed, CONTROL_FUNCTOR(control), MODE
 	game->time += passed * !game->paused;
 	control(game, passed);
 	if (!game->paused) model(game, falls);
-	if (GAME_OVER(game)) return true;
+	if (game_over(game)) return true;
 	view(game);
 	if (falls > 0) game->fell = game->time;
 

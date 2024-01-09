@@ -1,9 +1,25 @@
 #include "control.h"
 #include "model.h"
+#include "platform.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+
+#define DROP_KEY ' '
+#define QUIT_KEY 'q'
+#define PAUSE_KEY 'p'
+#define LEFT_KEY 'A'
+#define RIGHT_KEY 'D'
+#define DOWN_KEY 'S'
+
+enum Input {
+	NO_INPUT = -1,
+	DROP_INPUT,
+	DOWN_INPUT,
+	LEFT_INPUT,
+	RIGHT_INPUT,
+};
 
 #if OS_WINDOWS
 #include <windows.h>

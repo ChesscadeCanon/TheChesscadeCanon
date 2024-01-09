@@ -17,6 +17,6 @@ extern "C" {
     __declspec(dllexport) struct Game* malloc_init_default_game();
     __declspec(dllexport) void begin_game(struct Game*);
     __declspec(dllexport) void increment_game(struct Game*, time_t);
-    __declspec(dllexport) bool game_over(struct Game*);
+    __declspec(dllexport) bool is_game_over(struct Game*);
     __declspec(dllexport) void delete_game(struct Game*);
 }

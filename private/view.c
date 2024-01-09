@@ -1,6 +1,6 @@
 #include "view.h"
 #include "model.h"
-#include "main.h"
+#include "platform.h"
 #include <stdio.h>
 
 void print_info(struct Game* game) {
@@ -37,7 +37,8 @@ void print_cursor(struct Game* game) {
 	const bool wrapped = cursor_wrapped(game);
 	const size_t rank = game->cursor_rank;
 	const size_t file = game->cursor_file;
-	char next = DECKS[rank][file];
+	const char* d = deck(rank);
+	char next = d[file];
 	next = wrapped ? IS_WHITE(next) ? 'K' : 'k' : next;
 #if OS_WINDOWS
 	char cursor[FOUR_LINES + 1] = {
