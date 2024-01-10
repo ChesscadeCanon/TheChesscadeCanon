@@ -42,7 +42,7 @@ void _control_drop(struct Game* game) {
 		const char key = GETCH();
 		switch (key) {
 		case DROP_KEY: if (!game->paused) game->dropped = true; break;
-		default: break;
+		default: UNGETCH(key) break;
 		}
 	}
 }
@@ -55,7 +55,7 @@ void _control_game(struct Game* game) {
 		switch (key) {
 		case QUIT_KEY: QUIT(); break;
 		case PAUSE_KEY: game->paused = !game->paused; break;
-		default: break;
+		default: UNGETCH(key); break;
 		}
 	}
 }
