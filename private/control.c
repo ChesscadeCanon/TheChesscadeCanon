@@ -62,12 +62,12 @@ void _control_game(struct Game* game) {
 
 void key_control(struct Game* game, const time_t passed) {
 
-	_control_game(game);
+	//_control_game(game);
 	if(game->paused) return;
-	_control_drop(game);
-	_control_move(game, &(game->moved_right), RIGHT_KEY, passed);
+	//_control_drop(game);
+	//_control_move(game, &(game->moved_right), RIGHT_KEY, passed);
 	_control_move(game, &(game->moved_left), LEFT_KEY, passed);
-	_control_move(game, &(game->moved_down), DOWN_KEY, passed);
+	//_control_move(game, &(game->moved_down), DOWN_KEY, passed);
 }
 
 
