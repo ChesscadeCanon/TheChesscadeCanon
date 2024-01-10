@@ -73,7 +73,7 @@ void key_control(struct Game* game, const time_t passed) {
 	case RIGHT_KEY: _add_move(&(game->moved_right), passed); break;
 	case LEFT_KEY: _add_move(&(game->moved_left), passed); break;
 	case DOWN_KEY: _add_move(&(game->moved_down), passed); break;
-	//case ERR: game->moved_right = game->moved_left = game->moved_down = -1;
+	case ERR: game->moved_right = game->moved_left = game->moved_down = -1;
 	default: break;
 	}
 
