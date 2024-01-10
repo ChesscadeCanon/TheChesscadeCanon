@@ -16,7 +16,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <stdlib.h>
-#define GETCH getch
+#define GETCH wgetch
 #define UNGETCH ungetch
 void QUIT();
 int KBHIT(void);
