@@ -33,6 +33,7 @@ void tock(struct Game* game, struct timeb* then, struct timeb* now) {
 	Sleep(MPF);
 	system("cls");
 #else
+	refresh();
 	sleep(SPF);
 	system("clear");
 #endif
