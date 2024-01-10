@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <ncurses.h>
 #include <sys/select.h>
+#include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
