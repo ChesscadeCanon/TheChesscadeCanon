@@ -29,6 +29,6 @@ int GETKEYSTATE(const int C);
 #define KBHIT _kbhit
 #define GETCH _getch
 #define GETKEYSTATE GetKeyState
-#define UNGETCH(K) ; 
+#define UNGETCH(K) _ungetch 
 void QUIT();
 #endif

@@ -59,8 +59,7 @@ bool tick(struct Game* game, const time_t passed, CONTROL_FUNCTOR(control), MODE
 
 void play(struct Game* game, struct timeb* then, CONTROL_FUNCTOR(control), MODEL_FUNCTOR(model), VIEW_FUNCTOR(view)) {
 
-	while (true)
-	{
+	while (true) {
 
 		struct timeb now;
 		ftime(&now);
@@ -95,6 +94,7 @@ void run_pretty_text_game(size_t settings) {
 #else
 	initscr();
 	nodelay(stdscr, TRUE);
+	//cbreak();
 #endif
 	play_pretty(game);
 	free_game(game);
