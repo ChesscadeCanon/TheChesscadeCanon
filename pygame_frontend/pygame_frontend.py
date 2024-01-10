@@ -79,7 +79,7 @@ screen = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Chesscade")
 
 PIECES = ['p', 'q', 'k', 'n', 'b', 'r']
-piece_path = lambda p, d: d + ('w' + p if p.isupper() else 'b' + p) + ".png"
+piece_path = lambda p, d: (d + ('w' + p if p.isupper() else 'b' + p)).lower() + ".png"
 load_piece = lambda n, d: pygame.image.load(piece_path(n, d))
 scale_piece = lambda p: pygame.transform.scale(p, (SQUARE, SQUARE))
 setup_piece = lambda n, d: scale_piece(load_piece(n, d))
