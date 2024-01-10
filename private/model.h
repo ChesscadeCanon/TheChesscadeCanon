@@ -1,8 +1,12 @@
 #pragma once
 #include <sys/timeb.h>
 #include <stdbool.h>
+#if defined(_MSC_VER)
+//  Microsoft 
+#elif defined(__GNUC__)
+//  GCC
 #include <stddef.h>
-
+#endif
 typedef char* Board;
 typedef size_t Settings;
 typedef char Piece;
