@@ -17,7 +17,7 @@ int KBHIT() {
 
     if (!initialized) {
         // Use termios to turn off line buffering
-        termios term;
+        struct termios term;
         tcgetattr(STDIN, &term);
         term.c_lflag &= ~ICANON;
         tcsetattr(STDIN, TCSANOW, &term);
