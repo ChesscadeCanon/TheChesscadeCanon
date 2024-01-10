@@ -1,6 +1,7 @@
 #pragma once
 #include <sys/timeb.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 typedef char* Board;
 typedef size_t Settings;

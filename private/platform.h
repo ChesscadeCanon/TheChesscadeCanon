@@ -15,7 +15,6 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include <stropts.h>
 #define GETCH getch
 #define UNGETCH ungetch
 void QUIT();
