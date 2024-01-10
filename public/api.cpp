@@ -2,13 +2,6 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#define BE_game struct Game* game = (struct Game*)g
-
-struct Game* test(struct Game* game) {
-
-	return game;
-}
-
 size_t get_ranks() {
 
 	return RANKS;

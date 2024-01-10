@@ -355,11 +355,11 @@ size_t _hit(struct Game* game, enum Square piece_type, const size_t rank, const 
 
 	if (move_set.repeat && open) {
 
-		ret |= _hit(game, piece_type, to_rank, to_file, move, execute, pattern);
+		return ret | _hit(game, piece_type, to_rank, to_file, move, execute, pattern);
 	}
 	else if (CAN_CAPTURE(game, square)) {
 
-		ret |= _capture(game->state, square, move, execute);
+		return ret | _capture(game->state, square, move, execute);
 	}
 
 	return ret;

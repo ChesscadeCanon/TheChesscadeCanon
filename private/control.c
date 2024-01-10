@@ -21,54 +21,7 @@ enum Input {
 	RIGHT_INPUT,
 };
 
-#if OS_WINDOWS
-#include <windows.h>
-#include <WinUser.h>
-#include <conio.h>
-#define KBHIT _kbhit
-#define GETCH _getch
-#define GETKEYSTATE GetKeyState
-#define UNGETCH(K) ; 
-void QUIT() {
-	printf("\a");
-	exit(0);
-}
-#else
-#include <unistd.h>
-#include <ncurses.h>
-#include <sys/select.h>
-#include <termios.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <ctype.h>
-#define GETCH getch
-#define UNGETCH ungetch
-void QUIT() {
-	printf("\a");
-	endwin();
-	exit(0);
-}
-int KBHIT(void)
-{
-    int ch = GETCH();
-
-    if (ch != ERR) {
-        ungetch(ch);
-        return 1;
-    } else {
-        return 0;
-    }
-}
-int GETKEYSTATE(const int C) {
-
-	const int c = GETCH();
-	const int ret = toupper(c) == C ? -1 : 1;
-	ungetch(c);
-	return ret;
-}
-#endif
-
-void control_move(struct Game* game, long int* moved, const char key, const time_t passed) {
+void _control_move(struct Game* game, long int* moved, const char key, const time_t passed) {
 
 	if (GETKEYSTATE(key) < 0) {
 
@@ -82,7 +35,7 @@ void control_move(struct Game* game, long int* moved, const char key, const time
 	}
 }
 
-void control_drop(struct Game* game) {
+void _control_drop(struct Game* game) {
 
 	if (KBHIT()) {
 
@@ -98,11 +51,11 @@ void control_drop(struct Game* game) {
 
 void key_control(struct Game* game, const time_t passed) {
 
-	control_drop(game);
+	_control_drop(game);
 	if(game->paused) return;
-	control_move(game, &(game->moved_right), RIGHT_KEY, passed);
-	control_move(game, &(game->moved_left), LEFT_KEY, passed);
-	control_move(game, &(game->moved_down), DOWN_KEY, passed);
+	_control_move(game, &(game->moved_right), RIGHT_KEY, passed);
+	_control_move(game, &(game->moved_left), LEFT_KEY, passed);
+	_control_move(game, &(game->moved_down), DOWN_KEY, passed);
 }
 
 

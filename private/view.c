@@ -3,7 +3,7 @@
 #include "platform.h"
 #include <stdio.h>
 
-void print_info(struct Game* game) {
+void _print_info(struct Game* game) {
 #if OS_WINDOWS
 	printf("score %llu\n", game->score);
 	printf("time %llu\n", game->time);
@@ -13,26 +13,7 @@ void print_info(struct Game* game) {
 #endif
 }
 
-void print_raw(struct Game* game) {
-#if OS_WINDOWS
-	printf("score %llu\n", game->score);
-	printf("time %llu\n", game->time);
-	printf("fell %llu\n", game->fell);
-	printf("left %d\n", game->moved_left);
-	printf("right %d\n", game->moved_right);
-	printf("down %d\n", game->moved_down);
-#else
-	printf("score %llu\n\r", game->score);
-	printf("time %llu\n\r", game->time);
-	printf("fell %llu\n\r", game->fell);
-	printf("left %d\n\r", game->moved_left);
-	printf("right %d\n\r", game->moved_right);
-	printf("down %d\n\r", game->moved_down);
-#endif
-	printf(game->state);
-}
-
-void print_cursor(struct Game* game) {
+void _print_cursor(struct Game* game) {
 
 	const bool wrapped = cursor_wrapped(game);
 	const size_t rank = game->cursor_rank;
@@ -61,6 +42,25 @@ void print_cursor(struct Game* game) {
 	printf(cursor);
 }
 
+void print_raw(struct Game* game) {
+#if OS_WINDOWS
+	printf("score %llu\n", game->score);
+	printf("time %llu\n", game->time);
+	printf("fell %llu\n", game->fell);
+	printf("left %d\n", game->moved_left);
+	printf("right %d\n", game->moved_right);
+	printf("down %d\n", game->moved_down);
+#else
+	printf("score %llu\n\r", game->score);
+	printf("time %llu\n\r", game->time);
+	printf("fell %llu\n\r", game->fell);
+	printf("left %d\n\r", game->moved_left);
+	printf("right %d\n\r", game->moved_right);
+	printf("down %d\n\r", game->moved_down);
+#endif
+	printf(game->state);
+}
+
 void print_pretty(struct Game* game) {
 #if OS_WINDOWS
 	char board[STATE_LENGTH] = {[STATE_LENGTH - 1] = '\0'};
@@ -84,7 +84,7 @@ void print_pretty(struct Game* game) {
 	const size_t r = GET_PLAYER_RANK(game->state), f = GET_PLAYER_FILE(game->state);
 	board[(r * (FILES + 2)) + f] = GET_PLAYER(game->state);
 #endif
-	print_info(game);
-	print_cursor(game);
+	_print_info(game);
+	_print_cursor(game);
 	printf((const char*)board);
 }
