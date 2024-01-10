@@ -34,7 +34,7 @@ int GETKEYSTATE(const int C) {
 
 	const int c = GETCH();
 	const int ret = toupper(c) == C ? -1 : 1;
-	ungetch(c);
+	if(ret != ERR) ungetch(c);
 	return ret;
 }
 #endif
