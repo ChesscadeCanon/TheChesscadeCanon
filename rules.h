@@ -1,5 +1,5 @@
 #pragma once
-const char* RULES = "\
+static const char* RULES = "\
 Chesscade is a falling block puzzle game with chess pieces. Pieces fall\n\
 from the top of the board. When a piece reaches the bottom, it captures\n\
 all pieces it could capture in chess from its position. When a king is\n\
