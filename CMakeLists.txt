@@ -15,6 +15,7 @@ file(COPY ${WINLIB} DESTINATION ${PROJECT_SOURCE_DIR}/pygame_frontend/bin)
 ENDIF()
 IF(WIN32)
 ELSE()
+return() #command line executable not currently linux compatible
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIR})
 ENDIF()
