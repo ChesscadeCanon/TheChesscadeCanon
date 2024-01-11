@@ -7,6 +7,11 @@
 #include <ctype.h>
 #include <stdio.h>
 
+#ifdef __unix__ 
+#define max(A, B) (A > B ? A : B)
+#define min(A, B) (A < B ? A : B)
+#endif
+
 enum Square {
 	PAWN,
 	BISHOP,
