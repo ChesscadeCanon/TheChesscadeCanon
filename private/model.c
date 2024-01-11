@@ -237,7 +237,7 @@ const size_t PIECE_VALUES[SQUARE_COUNT] = {
 
 void print_rules() {
 
-	printf(RULES);
+	printf("%s", RULES);
 }
 
 unsigned short _update_cursor(struct Game* game) {
