@@ -1,17 +1,11 @@
 #include "control.h"
 #include "model.h"
 #include "platform.h"
+#include "config.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
-#define DROP_KEY ' '
-#define QUIT_KEY 'q'
-#define PAUSE_KEY 'p'
-#define LEFT_KEY 'A'
-#define RIGHT_KEY 'D'
-#define DOWN_KEY 'S'
 
 enum Input {
 	NO_INPUT = -1,
@@ -49,7 +43,12 @@ void _control_tap(struct Game* game) {
 		switch (key) {
 		case DROP_KEY: if (!game->paused) game->dropped = true; break;
 		case QUIT_KEY: QUIT(); break;
-		case PAUSE_KEY: game->paused = !game->paused; break;
+		case PAUSE_KEY: {
+
+			if (!game->paused) print_rules();
+			game->paused = !game->paused;
+			break;
+		}
 		default: break;
 		}
 	}

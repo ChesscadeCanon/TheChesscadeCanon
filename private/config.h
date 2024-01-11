@@ -1,3 +1,10 @@
+#define DROP_KEY ' '
+#define QUIT_KEY 'q'
+#define PAUSE_KEY 'p'
+#define LEFT_KEY 'A'
+#define RIGHT_KEY 'D'
+#define DOWN_KEY 'S'
+
 #define VERBOSE 0
 #define VERBOSE_MALLOC_FREE 0
 #if VERBOSE

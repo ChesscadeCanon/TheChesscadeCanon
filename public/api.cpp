@@ -71,7 +71,7 @@ void begin_game(struct Game* game) {
 void increment_game(struct Game* game, time_t passed) {
 
 	const time_t falls = COUNT_INTERVALS(game->fell, game->time, ease(game));
-	if (game_over(game)) return;
+	if (game_over(game) || game->paused) return;
 	game->time += passed;
 	exist(game, falls);
 	if (falls > 0) game->fell = game->time;
@@ -80,6 +80,11 @@ void increment_game(struct Game* game, time_t passed) {
 bool is_game_over(struct Game* game) {
 
 	return game_over(game);
+}
+
+bool is_on_brink(struct Game* game) {
+
+	return on_brink(game);
 }
 
 void delete_game(struct Game* game) {

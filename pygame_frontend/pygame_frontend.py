@@ -16,6 +16,12 @@ WHITE = ( 255, 255, 255)
 GREY = ( 127, 127, 127)
 DARK_GREY = (63, 63, 63)
 LIGHT_GREY = (171, 171, 171)
+DARK_ORANGE = (255, 127, 80)
+LIGHT_ORANGE = (255, 215, 0)
+DARK_BLUE = (0, 0, 64)
+LIGHT_BLUE = (191, 191, 255)
+DARK_RED = (64, 0, 0)
+LIGHT_RED = (255, 191, 191)
 SIZE = (400, 480)
 RANKS = engine.get_ranks()
 FILES = engine.get_files()
@@ -50,8 +56,8 @@ class Game(ctypes.Structure):
         ("moved_down", ctypes.c_long),
         ("state", ctypes.c_char * STATE_LENGTH),
         ("histotrie", ctypes.POINTER(Histotrie)),
-        ("settings", ctypes.c_ulonglong),
         ("repeat", ctypes.c_bool),
+        ("settings", ctypes.c_ulonglong)
     ]
 
 engine.malloc_init_default_game.restype = ctypes.POINTER(Game)
@@ -74,6 +80,8 @@ engine.get_square_bit.argtypes = [ctypes.c_ulonglong, ctypes.c_ulonglong]
 engine.get_square_bit.restype = ctypes.c_ulonglong
 engine.get_deck.argtypes = [ctypes.c_ulonglong]
 engine.get_deck.restype = ctypes.c_char_p
+engine.is_on_brink.argtypes = [ctypes.POINTER(Game)]
+engine.is_on_brink.restype = ctypes.c_bool
 
 screen = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Chesscade")
@@ -106,18 +114,26 @@ draw_piece_on_square = lambda P, p, r, f: draw_piece(P, p, (f + SQUARES_OFF_LEFT
 draw_piece_on_deck = lambda P, p, r, f: draw_piece(P, p, (f + SQUARES_OFF_LEFT) * SQUARE, r * SQUARE)
 
 def draw_board(game):
+    white = WHITE
+    black = BLACK
     color = WHITE
     pattern = engine.attack_pattern(game)
+    if engine.is_on_brink(game):
+        white = LIGHT_ORANGE
+        black = DARK_ORANGE
+    elif game.contents.repeat:
+        white = LIGHT_BLUE
+        black = DARK_BLUE
     for f in range(FILES):
         for r in range(RANKS):
             i = r * FILES + f
             b = 1 << i
             x = (SQUARES_OFF_LEFT + f) * SQUARE
             y = (SQUARES_OFF_TOP + r) * SQUARE
-            grey = LIGHT_GREY if color == WHITE else DARK_GREY
-            pygame.draw.rect(screen, grey if b & pattern else color, [x, y, SQUARE, SQUARE], 0)
-            color = BLACK if color == WHITE else WHITE
-        color = BLACK if color == WHITE else WHITE
+            pattern_color = LIGHT_RED if color == white else DARK_RED
+            pygame.draw.rect(screen, pattern_color if b & pattern else color, [x, y, SQUARE, SQUARE], 0)
+            color = black if color == white else white
+        color = black if color == white else white
 
 def draw_pieces(game):
     index = 0
@@ -197,6 +213,10 @@ def play():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     game.contents.dropped = True
+                elif event.key == pygame.K_p:
+                    game.contents.paused = not game.contents.paused
+                elif event.key == pygame.K_q:
+                    carryOn = False
             if event.type == pygame.QUIT: 
                 carryOn = False 
         passed = clock.tick(30)
@@ -213,8 +233,9 @@ def play():
         pygame.display.flip()
         clock.tick(60)
     ret = game.contents.score
+    over = engine.is_game_over(game)
     engine.delete_game(game)
-    return ret if engine.is_game_over(game) else -1
+    return ret if over else -1
 high_score = 0
 while True:
     score = play()

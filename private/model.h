@@ -1,29 +1,4 @@
 #pragma once
-////////////////////////////////////////////////////////////////////////////////   
-#define RULES "\
-Chesscade is a falling block puzzle game with chess pieces. Pieces fall from the\n\
-top of the board. When a piece reaches the bottom, it captures all pieces it\n\
-could capture in chess from its position. When a king is captured or the next\n\
-piece can't spawn, the game ends. As a piece falls, a cursor moves across the\n\
-top of the board. When it reaches one side, it wraps around to the other. When\n\
-a capture is made, the cursor changes directions. When a piece lands, the next\n\
-piece is determined by where the cursor is, whether the cursor wrapped around,\n\
-and whether the last piece made any captures. If the cursor wrapped, a king\n\
-spawns. Otherwise, if the last piece made any captures, a rook, knight, bishop,\n\
-or queen spawns, depending on the position of the cursor. Otherwise, a pawn\n\
-spawns. Each piece can only reach squares it could reach in chess. Thus, black\n\
-pawns spawn on the rank 7, white pawns land on rank 2, and bishops move 2\n\
-squares at a time so they stay on their colors. White pawns capture upward and\n\
-black pawns capture downward. If a white pawn lands on rank 8 or a black pawn\n\
-lands on rank 1, it promotes to a queen before capturing. The current \"combo\"\n\
-is the number of consecutive turns on which pices have been captured. The higher\n\
-the combo, the faster pieces fall. The points scored by a given piece are\n\
-determined by:\n\
-[total point value of pieces captured] x [number of pieces captured] x [combo]\n\
-Point values are as follows: pawn=1 knight=3 bishop=3 rook=5 queen=9 king=0\n\
-Finally, no points can be scored if the board state is identical to any\n\
-previous board state in the current game.\n\
-"
 
 #include <sys/timeb.h>
 #include <stdbool.h>
@@ -82,14 +57,14 @@ extern const size_t PIECE_SET;
 enum Setting {
 
 	WHITE_PAWN_HIT_UP = 1 << 0,
-	WHITE_PAWN_SPAWN_HIGH = 1 << 1,
+	BLACK_PAWN_SPAWN_LOW = 1 << 1,
 	WHITE_PAWN_LAND_HIGH = 1 << 2,
 	PAWNS_PROMOTE = 1 << 3,
 	NO_CAPTURE_ON_REPEAT = 1 << 4,
 	DOUBLE_BISHOPS = 1 << 5,
 	CHECKMATE = 1 << 6,
 	DIAGONALS = 1 << 7,
-	DEFAULT_SETTINGS = WHITE_PAWN_HIT_UP | WHITE_PAWN_SPAWN_HIGH | WHITE_PAWN_LAND_HIGH | PAWNS_PROMOTE | NO_CAPTURE_ON_REPEAT | DOUBLE_BISHOPS | CHECKMATE | DIAGONALS
+	DEFAULT_SETTINGS = WHITE_PAWN_HIT_UP | BLACK_PAWN_SPAWN_LOW | WHITE_PAWN_LAND_HIGH | PAWNS_PROMOTE | NO_CAPTURE_ON_REPEAT | DOUBLE_BISHOPS | CHECKMATE | DIAGONALS
 };
 
 #define TRIE_CHILDREN 13
@@ -123,6 +98,7 @@ struct Game {
 	Settings settings;
 };
 
+void print_rules();
 time_t ease(struct Game*);
 const char* deck(size_t);
 size_t square_bit(size_t, size_t);
@@ -136,3 +112,4 @@ char forecast_piece(struct Game*);
 size_t attack(struct Game*, const bool, const bool, const bool);
 bool cursor_wrapped(struct Game*);
 bool game_over(struct Game*);
+bool on_brink(struct Game*);

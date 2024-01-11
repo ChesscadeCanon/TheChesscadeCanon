@@ -31,11 +31,11 @@ void tock(struct Game* game, struct timeb* then, struct timeb* now) {
 
 #if OS_WINDOWS
 	Sleep(MPF);
-	system("cls");
+	if(!game->paused) system("cls");
 #else
 	refresh();
 	sleep(SPF);
-	system("clear");
+	if(!game->paused) system("clear");
 #endif
 }
 
@@ -50,10 +50,13 @@ bool tick(struct Game* game, const time_t passed, CONTROL_FUNCTOR(control), MODE
 
 	game->time += passed * !game->paused;
 	control(game, passed);
-	if (!game->paused) model(game, falls);
-	if (game_over(game)) return true;
-	view(game);
-	if (falls > 0) game->fell = game->time;
+
+	if (!game->paused) {
+		model(game, falls);
+		if (game_over(game)) return true;
+		view(game);
+		if (falls > 0) game->fell = game->time;
+	}
 
 	return false;
 }

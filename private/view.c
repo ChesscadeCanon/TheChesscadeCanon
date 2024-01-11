@@ -1,15 +1,34 @@
 #include "view.h"
 #include "model.h"
+#include "config.h"
 #include "platform.h"
 #include <stdio.h>
+
+void _print_instructions() {
+#if OS_WINDOWS
+	printf("pause: %c\n", PAUSE_KEY);
+	printf("quit: %c\n", QUIT_KEY);
+	printf("drop: %c\n", DROP_KEY);
+	printf("left, down, right: %c, %c, %c\n", LEFT_KEY, DOWN_KEY, RIGHT_KEY);
+#else
+	printf("pause: %c\n\r", PAUSE_KEY);
+	printf("quit: %c\n\r", QUIT_KEY);
+	printf("drop: %c\n\r", DROP_KEY);
+	printf("left, down, right: %c, %c, %c\n\r", LEFT_KEY, DOWN_KEY, RIGHT_KEY);
+#endif
+}
 
 void _print_info(struct Game* game) {
 #if OS_WINDOWS
 	printf("score %llu\n", game->score);
+	printf("combo %llu\n", game->combo);
+	printf("repeat %d\n", game->repeat);
 	printf("time %llu\n", game->time);
 #else
-	printf("score %llu\n\r", game->score);
-	printf("time %llu\n\r", game->time);
+	printf("score %lu\n\r", game->score);
+	printf("combo %lu\n\r", game->combo);
+	printf("repeat %d\n\r", game->repeat);
+	printf("time %lu\n\r", game->time);
 #endif
 }
 
@@ -39,7 +58,7 @@ void _print_cursor(struct Game* game) {
 	};
 #endif
 	cursor[rank * (LINE_LENGTH + !OS_WINDOWS) + file] = next;
-	printf(cursor);
+	printf("%s", cursor);
 }
 
 void print_raw(struct Game* game) {
@@ -47,18 +66,18 @@ void print_raw(struct Game* game) {
 	printf("score %llu\n", game->score);
 	printf("time %llu\n", game->time);
 	printf("fell %llu\n", game->fell);
-	printf("left %d\n", game->moved_left);
-	printf("right %d\n", game->moved_right);
-	printf("down %d\n", game->moved_down);
+	printf("left %ld\n", game->moved_left);
+	printf("right %ld\n", game->moved_right);
+	printf("down %ld\n", game->moved_down);
 #else
-	printf("score %llu\n\r", game->score);
-	printf("time %llu\n\r", game->time);
-	printf("fell %llu\n\r", game->fell);
-	printf("left %d\n\r", game->moved_left);
-	printf("right %d\n\r", game->moved_right);
-	printf("down %d\n\r", game->moved_down);
+	printf("score %lu\n\r", game->score);
+	printf("time %lu\n\r", game->time);
+	printf("fell %lu\n\r", game->fell);
+	printf("left %ld\n\r", game->moved_left);
+	printf("right %ld\n\r", game->moved_right);
+	printf("down %ld\n\r", game->moved_down);
 #endif
-	printf(game->state);
+	printf("%s", game->state);
 }
 
 void print_pretty(struct Game* game) {
@@ -84,7 +103,8 @@ void print_pretty(struct Game* game) {
 	const size_t r = game->player_rank, f = game->player_file;
 	board[(r * (FILES + 2)) + f] = game->player;
 #endif
+	_print_instructions();
 	_print_info(game);
 	_print_cursor(game);
-	printf((const char*)board);
+	printf("%s", board);
 }

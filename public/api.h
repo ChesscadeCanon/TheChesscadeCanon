@@ -93,6 +93,11 @@ EXPORT void increment_game(struct Game*, time_t);
 EXPORT bool is_game_over(struct Game*);
 
 /**
+* returns whether dropping the current piece now would result in a game over
+*/
+EXPORT bool is_on_brink(struct Game* game);
+
+/**
 * frees all memory allocated on behalf of the given game object
 */
 EXPORT void delete_game(struct Game*);

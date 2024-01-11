@@ -1,6 +1,7 @@
 #include "platform.h"
 #include "model.h"
 #include "config.h"
+#include "../rules.h"
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -117,7 +118,7 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 #define DOUBLE_BISHOP(G) (PIECE_MAP[G->player] == BISHOP && IS_SET(G->settings, DOUBLE_BISHOPS))
 #define BISHOP_SPEED(G, M) ((M) / (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_DOWN(G) SQUARE_INDEX(G->player_rank + (DOUBLE_BISHOP(G) + 1), G->player_file)
-#define EASE(G) (1024 - min(G->combo * 64, 512)) * (1 + DOUBLE_BISHOP(G))
+#define EASE(G) (1024 - min(G->combo * 80, 8 * 80)) * (1 + DOUBLE_BISHOP(G))
 #define QUEEN_ME(G, R) (\
 	IS_SET(G->settings, PAWNS_PROMOTE) ?\
 		G->player == WHITE_PAWN && (R) == 0 ? WHITE_QUEEN \
@@ -127,7 +128,7 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 )
 #define KING_ME(S, P) (IS_WHITE(P) ? WHITE_KING : BLACK_KING)
 #define DRAW_NEXT(G) DECKS[G->cursor_rank][G->cursor_file]
-#define SPAWN_RANK(G) (IS_SET(G->settings, WHITE_PAWN_SPAWN_HIGH) && DRAW_NEXT(G) == WHITE_PAWN ? 0 : (G->cursor_rank))
+#define SPAWN_RANK(G) (IS_SET(G->settings, BLACK_PAWN_SPAWN_LOW) && DRAW_NEXT(G) == BLACK_PAWN ? 1 : 0)
 #define NEXT_PIECE(G) (\
 	EMPTY_SQUARE(G->state, SQUARE_INDEX(SPAWN_RANK(G), G->cursor_file)) ?\
 		DRAW_NEXT(G) \
@@ -168,12 +169,25 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 #define LAST_FILE (FILES - 1ull)
 #define LAST_RANK (RANKS - 1ull)
 
-const char DECKS[4][9] = {
-	"RnBqQbNr",
-	"pPpPpPpP",
-	"kkkkkkkk",
-	"KKKKKKKK"
-};
+#define STANDARD_DECKS {\
+	"RnBqQbNr", \
+	"pPpPpPpP", \
+	"kkkkkkkk", \
+	"KKKKKKKK" \
+}
+#define KNIGHT_DECKS {\
+	"NnNnNnNn", \
+	"nNnNnNnN", \
+	"nnnnnnnn", \
+	"NNNNNNNN" \
+}
+#define BISHOP_DECKS {\
+	"BbBbBbBb", \
+	"bBbBbBbB", \
+	"bbbbbbbb", \
+	"BBBBBBBB" \
+}
+const char DECKS[4][9] = STANDARD_DECKS;
 
 const size_t PIECE_SET =
 PIECE_BIT(WHITE_PAWN) |
@@ -216,6 +230,11 @@ const size_t PIECE_VALUES[SQUARE_COUNT] = {
 };
 
 #define PIECE_VALUE(P) (PIECE_VALUES[PIECE_MAP[P]])
+
+void print_rules() {
+
+	printf(RULES);
+}
 
 unsigned short _update_cursor(struct Game* game) {
 
@@ -473,8 +492,9 @@ void _move(struct Game* game, time_t steps, const short by_rank, const short by_
 
 	if (steps == 0) return;
 	const bool orthogonal = !by_rank != !by_file;
-	const short to_rank = game->player_rank + (by_rank + DOUBLE_BISHOP(game) * orthogonal);
-	const short to_file = game->player_file + (by_file + DOUBLE_BISHOP(game) * orthogonal);
+	const size_t mult = (DOUBLE_BISHOP(game) + orthogonal);
+	const size_t to_rank = game->player_rank + (by_rank * mult);
+	const size_t to_file = game->player_file + (by_file * mult);
 	const size_t to = SQUARE_INDEX(to_rank, to_file);
 	if(_move_player(game, to)) _move(game, steps - 1, by_rank, by_file);
 }
@@ -558,6 +578,39 @@ bool game_over(struct Game* game) {
 	return GAME_OVER(game);
 }
 
+bool on_brink(struct Game* game) {
+
+	size_t hits = attack(game, false, true, false);
+	size_t b = 1;
+
+	if(hits) while (b) {
+
+		if (b & hits) {
+
+			size_t i = _bit_index(b);
+			size_t r = i / FILES;
+			size_t f = i % FILES;
+
+			if (PIECE_MAP[GET_SQUARE(game->state, SQUARE_INDEX(r, f))] == KING) {
+
+				return true;
+			}
+		}
+
+		b <<= 1;
+	}
+
+	size_t spawn_rank = SPAWN_RANK(game);
+	size_t spawn_file = game->cursor_file;
+
+	if (GET_SQUARE(game->state, SQUARE_INDEX(spawn_rank, spawn_file)) != EMPTY) {
+
+		return true;
+	}
+
+	return false;
+}
+
 bool cursor_wrapped(struct Game* game) {
 
 	return CURSOR_WRAPPED(game);
@@ -594,6 +647,8 @@ void free_game(struct Game* game) {
 }
 
 size_t attack(struct Game* game, const bool execute, const bool forecast, const bool pattern) {
+
+	if (game->repeat) return 0;
 
 	Piece piece = game->player;
 	size_t rank = game->player_rank;
