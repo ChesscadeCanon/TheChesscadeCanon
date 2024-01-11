@@ -249,6 +249,10 @@ def title():
                     helping = True
         screen.fill(GREY)
         if helping:
+            label = FONT_0.render("press any key to return to main screen", True, BLACK)
+            rect = label.get_rect()
+            rect.center = SIZE[0] / 2, SIZE[1] / 8
+            screen.blit(label, rect)
             draw_help()
         else:
             draw_title()
@@ -292,7 +296,7 @@ def play():
         over = engine.is_game_over(game)
         screen.fill(GREY)
         if game.contents.paused:
-            label = FONT_2.render("paused", False, BLACK)
+            label = FONT_2.render("paused", True, BLACK)
             rect = label.get_rect()
             rect.center = SIZE[0] / 2, SIZE[1] / 8
             screen.blit(label, rect)
