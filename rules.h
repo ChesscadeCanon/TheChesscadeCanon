@@ -16,7 +16,7 @@ Thus, black pawns spawn on the rank 7, white pawns land on rank 2, and\n\
 bishops move 2 squares at a time so they stay on their colors. White\n\
 pawns capture upward and black pawns capture downward. If a white pawn\n\
 lands on rank 8 or a black pawn lands on rank 1, it promotes to a queen\n\
-before capturing. The current \"combo\" is the number of consecutive\n\
+before capturing. The current 'combo' is the number of consecutive\n\
 turns on which pieces have been captured. The higher the combo, the\n\
 faster pieces fall. No points can be scored if the board state is\n\
 identical to any previous board state in the current game. The points\n\
