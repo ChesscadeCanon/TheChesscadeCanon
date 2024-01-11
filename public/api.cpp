@@ -1,6 +1,17 @@
 #include "api.h"
+#include "../rules.h"
 #include <stdio.h>
 #include <ctype.h>
+
+const char* get_rules() {
+
+	return RULES;
+}
+
+size_t get_rules_length() {
+
+	return RULES_LENGTH;
+}
 
 size_t get_ranks() {
 

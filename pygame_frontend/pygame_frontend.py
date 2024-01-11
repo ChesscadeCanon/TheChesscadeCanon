@@ -6,11 +6,14 @@ from res import *
 pygame.init()
 engine = ctypes.CDLL(ENGINE_PATH)
 
+engine.get_rules_length.restype = ctypes.c_ulonglong
+engine.get_rules.restype = ctypes.c_char_p
 engine.get_ranks.restype = ctypes.c_ulonglong
 engine.get_files.restype = ctypes.c_ulonglong
 engine.get_trie_children.restype = ctypes.c_ulonglong
 engine.get_state_length.restype = ctypes.c_ulonglong
 
+RULES = ''.join([chr(b) for b in engine.get_rules()])
 BLACK = ( 0, 0, 0)
 WHITE = ( 255, 255, 255)
 GREY = ( 127, 127, 127)
@@ -30,7 +33,9 @@ STATE_LENGTH = engine.get_state_length()
 SQUARES_OFF_LEFT = 2
 SQUARES_OFF_TOP = 4
 SQUARE = min(SIZE[0] // (FILES + SQUARES_OFF_LEFT), SIZE[1] // (RANKS + SQUARES_OFF_TOP))
+FONT_0 = pygame.font.Font('freesansbold.ttf', 11)
 FONT_1 = pygame.font.Font('freesansbold.ttf', 16)
+FONT_2 = pygame.font.Font('freesansbold.ttf', 32)
                                                  
 class Histotrie(ctypes.Structure):
     pass
@@ -177,7 +182,7 @@ def draw_text(game):
     y = 0
     for readout in readouts:
         for part in readout:    
-            text = FONT_1.render(part, True, WHITE, BLACK)
+            text = FONT_1.render(part, False, WHITE, BLACK)
             rect = text.get_rect()
             rect.topright = (SQUARE * SQUARES_OFF_LEFT, y)
             screen.blit(text, rect)
@@ -202,48 +207,116 @@ def take_input(game, passed):
     else:
         game.contents.moved_down = -1    
 
+def draw_title():
+    title_label = FONT_2.render("Chesscade", True, BLACK)
+    title_rect = title_label.get_rect()
+    title_rect.center = SIZE[0] / 2, SIZE[1] / 4
+    screen.blit(title_label, title_rect)
+    help_label = FONT_1.render("press ENTER to play, h for help, or q to quit", True, BLACK)
+    help_rect = help_label.get_rect()
+    help_rect.center = SIZE[0] / 2, SIZE[1] / 2
+    screen.blit(help_label, help_rect)
+
+def draw_help():
+    lines = ["arrow keys to move, space to drop"]
+    lines += ["p to pause, q to quit, backspace to go back", ""]
+    lines += RULES.split('\n')
+    x = SIZE[0] / 2
+    y = SIZE[1] / 4
+    for line in lines:
+        label = FONT_0.render(line, True, BLACK)
+        rect = label.get_rect()
+        rect.center = x, y
+        screen.blit(label, rect)
+        y += rect.height
+
+def title():
+    carryOn = True
+    helping = False
+    clock = pygame.time.Clock()
+    while True:
+        for event in pygame.event.get():     
+            if event.type == pygame.QUIT: 
+                return 0
+            elif event.type == pygame.KEYDOWN:
+                if helping:
+                    helping = False
+                elif event.key == pygame.K_q:
+                    return 0
+                elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    return 1
+                elif event.key == pygame.K_h:
+                    helping = True
+        screen.fill(GREY)
+        if helping:
+            draw_help()
+        else:
+            draw_title()
+        passed = clock.tick(30)
+        pygame.display.flip()
+
+def draw_game(game):
+    draw_board(game)
+    draw_next(game)
+    draw_pieces(game)
+    draw_shadow(game)
+    draw_player(game)
+    draw_text(game)
+
 def play():
     ret = 0
     game = engine.malloc_init_default_game()
     engine.begin_game(game)
-    carryOn = True
+    go = True
+    over = False
+    back = False
     clock = pygame.time.Clock()
-    while carryOn:
+    while go:
         for event in pygame.event.get(): 
+            if event.type == pygame.QUIT: 
+                go = False 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_BACKSPACE:
+                    back = True
+                    go = False
+                elif event.key == pygame.K_SPACE:
                     game.contents.dropped = True
                 elif event.key == pygame.K_p:
                     game.contents.paused = not game.contents.paused
                 elif event.key == pygame.K_q:
-                    carryOn = False
-            if event.type == pygame.QUIT: 
-                carryOn = False 
+                    go = False
         passed = clock.tick(30)
         take_input(game, passed)
-        engine.increment_game(game, passed)
-        carryOn = carryOn and not engine.is_game_over(game)
+        if not over:
+            engine.increment_game(game, passed)
+        over = engine.is_game_over(game)
         screen.fill(GREY)
-        draw_board(game)
-        draw_next(game)
-        draw_pieces(game)
-        draw_shadow(game)
-        draw_player(game)
-        draw_text(game)
+        if game.contents.paused:
+            label = FONT_2.render("paused", False, BLACK)
+            rect = label.get_rect()
+            rect.center = SIZE[0] / 2, SIZE[1] / 8
+            screen.blit(label, rect)
+            draw_help()
+        else:
+            draw_game(game)
         pygame.display.flip()
         clock.tick(60)
     ret = game.contents.score
     over = engine.is_game_over(game)
     engine.delete_game(game)
-    return ret if over else -1
+    return ret if over else 0 if back else -1
 high_score = 0
 while True:
-    score = play()
-    if score < 0:
+    do = title()
+    if do > 0:
+        score = play()
+        if score < 0:
+            break
+        if score > high_score:
+            high_score = score
+        print(score)
+    else:
         break
-    if score > high_score:
-        high_score = score
-    print(score)
 print(high_score)
 pygame.quit()
 

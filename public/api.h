@@ -18,6 +18,16 @@ extern "C" {
 #include "../private/model.h"
 
 /**
+* returns the full text of the rules of Chesscade
+*/
+EXPORT const char* get_rules();
+
+/**
+* returns the full text of the rules of Chesscade
+*/
+EXPORT size_t get_rules_length();
+
+/**
 * returns the height of the board
 */
 EXPORT size_t get_ranks();
