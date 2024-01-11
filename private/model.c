@@ -1,4 +1,3 @@
-#include "platform.h"
 #include "model.h"
 #include "config.h"
 #include "../rules.h"
