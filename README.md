@@ -17,6 +17,19 @@ Included is an extremely basic frontend written in Python using the PyGame engin
 4. The game will appear in a tab within Replit called "Output".
 5. Click the game and it will begin responding to keyboard input.
 
+## To play on Unix:
+
+1. Install Git, CMake, Pip, and PyGame.
+2. In a terminal:
+```
+$ git clone https://github.com/ChesscadeCanon/TheChesscadeCanon
+$ cd ChesscadeBox
+$ cmake -S . -B out/build
+$ cmake --build out/build
+$ cp out/build/libChesscadeLib.so pygame_frontend/bin/libChesscadeLib.so
+$ python pygame_frontend/pygame_frontend.py
+```
+
 ## To play on Windows using Visual Studio:
 
 1. Install Visual Studio, including the Desktop Development with C++ workload and the Python Development workload.
@@ -36,16 +49,3 @@ Included is an extremely basic frontend written in Python using the PyGame engin
 15. Make sure CMake has made a "ChesscadeBox\pygame_frontend\bin" folder containing a file called "ChesscadeLib.dll".
 16. If not, make such a folder and copy ChesscadeLib.dll into it from ChesscadeBox\out\build\x64-Debug.
 17. The green play button at the top of the screen should now launch the game.
-
-## To play on Unix:
-
-1. Install Git, CMake, Pip, and PyGame.
-2. In a terminal:
-```
-$ git clone https://github.com/ChesscadeCanon/TheChesscadeCanon
-$ cd ChesscadeBox
-$ cmake -S . -B out/build
-$ cmake --build out/build
-$ cp out/build/libChesscadeLib.so pygame_frontend/bin/libChesscadeLib.so
-$ python pygame_frontend/pygame_frontend.py
-```
