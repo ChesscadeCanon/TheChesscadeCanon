@@ -9,4 +9,4 @@ struct Histotrie {
 
 struct Histotrie* malloc_init_histotrie();
 void free_histotrie(struct Histotrie*);
-size_t record_state(struct Histotrie*, const char*, const size_t);
+size_t record_state(struct Histotrie*, const char*, const unsigned long long);
