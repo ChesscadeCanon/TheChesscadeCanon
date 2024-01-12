@@ -1,5 +1,5 @@
 #pragma once
-
+#include "histotrie.h"
 #include <sys/timeb.h>
 #include <stdbool.h>
 #if defined(_MSC_VER)
@@ -13,8 +13,20 @@ typedef size_t Settings;
 typedef char Piece;
 typedef char* State;
 
+enum Square {
+	PAWN,
+	BISHOP,
+	ROOK,
+	KNIGHT,
+	QUEEN,
+	KING,
+	NO_PIECE,
+	SQUARE_COUNT
+};
+
 #define FPS 60
 #define DEAD_PLAYER '!'
+#define EMPTY '_'
 #define WHITE_PAWN 'P'
 #define BLACK_PAWN 'p'
 #define WHITE_KING 'K'
@@ -67,12 +79,7 @@ enum Setting {
 	DEFAULT_SETTINGS = WHITE_PAWN_HIT_UP | BLACK_PAWN_SPAWN_LOW | WHITE_PAWN_LAND_HIGH | PAWNS_PROMOTE | NO_CAPTURE_ON_REPEAT | DOUBLE_BISHOPS | CHECKMATE | DIAGONALS
 };
 
-#define TRIE_CHILDREN 13
-
-struct Histotrie {
-
-	struct Histotrie* children[TRIE_CHILDREN];
-};
+extern const enum Square PIECE_MAP[128];
 
 struct Game {
 

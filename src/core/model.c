@@ -12,15 +12,20 @@
 #define min(A, B) (A < B ? A : B)
 #endif
 
-enum Square {
-	PAWN,
-	BISHOP,
-	ROOK,
-	KNIGHT,
-	QUEEN,
-	KING,
-	NO_PIECE,
-	SQUARE_COUNT
+const enum Square PIECE_MAP[128] = {
+	[WHITE_PAWN] = PAWN,
+	[BLACK_PAWN] = PAWN,
+	[WHITE_BISHOP] = BISHOP,
+	[BLACK_BISHOP] = BISHOP,
+	[WHITE_ROOK] = ROOK,
+	[BLACK_ROOK] = ROOK,
+	[WHITE_KNIGHT] = KNIGHT,
+	[BLACK_KNIGHT] = KNIGHT,
+	[WHITE_QUEEN] = QUEEN,
+	[BLACK_QUEEN] = QUEEN,
+	[WHITE_KING] = KING,
+	[BLACK_KING] = KING,
+	[EMPTY] = NO_PIECE
 };
 
 struct MoveSet {
@@ -105,7 +110,6 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 
 #define MOVE_RATE(G) 64
 #define FPS 60
-#define EMPTY '_'
 #define GET_SQUARE(S, I) S[I]
 #define GET_CAPTURE(S, I) (S[CAPTURE_INDEX + I])
 #define PLACE_PLAYER(G) SET_SQUARE(G->state, PLAYER_SQUARE(G), G->player)
@@ -207,22 +211,6 @@ PIECE_BIT(BLACK_QUEEN) |
 PIECE_BIT(WHITE_KING) |
 PIECE_BIT(BLACK_KING);
 
-const enum Square PIECE_MAP[128] = {
-	[WHITE_PAWN] = PAWN,
-	[BLACK_PAWN] = PAWN,
-	[WHITE_BISHOP] = BISHOP,
-	[BLACK_BISHOP] = BISHOP,
-	[WHITE_ROOK] = ROOK,
-	[BLACK_ROOK] = ROOK,
-	[WHITE_KNIGHT] = KNIGHT,
-	[BLACK_KNIGHT] = KNIGHT,
-	[WHITE_QUEEN] = QUEEN,
-	[BLACK_QUEEN] = QUEEN,
-	[WHITE_KING] = KING,
-	[BLACK_KING] = KING,
-	[EMPTY] = NO_PIECE
-};
-
 const size_t PIECE_VALUES[SQUARE_COUNT] = {
 	[PAWN] = 1,
 	[BISHOP] = 3,
@@ -260,74 +248,6 @@ size_t _bit_index(size_t bit) {
 	}
 
 	return i >= 64 ? 0 : i;
-}
-
-size_t _free_children(struct Histotrie* root) {
-
-	if (!root) return 0;
-	size_t ret = 1;
-
-	for (size_t c = 0; c < TRIE_CHILDREN; ++c) {
-
-		if (root->children[c]) {
-
-			ret += _free_children(root->children[c]);
-		}
-	}
-
-	free(root);
-	MEMLOG("freed histotrie node\n");
-	return ret;
-}
-
-void _free_histotrie(struct Game* game) {
-
-	size_t count = _free_children(game->histotrie);
-	MEMLOGF("freed %llu histotrie nodes\n", count);
-}
-
-void _init_histotrie(struct Histotrie* histotrie) {
-
-	memset(histotrie->children, 0, TRIE_CHILDREN * sizeof(struct Histotrie*));
-}
-
-struct Histotrie* _malloc_histotrie() {
-
-	struct Histotrie* ret = malloc(sizeof(struct Histotrie));
-	MEMLOG("malloc histotrie\n");
-	_init_histotrie(ret);
-	return ret;
-}
-
-size_t _record_state(struct Histotrie* root, const Board board, const size_t index) {
-
-	if (index >= BOARD_LENGTH) return 0;
-	if (board[index] == '\n') return _record_state(root, board, index + 1);
-
-	Piece piece = board[index];
-	enum Square square = PIECE_MAP[piece];
-	size_t child = square == NO_PIECE ? TRIE_CHILDREN - 1 : square + NO_PIECE * IS_WHITE(piece);
-
-	if (root->children[child]) {
-
-		return _record_state(root->children[child], board, index + 1);
-	}
-
-	root->children[child] = malloc(sizeof(struct Histotrie));
-	MEMLOG("malloc histotrie node\n");
-	_init_histotrie(root->children[child]);
-	return 1 + _record_state(root->children[child], board, index + 1);
-}
-
-size_t _chronicle(struct Game* game) {
-
-	if (!game->histotrie) return false;
-	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT)) return false;
-
-	const size_t ret = _record_state(game->histotrie, game->state, 0);
-	MEMLOGF("created %llu histotrie nodes\n", ret);
-	game->repeat = !ret;
-	return ret;
 }
 
 void _init_captures(State state) {
@@ -438,6 +358,17 @@ size_t _judge(struct Game* game) {
 	game->scored *= game->combo * count;
 	game->score += game->scored;
 	return game->score;
+}
+
+size_t _chronicle(struct Game* game) {
+
+	if (!game->histotrie) return false;
+	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT)) return false;
+
+	const size_t ret = record_state(game->histotrie, game->state, 0);
+	MEMLOGF("created %llu histotrie nodes\n", ret);
+	game->repeat = !ret;
+	return ret;
 }
 
 void _resolve(struct Game* game) {
@@ -644,7 +575,7 @@ void free_game(struct Game* game) {
 
 	if (game) {
 
-		_free_histotrie(game);
+		free_histotrie(game->histotrie);
 		MEMLOG("freed game\n");
 		free(game);
 	}
@@ -703,7 +634,7 @@ struct Game* malloc_init_game(Settings settings) {
 	MEMLOG("malloc game\n");
 	assert(game);
 	_init_game(game);
-	game->histotrie = _malloc_histotrie();
+	game->histotrie = malloc_init_histotrie();
 	game->settings = settings;
 	return game;
 }
