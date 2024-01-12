@@ -1,10 +1,12 @@
+## The Chesscade Canon
+
 Chesscade is an open source, deterministic, perfect-information, falling block puzzle game with
 chess pieces. The Chesscade Canon seeks to be a universal, canonical implementation of Chesscade,
 in the form of a lightweight, thread-safe, optimized dynamic library that can be used as a backend
 to graphical interfaces written in any language, as well as AI engines for experimentation.
 Included is an extremely basic frontend written in Python using the PyGame engine.
 
-For complete rules, see "rules.h".
+**For complete rules, see "rules.h".**
 
 # To play on Replit (THE EASY WAY):
 
