@@ -37,10 +37,11 @@ To play on Unix:
 
 1. Install Git, CMake, Pip, and PyGame.
 2. In a terminal:
-
+```
 $ git clone https://github.com/ChesscadeCanon/TheChesscadeCanon
 $ cd ChesscadeBox
 $ cmake -S . -B out/build
 $ cmake --build out/build
 $ cp out/build/libChesscadeLib.so pygame_frontend/bin/libChesscadeLib.so
 $ python pygame_frontend/pygame_frontend.py
+```
