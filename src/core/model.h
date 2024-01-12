@@ -86,8 +86,8 @@ struct Game {
 	unsigned short player_rank;
 	unsigned short player_file;
 	short cursor;
-	unsigned short cursor_rank;
-	unsigned short cursor_file;
+	unsigned short cursor_grade;
+	unsigned short cursor_increment;
 	bool dropped;
 	long int moved_left;
 	long int moved_right;

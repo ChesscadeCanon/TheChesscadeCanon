@@ -131,10 +131,10 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 	: G->player \
 )
 #define KING_ME(S, P) (IS_WHITE(P) ? WHITE_KING : BLACK_KING)
-#define DRAW_NEXT(G) DECKS[G->cursor_rank][G->cursor_file]
+#define DRAW_NEXT(G) DECKS[G->cursor_grade][G->cursor_increment]
 #define SPAWN_RANK(G) (IS_SET(G->settings, BLACK_PAWN_SPAWN_LOW) && DRAW_NEXT(G) == BLACK_PAWN ? 1 : 0)
 #define NEXT_PIECE(G) (\
-	EMPTY_SQUARE(G->state, SQUARE_INDEX(SPAWN_RANK(G), G->cursor_file)) ?\
+	EMPTY_SQUARE(G->state, SQUARE_INDEX(SPAWN_RANK(G), G->cursor_increment)) ?\
 		DRAW_NEXT(G) \
 	:\
 		DEAD_PLAYER \
@@ -152,16 +152,16 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 #define SPAWN(G) (\
 	NEXT_PLAYER(G) &\
 	(G->player_rank = SPAWN_RANK(G)) &\
-	(G->player_file = G->cursor_file) \
+	(G->player_file = G->cursor_increment) \
 )
 #define PACMAN(G, I) (abs(SQUARE_FILE(I) - (G->player_file)) > 2)
 #define CAN_STRIKE(G, I) (ON_BOARD(G, I + RAISE_FLOOR(G)) && EMPTY_SQUARE(G->state, I))
 #define CAN_MOVE(G, I) (CAN_STRIKE(G, I) && !PACMAN(G, I))
-#define CURSOR_WRAPPED(G) (G->cursor_rank > 1)
+#define CURSOR_WRAPPED(G) (G->cursor_grade > 1)
 #define CURSOR_GRADE(G, W) (!HAS_CAPTURED(G->state) + (W) * 2)
 #define CURSOR_INCREMENT(G) (\
-	(G->cursor > 0 && G->cursor_file < LAST_FILE) ||\
-	(G->cursor < 0 && G->cursor_file > 0) ?\
+	(G->cursor > 0 && G->cursor_increment < LAST_FILE) ||\
+	(G->cursor < 0 && G->cursor_increment > 0) ?\
 	G->cursor : -G->cursor * LAST_FILE \
 )
 #define LAND(G) (\
@@ -243,8 +243,8 @@ void print_rules() {
 unsigned short _update_cursor(struct Game* game) {
 
 	const short inc = CURSOR_INCREMENT(game);
-	game->cursor_file += inc;
-	game->cursor_rank = CURSOR_GRADE(game, abs(inc) > 1 || CURSOR_WRAPPED(game));
+	game->cursor_increment += inc;
+	game->cursor_grade = CURSOR_GRADE(game, abs(inc) > 1 || CURSOR_WRAPPED(game));
 	return game->cursor;
 }
 
@@ -446,7 +446,7 @@ void _resolve(struct Game* game) {
 	game->player = QUEEN_ME(game, from_rank);
 	const size_t captures = attack(game, true, false, false);
 	LAND(game);
-	game->cursor_rank = max(0, game->cursor_rank - (captures ? 1 : 0) - (game->cursor_rank > 1) * 2);
+	game->cursor_grade = CURSOR_GRADE(game, 0);
 	_judge(game);
 
 	if (captures) {
@@ -567,8 +567,8 @@ void _init_game(struct Game* game) {
 	game->player_rank = 1;
 	game->player_file = 7;
 	game->cursor = -1;
-	game->cursor_rank = 1;
-	game->cursor_file = LAST_FILE;
+	game->cursor_grade = 1;
+	game->cursor_increment = LAST_FILE;
 	game->dropped = false;
 	game->moved_left = -1;
 	game->moved_right = -1;
@@ -605,7 +605,7 @@ bool on_brink(struct Game* game) {
 	}
 
 	size_t spawn_rank = SPAWN_RANK(game);
-	size_t spawn_file = game->cursor_file;
+	size_t spawn_file = game->cursor_increment;
 
 	if (GET_SQUARE(game->state, SQUARE_INDEX(spawn_rank, spawn_file)) != EMPTY) {
 

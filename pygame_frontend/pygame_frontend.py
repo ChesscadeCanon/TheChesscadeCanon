@@ -30,8 +30,10 @@ RANKS = engine.get_ranks()
 FILES = engine.get_files()
 TRIE_CHILDREN = engine.get_trie_children()
 STATE_LENGTH = engine.get_state_length()
-SQUARES_OFF_LEFT = 2
+SQUARE = 40
+SQUARES_OFF_LEFT = 4
 SQUARES_OFF_TOP = 4
+SIZE = (FILES + SQUARES_OFF_LEFT) * SQUARE, (RANKS + SQUARES_OFF_TOP) * SQUARE
 SQUARE = min(SIZE[0] // (FILES + SQUARES_OFF_LEFT), SIZE[1] // (RANKS + SQUARES_OFF_TOP))
 FONT_0 = pygame.font.Font('freesansbold.ttf', 11)
 FONT_1 = pygame.font.Font('freesansbold.ttf', 16)
@@ -182,13 +184,20 @@ def draw_text(game):
     y = 0
     for readout in readouts:
         for part in readout:    
-            text = FONT_1.render(part, False, WHITE, BLACK)
+            text = FONT_1.render(part, True, WHITE, BLACK)
             rect = text.get_rect()
             rect.topright = (SQUARE * SQUARES_OFF_LEFT, y)
             screen.blit(text, rect)
             y += text.get_rect().height
         y += text.get_rect().height
-
+    controls = (("arrow keys: move"), ("space: drop"), ("p: pause/help"), ("q: quit"))
+    for control in controls:
+        text = FONT_1.render(control, True, BLACK, WHITE)
+        rect = text.get_rect()
+        rect.topleft = (0, y)
+        screen.blit(text, rect)
+        y += text.get_rect().height
+    
 def take_input(game, passed):
     keys=pygame.key.get_pressed()
     
@@ -267,31 +276,43 @@ def draw_game(game):
     draw_player(game)
     draw_text(game)
 
+def draw_game_over(game):
+    if engine.is_game_over(game):    
+        title_label = FONT_2.render("Game Over", True, WHITE, BLACK)
+        title_rect = title_label.get_rect()
+        title_rect.center = SIZE[0] / 2, SIZE[1] / 2
+        screen.blit(title_label, title_rect)
+
+GO = 0
+BACK = 1
+QUIT = 2
+
 def play():
     ret = 0
     game = engine.malloc_init_default_game()
     engine.begin_game(game)
-    go = True
+    go = GO
     over = False
     back = False
     clock = pygame.time.Clock()
-    while go:
+    while go == GO:
         for event in pygame.event.get(): 
             if event.type == pygame.QUIT: 
-                go = False 
+                go = QUIT 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
-                    back = True
-                    go = False
+                    go = BACK
                 elif event.key == pygame.K_SPACE:
                     game.contents.dropped = True
                 elif event.key == pygame.K_p:
                     game.contents.paused = not game.contents.paused
                 elif event.key == pygame.K_q:
-                    go = False
+                    go = QUIT
         passed = clock.tick(30)
         take_input(game, passed)
-        if not over:
+        if over:
+            pass
+        else:
             engine.increment_game(game, passed)
         over = engine.is_game_over(game)
         screen.fill(GREY)
@@ -303,25 +324,30 @@ def play():
             draw_help()
         else:
             draw_game(game)
+        draw_game_over(game)
         pygame.display.flip()
         clock.tick(60)
-    ret = game.contents.score
+    update_high_score(game.contents.score)
     over = engine.is_game_over(game)
     engine.delete_game(game)
-    return ret if over else 0 if back else -1
-high_score = 0
+    return go
+
+def update_high_score(score):
+    with open('high_score.txt', 'w+') as file:
+        line = file.readline()
+        high_score = int(line) if line else 0
+        if score > high_score:
+            file.write(str(score))
+            
 while True:
     do = title()
     if do > 0:
-        score = play()
-        if score < 0:
+        do = play()
+        if do == QUIT:
             break
-        if score > high_score:
-            high_score = score
-        print(score)
     else:
         break
-print(high_score)
+
 pygame.quit()
 
     
