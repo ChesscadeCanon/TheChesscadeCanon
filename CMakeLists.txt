@@ -7,7 +7,7 @@ add_library(ChesscadeLib SHARED)
 target_include_directories(ChesscadeLib PUBLIC export)
 target_sources(ChesscadeLib PUBLIC export/api.cpp PRIVATE core/model.c rules.h)
 file(COPY assets DESTINATION ${PROJECT_SOURCE_DIR}/pygame_frontend)
-IF(FALSE) # Command line app currently only works on Windows, and is turned off because the .exe gives Windows Defender a false positive. It's more of a debugging tool, than a game anyway.
+IF(FALSE) # Command line app currently only works on Windows, and is turned off because the .exe gives Windows Defender a false positive. It's more of a debugging tool than a game anyway.
 	IF(WIN32) 
 		IF(WIN32)
 		ELSE()
