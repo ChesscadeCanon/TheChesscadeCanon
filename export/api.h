@@ -15,7 +15,7 @@
 #endif
 
 extern "C" {
-#include "../private/model.h"
+#include "model.h"
 
 /**
 * returns the full text of the rules of Chesscade
