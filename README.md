@@ -26,7 +26,6 @@ $ git clone https://github.com/ChesscadeCanon/TheChesscadeCanon
 $ cd ChesscadeBox
 $ cmake -S . -B out/build
 $ cmake --build out/build
-$ cp out/build/libChesscadeLib.so pygame_frontend/bin/libChesscadeLib.so
 $ python pygame_frontend/pygame_frontend.py
 ```
 
@@ -40,12 +39,10 @@ $ python pygame_frontend/pygame_frontend.py
 6. Choose a path to download into.
 7. Click "Clone". VS will open the "pygame_frontend" project, because that's the part that has an .sln file.
 8. Go to "File->Open->Folder..."
-9. Navigate to the ChesscadeBox directory.
+9. Navigate to wherever you put the ChesscadeBox directory.
 10. Click "Open".
 11. In the Solution Explorer, select CMakeLists.txt.
 12. Go to "Build->Rebuild All".
 13. If the build is successful, go to "File->Open->Project/Solution...".
 14. Open "ChesscadeBox\pygame_frontend\pygame_frontend.sln".
-15. Make sure CMake has made a "ChesscadeBox\pygame_frontend\bin" folder containing a file called "ChesscadeLib.dll".
-16. If not, make such a folder and copy ChesscadeLib.dll into it from ChesscadeBox\out\build\x64-Debug.
-17. The green play button at the top of the screen should now launch the game.
+15. The green play button at the top of the screen should now launch the game.
