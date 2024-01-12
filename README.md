@@ -1,4 +1,4 @@
-## The Chesscade Canon
+# The Chesscade Canon
 
 Chesscade is an open source, deterministic, perfect-information, falling block puzzle game with
 chess pieces. The Chesscade Canon seeks to be a universal, canonical implementation of Chesscade,
@@ -8,7 +8,7 @@ Included is an extremely basic frontend written in Python using the PyGame engin
 
 **For complete rules, see "rules.h".**
 
-# To play on Replit (THE EASY WAY):
+## To play on Replit (THE EASY WAY):
 
 1. In a web browser, navigate to https://www.replit.com and create an account.
 2. Navigate to https://replit.com/@chesscadecanon/TheChesscadeCanon
@@ -17,7 +17,7 @@ Included is an extremely basic frontend written in Python using the PyGame engin
 4. The game will appear in a tab within Replit called "Output".
 5. Click the game and it will begin responding to keyboard input.
 
-# To play on Windows using Visual Studio:
+## To play on Windows using Visual Studio:
 
 1. Install Visual Studio, including the Desktop Development with C++ workload and the Python Development workload.
 2. Install Pip and PyGame.
@@ -37,7 +37,7 @@ Included is an extremely basic frontend written in Python using the PyGame engin
 16. If not, make such a folder and copy ChesscadeLib.dll into it from ChesscadeBox\out\build\x64-Debug.
 17. The green play button at the top of the screen should now launch the game.
 
-# To play on Unix:
+## To play on Unix:
 
 1. Install Git, CMake, Pip, and PyGame.
 2. In a terminal:
