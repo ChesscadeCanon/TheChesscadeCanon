@@ -1,5 +1,5 @@
 #include "api.h"
-#include "../rules.h"
+#include "../../rules.h"
 #include <stdio.h>
 #include <ctype.h>
 

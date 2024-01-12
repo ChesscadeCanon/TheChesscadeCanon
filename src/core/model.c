@@ -1,6 +1,6 @@
 #include "model.h"
 #include "config.h"
-#include "../rules.h"
+#include "../../rules.h"
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
