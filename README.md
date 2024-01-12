@@ -1,4 +1,4 @@
-Chesscade is an open source deterministic, perfect-information, falling block puzzle game with
+Chesscade is an open source, deterministic, perfect-information, falling block puzzle game with
 chess pieces. For complete rules, see "rules.h". The Chesscade Canon seeks to be a universal,
 canonical implementation of Chesscade, in the form of a lightweight, thread-safe, optimized
 dynamic library that can be used as a backend to graphical interfaces written in any language,
@@ -7,7 +7,8 @@ written in Python using the PyGame engine.
 
 # To play on Replit (THE EASY WAY):
 
-1. In a web browser, navigate to https://replit.com/@chesscadecanon/TheChesscadeCanon
+1. In a web browser, navigate to https://www.replit.com and create an account.
+2. Navigate to https://replit.com/@chesscadecanon/TheChesscadeCanon
 2. Click the "Fork" button in the upper right hand corner.
 3. In the popup that appears, click the "Fork Repl" button.
 4. The game will appear in a tab within Replit called "Output".
