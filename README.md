@@ -30,7 +30,7 @@ written in Python using the PyGame engine.
 12. Go to "Build->Rebuild All".
 13. If the build is successful, go to "File->Open->Project/Solution...".
 14. Open "ChesscadeBox\pygame_frontend\pygame_frontend.sln".
-15. Make sure there is a "ChesscadeBox\pygame_frontend\bin" folder containing a file called "ChesscadeLib.dll".
+15. Make sure CMake has made a "ChesscadeBox\pygame_frontend\bin" folder containing a file called "ChesscadeLib.dll".
 16. If not, make such a folder and copy ChesscadeLib.dll into it from ChesscadeBox\out\build\x64-Debug.
 17. The green play button at the top of the screen should now launch the game.
 
