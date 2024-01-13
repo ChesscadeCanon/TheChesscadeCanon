@@ -55,7 +55,7 @@
 #define CAN_STRIKE(G, I) (ON_BOARD(G, I + RAISE_FLOOR(G)) && EMPTY_SQUARE(G->board, I))
 #define CAN_MOVE(G, I) (CAN_STRIKE(G, I) && !PACMAN(G, I))
 #define CURSOR_WRAPPED(G) (G->cursor_grade > 1)
-#define CURSOR_GRADE(G, W) (!HAS_CAPTURED(G->board) + (W) * 2)
+#define CURSOR_GRADE(G, W) (!HAS_CAPTURED(G->captures) + (W) * 2)
 #define CURSOR_INCREMENT(G) (\
 	(G->cursor > 0 && G->cursor_increment < LAST_FILE) ||\
 	(G->cursor < 0 && G->cursor_increment > 0) ?\
@@ -94,18 +94,18 @@ size_t _bit_index(size_t bit) {
 	return i >= 64 ? 0 : i;
 }
 
-void _kill(Board board, const size_t square, const size_t move) {
+void _kill(struct Game* game, const size_t square, const size_t move) {
 
-	Piece piece = GET_SQUARE(board, square);
-	SET_CAPTURE(board, move, piece);
-	SET_SQUARE(board, square, EMPTY);
+	Piece piece = GET_SQUARE(game->board, square);
+	SET_CAPTURE(game->captures, move, piece);
+	SET_SQUARE(game->board, square, EMPTY);
 }
 
-size_t _capture(Board board, const size_t square, const size_t move, const bool execute) {
+size_t _capture(struct Game* game, const size_t square, const size_t move, const bool execute) {
 
 	if (execute) {
 
-		_kill(board, square, move);
+		_kill(game, square, move);
 	}
 
 	return SQUARE_BIT(square);
@@ -127,7 +127,7 @@ size_t _hit(struct Game* game, enum Square piece_type, const size_t rank, const 
 	}
 	else if (CAN_CAPTURE(game, square)) {
 
-		return ret | _capture(game->board, square, move, execute);
+		return ret | _capture(game, square, move, execute);
 	}
 
 	return ret;
@@ -165,7 +165,7 @@ size_t _judge(struct Game* game) {
 
 	for (size_t i = 0; i < FILES; ++i) {
 
-		Piece piece = GET_CAPTURE(game->board, i);
+		Piece piece = GET_CAPTURE(game->captures, i);
 
 		if (IS_SET(game->settings, CHECKMATE) && PIECE_MAP[piece] == KING) {
 
@@ -323,6 +323,7 @@ void _init_game(struct Game* game) {
 	game->moved_down = -1;
 	game->settings = 0;
 	init_board(game->board);
+	init_captures(game->captures);
 }
 
 bool game_over(struct Game* game) {
@@ -414,7 +415,7 @@ size_t attack(struct Game* game, const bool execute, const bool forecast, const 
 
 	if (execute) {
 
-		init_captures(game->board);
+		init_captures(game->captures);
 	}
 
 	enum Square piece_type = PIECE_MAP[piece];

@@ -3,6 +3,8 @@
 #include "config.h"
 #include <string.h>
 
+#define CHILD_INDEX(P) (PIECE_MAP[P] == NO_PIECE ? TRIE_CHILDREN - 1 : PIECE_MAP[P] + NO_PIECE * IS_WHITE(P))
+
 size_t _free_children(struct Histotrie* root) {
 
 	if (!root) return 0;

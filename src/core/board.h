@@ -24,33 +24,31 @@
 #define BLACK_BISHOP 'b'
 #define FILES 8ull
 #define RANKS 8ull
+#define CAPTURE_LENGTH 9ull
 #define EMPTY_CAPTURES "********"
-#define EMPTY_SQUARE(B, I) (GET_SQUARE(B, I) == EMPTY)
-#define HAS_CAPTURED(B) (strncmp(EMPTY_CAPTURES, B + CAPTURE_INDEX, CAPTURE_LENGTH) != 0)
+#define HAS_CAPTURED(C) (strncmp(EMPTY_CAPTURES, C, CAPTURE_LENGTH) != 0)
 #define SQUARE_RANK(I) ((unsigned short)(I / LINE_LENGTH))
 #define SQUARE_FILE(I) ((unsigned short)(I % LINE_LENGTH))
 #define SQUARE_BIT(I) (1ull << (SQUARE_RANK(I) * FILES + SQUARE_FILE(I)))
-#define SET_CAPTURE(B, C, V) (B[CAPTURE_INDEX + C] = V)
+#define SET_CAPTURE(C, P, V) (C[P] = V)
 #define SET_SQUARE(B, I, V) (B[I] = V)
 #define IS_WHITE(P) (P <= 'Z')
 #define SQUARE_INDEX(R, F) ((R) * LINE_LENGTH + (F))
 #define LINE_LENGTH (FILES + 1ull)
 #define FOUR_LINES (LINE_LENGTH * 4ull)
-#define BOARD_LENGTH (LINE_LENGTH * RANKS)
-#define CAPTURE_LENGTH 8ull
-#define END_LENGTH 2ull
-#define STATE_LENGTH (BOARD_LENGTH + CAPTURE_LENGTH + END_LENGTH)
-#define CURSES_STATE_LENGTH (STATE_LENGTH + RANKS + 2)
-#define TERMINATOR_INDEX (STATE_LENGTH - 1)
+#define BOARD_LENGTH (LINE_LENGTH * RANKS + 1)
+#define CURSES_STATE_LENGTH (BOARD_LENGTH + RANKS)
+#define TERMINATOR_INDEX (BOARD_LENGTH - 1)
 #define TERMINATE(B) (B[TERMINATOR_INDEX] = '\0')
-#define CAPTURE_INDEX BOARD_LENGTH
 #define GET_SQUARE(B, I) B[I]
-#define GET_CAPTURE(B, I) (B[CAPTURE_INDEX + I])
+#define GET_CAPTURE(C, I) (C[I])
+#define EMPTY_SQUARE(B, I) (GET_SQUARE(B, I) == EMPTY)
 #define LAST_FILE (FILES - 1ull)
 #define LAST_RANK (RANKS - 1ull)
 #define SQUARE_DOWN(I) (I + LINE_LENGTH)
 
 typedef char* Board;
+typedef char* Captures;
 typedef char Piece;
 
 enum Square {
@@ -116,4 +114,4 @@ PIECE_BIT(BLACK_KING);
 #define IS_PIECE(P) (PIECE_SET & PIECE_BIT(P))
 
 void init_board(Board);
-void init_captures(Board);
+void init_captures(Captures);

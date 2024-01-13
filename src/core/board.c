@@ -114,15 +114,15 @@ void _init_squares(Board board) {
 	}
 }
 
-void init_captures(Board board) {
+void init_captures(Captures captures) {
 
-	memcpy(board + BOARD_LENGTH, EMPTY_CAPTURES, CAPTURE_LENGTH * sizeof(char));
+	memcpy(captures, EMPTY_CAPTURES, CAPTURE_LENGTH * sizeof(char));
+	captures[CAPTURE_LENGTH - 1] = '\0';
 }
 
 void init_board(Board board) {
 
-	memset(board, '\n', STATE_LENGTH * sizeof(char));
-	init_captures(board);
+	memset(board, '\n', BOARD_LENGTH * sizeof(char));
 	_init_squares(board);
 	TERMINATE(board);
 }

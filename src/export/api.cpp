@@ -23,9 +23,9 @@ size_t get_files() {
 	return FILES;
 }
 
-size_t get_state_length() {
+size_t get_board_length() {
 
-	return STATE_LENGTH;
+	return BOARD_LENGTH;
 }
 
 size_t get_trie_children() {

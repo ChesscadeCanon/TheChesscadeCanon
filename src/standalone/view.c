@@ -82,8 +82,8 @@ void print_raw(struct Game* game) {
 
 void print_pretty(struct Game* game) {
 #if OS_WINDOWS
-	char board[STATE_LENGTH] = {[STATE_LENGTH - 1] = '\0'};
-	memcpy(board, game->board, STATE_LENGTH * sizeof(char));
+	char board[BOARD_LENGTH] = {[BOARD_LENGTH - 1] = '\0'};
+	memcpy(board, game->board, BOARD_LENGTH * sizeof(char));
 	SET_SQUARE(board, PLAYER_SQUARE(game), game->player);
 #else
 	char board[CURSES_STATE_LENGTH];

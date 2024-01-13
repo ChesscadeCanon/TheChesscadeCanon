@@ -40,7 +40,7 @@ EXPORT size_t get_files();
 /**
 * returns the number of squares on the board, plus newlines
 */
-EXPORT size_t get_state_length();
+EXPORT size_t get_board_length();
     
 /**
 * returns the branching factor of the trie structure used to identify repeated board states

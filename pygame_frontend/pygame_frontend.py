@@ -11,7 +11,7 @@ engine.get_rules.restype = ctypes.c_char_p
 engine.get_ranks.restype = ctypes.c_ulonglong
 engine.get_files.restype = ctypes.c_ulonglong
 engine.get_trie_children.restype = ctypes.c_ulonglong
-engine.get_state_length.restype = ctypes.c_ulonglong
+engine.get_board_length.restype = ctypes.c_ulonglong
 
 RULES = ''.join([chr(b) for b in engine.get_rules()])
 BLACK = ( 0, 0, 0)
@@ -29,7 +29,7 @@ SIZE = (400, 480)
 RANKS = engine.get_ranks()
 FILES = engine.get_files()
 TRIE_CHILDREN = engine.get_trie_children()
-STATE_LENGTH = engine.get_state_length()
+BOARD_LENGTH = engine.get_board_length()
 SQUARE = 40
 SQUARES_OFF_LEFT = 4
 SQUARES_OFF_TOP = 4
@@ -61,7 +61,8 @@ class Game(ctypes.Structure):
         ("moved_left", ctypes.c_long),
         ("moved_right", ctypes.c_long),
         ("moved_down", ctypes.c_long),
-        ("board", ctypes.c_char * STATE_LENGTH),
+        ("board", ctypes.c_char * BOARD_LENGTH),
+        ("captures", ctypes.c_char * FILES),
         ("histotrie", ctypes.POINTER(Histotrie)),
         ("repeat", ctypes.c_bool),
         ("settings", ctypes.c_ulonglong)

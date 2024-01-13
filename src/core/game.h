@@ -44,7 +44,8 @@ struct Game {
 	long int moved_left;
 	long int moved_right;
 	long int moved_down;
-	char board[STATE_LENGTH];
+	char board[BOARD_LENGTH];
+	char captures[CAPTURE_LENGTH];
 	struct Histotrie* histotrie;
 	bool repeat;
 	Settings settings;

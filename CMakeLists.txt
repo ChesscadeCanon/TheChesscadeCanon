@@ -12,7 +12,7 @@ add_custom_command(
 	POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:ChesscadeLib> ${PROJECT_SOURCE_DIR}/pygame_frontend/bin/
 )
-IF(FALSE) # Command line app currently only works on Windows, and is turned off because the .exe gives Windows Defender a false positive. It's more of a debugging tool than a game anyway.
+IF(false) # Command line app currently only works on Windows, and is turned off because the .exe gives Windows Defender a false positive. It's more of a debugging tool than a game anyway.
 	IF(WIN32) 
 		add_executable(ChesscadeApp)
 		IF(WIN32)
