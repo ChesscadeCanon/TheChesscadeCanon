@@ -1,7 +1,6 @@
 #include "histotrie.h"
-#include "model.h"
+#include "game.h"
 #include "config.h"
-#include <stdlib.h>
 #include <string.h>
 
 size_t _free_children(struct Histotrie* root) {

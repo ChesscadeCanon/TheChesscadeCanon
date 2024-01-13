@@ -1,4 +1,4 @@
-#include "model.h"
+#include "game.h"
 #include "config.h"
 #include "../../rules.h"
 #include <stdlib.h>
@@ -12,116 +12,10 @@
 #define min(A, B) (A < B ? A : B)
 #endif
 
-const enum Square PIECE_MAP[128] = {
-	[WHITE_PAWN] = PAWN,
-	[BLACK_PAWN] = PAWN,
-	[WHITE_BISHOP] = BISHOP,
-	[BLACK_BISHOP] = BISHOP,
-	[WHITE_ROOK] = ROOK,
-	[BLACK_ROOK] = ROOK,
-	[WHITE_KNIGHT] = KNIGHT,
-	[BLACK_KNIGHT] = KNIGHT,
-	[WHITE_QUEEN] = QUEEN,
-	[BLACK_QUEEN] = QUEEN,
-	[WHITE_KING] = KING,
-	[BLACK_KING] = KING,
-	[EMPTY] = NO_PIECE
-};
-
-struct MoveSet {
-
-	const bool repeat;
-	const unsigned short count;
-	const short moves[8][2];
-};
-
-const struct MoveSet MOVES[SQUARE_COUNT] = {
-	[PAWN] = {
-		.repeat = false,
-		.count = 2,
-		.moves = {
-			{1, 1},
-			{1, -1}
-		}
-	},
-	[BISHOP] = {
-		.repeat = true,
-		.count = 4,
-		.moves = {
-			{1, 1},
-			{-1, 1},
-			{-1, -1},
-			{1, -1}
-		}
-	},
-	[ROOK] = {
-		.repeat = true,
-		.count = 4,
-		.moves = {
-			{0, 1},
-			{-1, 0},
-			{0, -1},
-			{1, 0}
-		}
-	},
-	[KNIGHT] = {
-		.repeat = true,
-		.count = 8,
-		.moves = {
-			{1, 2},
-			{-1, 2},
-			{-2, 1},
-			{-2, -1},
-			{-1, -2},
-			{1, -2},
-			{2, -1},
-			{2, 1}
-		}
-	},
-	[QUEEN] = {
-		.repeat = true,
-		.count = 8,
-		.moves = {
-			{1, 1},
-			{-1, 1},
-			{-1, -1},
-			{1, -1},
-			{0, 1},
-			{-1, 0},
-			{0, -1},
-			{1, 0}
-		}
-	},
-	[KING] = {
-		.repeat = false,
-		.count = 8,
-		.moves = {
-			{1, 1},
-			{-1, 1},
-			{-1, -1},
-			{1, -1},
-			{0, 1},
-			{-1, 0},
-			{0, -1},
-			{1, 0}
-		}
-	}
-};
-
 #define MOVE_RATE(G) 64
 #define FPS 60
-#define GET_SQUARE(S, I) S[I]
-#define GET_CAPTURE(S, I) (S[CAPTURE_INDEX + I])
-#define PLACE_PLAYER(G) SET_SQUARE(G->state, PLAYER_SQUARE(G), G->player)
-#define EMPTY_CAPTURES "********"
-#define EMPTY_SQUARE(S, I) (GET_SQUARE(S, I) == EMPTY)
-#define HAS_CAPTURED(S) (strncmp(EMPTY_CAPTURES, S + CAPTURE_INDEX, CAPTURE_LENGTH) != 0)
-#define SQUARE_RANK(I) ((unsigned short)(I / LINE_LENGTH))
-#define SQUARE_FILE(I) ((unsigned short)(I % LINE_LENGTH))
-#define SQUARE_BIT(I) (1ull << (SQUARE_RANK(I) * FILES + SQUARE_FILE(I)))
-#define SET_CAPTURE(S, C, V) (S[CAPTURE_INDEX + C] = V)
+#define PLACE_PLAYER(G) SET_SQUARE(G->board, PLAYER_SQUARE(G), G->player)
 #define REVERSE_CURSOR(G) (G->cursor *= -1)
-#define SQUARE_DOWN(I) (I + LINE_LENGTH)
 #define PLAYER_SQUARE(G) SQUARE_INDEX(G->player_rank, G->player_file)
 #define DOUBLE_BISHOP(G) (PIECE_MAP[G->player] == BISHOP && IS_SET(G->settings, DOUBLE_BISHOPS))
 #define BISHOP_SPEED(G, M) ((M) / (1 + DOUBLE_BISHOP(G)))
@@ -134,22 +28,21 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 		: G->player) \
 	: G->player \
 )
-#define KING_ME(S, P) (IS_WHITE(P) ? WHITE_KING : BLACK_KING)
 #define DRAW_NEXT(G) DECKS[G->cursor_grade][G->cursor_increment]
 #define SPAWN_RANK(G) (IS_SET(G->settings, BLACK_PAWN_SPAWN_LOW) && DRAW_NEXT(G) == BLACK_PAWN ? 1 : 0)
 #define NEXT_PIECE(G) (\
-	EMPTY_SQUARE(G->state, SQUARE_INDEX(SPAWN_RANK(G), G->cursor_increment)) ?\
+	EMPTY_SQUARE(G->board, SQUARE_INDEX(SPAWN_RANK(G), G->cursor_increment)) ?\
 		DRAW_NEXT(G) \
 	:\
 		DEAD_PLAYER \
 )
 #define IN_BOUNDS(V, L, H) (V >= L && V < H)
 #define RAISE_FLOOR(G) (IS_SET(G->settings, WHITE_PAWN_LAND_HIGH) && (G->player == WHITE_PAWN) ? LINE_LENGTH : 0)
-#define ON_BOARD(G, I) (IN_BOUNDS(I, 0, BOARD_LENGTH) && G->state[I] != '\n')
+#define ON_BOARD(G, I) (IN_BOUNDS(I, 0, BOARD_LENGTH) && G->board[I] != '\n')
 #define CAN_CAPTURE(G, I) (\
 	ON_BOARD(G, I) &&\
-	IS_PIECE(GET_SQUARE(G->state, I)) &&\
-	IS_WHITE(GET_SQUARE(G->state, I)) != IS_WHITE(G->player) &&\
+	IS_PIECE(GET_SQUARE(G->board, I)) &&\
+	IS_WHITE(GET_SQUARE(G->board, I)) != IS_WHITE(G->player) &&\
 	(!G->repeat) \
 )
 #define NEXT_PLAYER(G) (G->player = NEXT_PIECE(G)) 
@@ -159,10 +52,10 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 	(G->player_file = G->cursor_increment) \
 )
 #define PACMAN(G, I) (abs(SQUARE_FILE(I) - (G->player_file)) > 2)
-#define CAN_STRIKE(G, I) (ON_BOARD(G, I + RAISE_FLOOR(G)) && EMPTY_SQUARE(G->state, I))
+#define CAN_STRIKE(G, I) (ON_BOARD(G, I + RAISE_FLOOR(G)) && EMPTY_SQUARE(G->board, I))
 #define CAN_MOVE(G, I) (CAN_STRIKE(G, I) && !PACMAN(G, I))
 #define CURSOR_WRAPPED(G) (G->cursor_grade > 1)
-#define CURSOR_GRADE(G, W) (!HAS_CAPTURED(G->state) + (W) * 2)
+#define CURSOR_GRADE(G, W) (!HAS_CAPTURED(G->board) + (W) * 2)
 #define CURSOR_INCREMENT(G) (\
 	(G->cursor > 0 && G->cursor_increment < LAST_FILE) ||\
 	(G->cursor < 0 && G->cursor_increment > 0) ?\
@@ -172,56 +65,7 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 	PLACE_PLAYER(G) &\
 	SPAWN(G) \
 )
-#define INIT(S) (TERMINATE(S))
 #define GAME_OVER(G) (G->player == DEAD_PLAYER)
-#define LAST_FILE (FILES - 1ull)
-#define LAST_RANK (RANKS - 1ull)
-
-#define STANDARD_DECKS {\
-	"RnBqQbNr", \
-	"pPpPpPpP", \
-	"kkkkkkkk", \
-	"KKKKKKKK" \
-}
-#define KNIGHT_DECKS {\
-	"NnNnNnNn", \
-	"nNnNnNnN", \
-	"nnnnnnnn", \
-	"NNNNNNNN" \
-}
-#define BISHOP_DECKS {\
-	"BbBbBbBb", \
-	"bBbBbBbB", \
-	"bbbbbbbb", \
-	"BBBBBBBB" \
-}
-const char DECKS[4][9] = STANDARD_DECKS;
-
-const size_t PIECE_SET =
-PIECE_BIT(WHITE_PAWN) |
-PIECE_BIT(BLACK_PAWN) |
-PIECE_BIT(WHITE_BISHOP) |
-PIECE_BIT(BLACK_BISHOP) |
-PIECE_BIT(WHITE_ROOK) |
-PIECE_BIT(BLACK_ROOK) |
-PIECE_BIT(WHITE_KNIGHT) |
-PIECE_BIT(BLACK_KNIGHT) |
-PIECE_BIT(WHITE_QUEEN) |
-PIECE_BIT(BLACK_QUEEN) |
-PIECE_BIT(WHITE_KING) |
-PIECE_BIT(BLACK_KING);
-
-const size_t PIECE_VALUES[SQUARE_COUNT] = {
-	[PAWN] = 1,
-	[BISHOP] = 3,
-	[KNIGHT] = 3,
-	[ROOK] = 5,
-	[QUEEN] = 9,
-	[KING] = 0,
-	[NO_PIECE] = 0
-};
-
-#define PIECE_VALUE(P) (PIECE_VALUES[PIECE_MAP[P]])
 
 void print_rules() {
 
@@ -250,37 +94,18 @@ size_t _bit_index(size_t bit) {
 	return i >= 64 ? 0 : i;
 }
 
-void _init_captures(State state) {
+void _kill(Board board, const size_t square, const size_t move) {
 
-	memcpy(state + BOARD_LENGTH, EMPTY_CAPTURES, CAPTURE_LENGTH * sizeof(char));
+	Piece piece = GET_SQUARE(board, square);
+	SET_CAPTURE(board, move, piece);
+	SET_SQUARE(board, square, EMPTY);
 }
 
-void _init_board(Board board) {
-
-	for (size_t i = 0, r = 0; r < RANKS; ++r) {
-
-		for (size_t f = 0; f < FILES; ++f) {
-
-			board[i] = EMPTY;
-			++i;
-		}
-
-		++i;
-	}
-}
-
-void _kill(State state, const size_t square, const size_t move) {
-
-	Piece piece = GET_SQUARE(state, square);
-	SET_CAPTURE(state, move, piece);
-	SET_SQUARE(state, square, EMPTY);
-}
-
-size_t _capture(State state, const size_t square, const size_t move, const bool execute) {
+size_t _capture(Board board, const size_t square, const size_t move, const bool execute) {
 
 	if (execute) {
 
-		_kill(state, square, move);
+		_kill(board, square, move);
 	}
 
 	return SQUARE_BIT(square);
@@ -302,7 +127,7 @@ size_t _hit(struct Game* game, enum Square piece_type, const size_t rank, const 
 	}
 	else if (CAN_CAPTURE(game, square)) {
 
-		return ret | _capture(game->state, square, move, execute);
+		return ret | _capture(game->board, square, move, execute);
 	}
 
 	return ret;
@@ -340,7 +165,7 @@ size_t _judge(struct Game* game) {
 
 	for (size_t i = 0; i < FILES; ++i) {
 
-		Piece piece = GET_CAPTURE(game->state, i);
+		Piece piece = GET_CAPTURE(game->board, i);
 
 		if (IS_SET(game->settings, CHECKMATE) && PIECE_MAP[piece] == KING) {
 
@@ -365,7 +190,7 @@ size_t _chronicle(struct Game* game) {
 	if (!game->histotrie) return false;
 	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT)) return false;
 
-	const size_t ret = record_state(game->histotrie, game->state, 0);
+	const size_t ret = record_state(game->histotrie, game->board, 0);
 	MEMLOGF("created %llu histotrie nodes\n", ret);
 	game->repeat = !ret;
 	return ret;
@@ -477,14 +302,6 @@ void _take_input(struct Game* game) {
 	}
 }
 
-void _init_state(State state) {
-
-	memset(state, '\n', STATE_LENGTH * sizeof(char));
-	_init_captures(state);
-	_init_board(state);
-	INIT(state);
-}
-
 void _init_game(struct Game* game) {
 
 	game->score = 0;
@@ -505,7 +322,7 @@ void _init_game(struct Game* game) {
 	game->moved_right = -1;
 	game->moved_down = -1;
 	game->settings = 0;
-	_init_state(game->state);
+	init_board(game->board);
 }
 
 bool game_over(struct Game* game) {
@@ -526,7 +343,7 @@ bool on_brink(struct Game* game) {
 			size_t r = i / FILES;
 			size_t f = i % FILES;
 
-			if (PIECE_MAP[GET_SQUARE(game->state, SQUARE_INDEX(r, f))] == KING) {
+			if (PIECE_MAP[GET_SQUARE(game->board, SQUARE_INDEX(r, f))] == KING) {
 
 				return true;
 			}
@@ -538,7 +355,7 @@ bool on_brink(struct Game* game) {
 	size_t spawn_rank = SPAWN_RANK(game);
 	size_t spawn_file = game->cursor_increment;
 
-	if (GET_SQUARE(game->state, SQUARE_INDEX(spawn_rank, spawn_file)) != EMPTY) {
+	if (GET_SQUARE(game->board, SQUARE_INDEX(spawn_rank, spawn_file)) != EMPTY) {
 
 		return true;
 	}
@@ -597,7 +414,7 @@ size_t attack(struct Game* game, const bool execute, const bool forecast, const 
 
 	if (execute) {
 
-		_init_captures(game->state);
+		init_captures(game->board);
 	}
 
 	enum Square piece_type = PIECE_MAP[piece];

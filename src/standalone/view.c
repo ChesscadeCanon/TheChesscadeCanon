@@ -1,5 +1,5 @@
 #include "view.h"
-#include "model.h"
+#include "game.h"
 #include "config.h"
 #include "platform.h"
 #include <stdio.h>
@@ -77,13 +77,13 @@ void print_raw(struct Game* game) {
 	printf("right %ld\n\r", game->moved_right);
 	printf("down %ld\n\r", game->moved_down);
 #endif
-	printf("%s", game->state);
+	printf("%s", game->board);
 }
 
 void print_pretty(struct Game* game) {
 #if OS_WINDOWS
 	char board[STATE_LENGTH] = {[STATE_LENGTH - 1] = '\0'};
-	memcpy(board, game->state, STATE_LENGTH * sizeof(char));
+	memcpy(board, game->board, STATE_LENGTH * sizeof(char));
 	SET_SQUARE(board, PLAYER_SQUARE(game), game->player);
 #else
 	char board[CURSES_STATE_LENGTH];
@@ -91,14 +91,14 @@ void print_pretty(struct Game* game) {
 	memset(board, '\n', CURSES_STATE_LENGTH * sizeof(char));
 	for(size_t i = 1; i < CURSES_STATE_LENGTH; i += 2) board[i] = '\r';
 	board[CURSES_STATE_LENGTH - 1] = '\0';
-	while(game->state[from_index]) {
+	while(game->board[from_index]) {
 		
-		if(game->state[from_index] == '\n') {
+		if(game->board[from_index] == '\n') {
 			
 			board[to_index++] = '\r';
 		}
 
-		board[to_index++] = game->state[from_index++];
+		board[to_index++] = game->board[from_index++];
 	}
 	const size_t r = game->player_rank, f = game->player_file;
 	board[(r * (FILES + 2)) + f] = game->player;

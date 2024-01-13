@@ -1,5 +1,5 @@
 #include "control.h"
-#include "model.h"
+#include "game.h"
 #include "platform.h"
 #include "config.h"
 #include <stdio.h>

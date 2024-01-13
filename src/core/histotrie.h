@@ -1,10 +1,6 @@
 #pragma once
-#if defined(_MSC_VER)
-//  Microsoft 
-#elif defined(__GNUC__)
-//  GCC
-#include <stddef.h>
-#endif
+#include "board.h"
+
 #define TRIE_CHILDREN 13
 
 struct Histotrie {
