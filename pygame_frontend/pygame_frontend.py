@@ -61,7 +61,7 @@ class Game(ctypes.Structure):
         ("moved_left", ctypes.c_long),
         ("moved_right", ctypes.c_long),
         ("moved_down", ctypes.c_long),
-        ("state", ctypes.c_char * STATE_LENGTH),
+        ("board", ctypes.c_char * STATE_LENGTH),
         ("histotrie", ctypes.POINTER(Histotrie)),
         ("repeat", ctypes.c_bool),
         ("settings", ctypes.c_ulonglong)
@@ -147,9 +147,9 @@ def draw_pieces(game):
     threats = engine.forecast_captures(game)
     for r in range(RANKS):
         for f in range(FILES):
-            while chr(game.contents.state[index]) == '\n':
+            while chr(game.contents.board[index]) == '\n':
                 index += 1
-            square = chr(game.contents.state[index])
+            square = chr(game.contents.board[index])
             if square in board_pieces:
                 if threats & engine.get_square_bit(r, f):
                     draw_piece_on_square(threatened_pieces, square, r, f)

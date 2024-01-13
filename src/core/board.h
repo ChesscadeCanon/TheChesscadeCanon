@@ -64,15 +64,15 @@ enum Square {
 	SQUARE_COUNT
 };
 
-extern const enum Square PIECE_MAP[128];
-extern const struct MoveSet MOVES[SQUARE_COUNT];
-
 struct MoveSet {
 
 	const bool repeat;
 	const unsigned short count;
 	const short moves[8][2];
 };
+
+extern const enum Square PIECE_MAP[128];
+extern const struct MoveSet MOVES[SQUARE_COUNT];
 
 #define STANDARD_DECKS {\
 	"RnBqQbNr", \
