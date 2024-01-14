@@ -4,7 +4,6 @@ import pygame
 from res import *
 
 pygame.init()
-pygame.mixer.init()
 
 RULES = ''.join([chr(b) for b in engine.get_rules()])
 BLACK = ( 0, 0, 0)
@@ -34,15 +33,6 @@ FONT_2 = pygame.font.Font('freesansbold.ttf', 32)
 
 screen = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Chesscade")
-
-note = lambda n: pygame.mixer.Sound(f"assets/tedagame_piano/{n}.mp3")
-fall_notes = [
-    ["C3", "D3", "E3", "F3", "G3", "A4", "B4", "C4"],
-    ["C4", "D4", "E4", "F4", "G4", "A5", "B5", "C5"],
-    ["C5", "D5", "E5", "F5", "G5", "A6", "B6", "C6"],
-    ["C6", "D6", "E6", "F6", "G6", "A7", "B7", "C7"],
-    ]
-fall_notes = [[note(n) for n in s] for s in fall_notes]
 
 PIECES = ['p', 'q', 'k', 'n', 'b', 'r']
 piece_path = lambda p, d: (d + ('w' + p if p.isupper() else 'b' + p)).lower() + ".png"
@@ -148,15 +138,6 @@ def draw_text(game):
         rect.topleft = (0, y)
         screen.blit(text, rect)
         y += text.get_rect().height
-
-def play_sounds(game):
-    
-    if game.contents.events & EVENT_FELL:
-        ease = maxtime=engine.get_ease(game)
-        sound = fall_notes[game.contents.cursor_grade][game.contents.cursor_increment]
-        sound.set_volume(0.05)
-        sound.play(maxtime=ease)
-        sound.fadeout(ease)
 
 def take_input(game, passed):
     keys=pygame.key.get_pressed()
@@ -285,7 +266,6 @@ def play():
         else:
             draw_game(game)
         draw_game_over(game)
-        play_sounds(game)
         pygame.display.flip()
         clock.tick(60)
     update_high_score(game.contents.score)
