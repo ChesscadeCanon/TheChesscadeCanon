@@ -23,6 +23,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="instrument.py" />
     <Compile Include="pygame_frontend.py" />
     <Compile Include="res.py" />
   </ItemGroup>

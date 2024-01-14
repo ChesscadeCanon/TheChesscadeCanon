@@ -2,8 +2,21 @@ import ctypes
 import atexit
 import pygame
 from res import *
+from instrument import MIDINote
 
 pygame.init()
+pygame.midi.init()
+
+fall_notes = [
+    list(range(48, 64, 2)),
+    list(range(64, 80, 2)),
+    list(range(80, 96, 2)),
+    list(range(96, 112, 2))
+]
+port = pygame.midi.get_default_output_id()
+midi_out = pygame.midi.Output(port, 0)
+midi_out.set_instrument(0)
+fall_notes = [[MIDINote(midi_out, n, 127) for n in s] for s in fall_notes]
 
 RULES = ''.join([chr(b) for b in engine.get_rules()])
 BLACK = ( 0, 0, 0)
@@ -139,6 +152,15 @@ def draw_text(game):
         screen.blit(text, rect)
         y += text.get_rect().height
 
+def play_sounds(game, passed):
+    
+    if game.contents.events & EVENT_FELL:
+        ease = maxtime=engine.get_ease(game)
+        note = fall_notes[game.contents.cursor_grade][game.contents.cursor_increment]
+        note.play(ease)
+    
+    [[n.pump(passed) for n in s] for s in fall_notes]
+
 def take_input(game, passed):
     keys=pygame.key.get_pressed()
     
@@ -272,6 +294,7 @@ def play():
             draw_help()
         else:
             draw_game(game)
+        play_sounds(game, passed)
         draw_game_over(game)
         pygame.display.flip()
         clock.tick(60)
@@ -297,6 +320,7 @@ while True:
     else:
         break
 
+pygame.midi.quit()
 pygame.quit()
 
     
