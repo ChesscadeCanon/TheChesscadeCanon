@@ -5,6 +5,8 @@ from res import *
 pygame.init()
 
 try:
+    import replit
+except ImportError:
     import pygame.midi
     pygame.midi.init()
     from instrument import MIDINote
@@ -19,8 +21,6 @@ try:
     midi_out = pygame.midi.Output(port, 0)
     midi_out.set_instrument(0)
     fall_notes = [[MIDINote(midi_out, n, 127) for n in s] for s in fall_notes]
-except pygame.midi.MidiException:
-    pass
 
 RULES = ''.join([chr(b) for b in engine.get_rules()])
 BLACK = ( 0, 0, 0)
@@ -159,14 +159,14 @@ def draw_text(game):
 def play_sounds(game, passed):
     
     try:
+        import replit
+    except ImportError:
         if game.contents.events & EVENT_FELL:
             ease = maxtime=engine.get_ease(game)
             note = fall_notes[game.contents.cursor_grade][game.contents.cursor_increment]
             note.play(ease)
     
         [[n.pump(passed) for n in s] for s in fall_notes]
-    except pygame.midi.MidiException:
-        pass
 
 def take_input(game, passed):
     keys=pygame.key.get_pressed()
