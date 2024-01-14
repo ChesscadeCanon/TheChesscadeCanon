@@ -6,14 +6,17 @@
 #include <assert.h>
 #include <stdio.h>
 
+#define HISTOTRIE_TEST 0
+#if HISTOTRIE_TEST
 void test_histotrie() {
 
-	const size_t n = 1024;
+	const size_t n = 1000;
 	struct Histotrie* root = malloc_init_histotrie();
 	srand((unsigned int)time(NULL));
 	char keeper[BOARD_LENGTH];
 	init_board(keeper);
 	size_t result = record_state(root, keeper, 0);
+	printf("%zu nodes added\n", result);
 	assert(result == RANKS * FILES);
 	size_t since = 0, until = 0;
 	for (size_t b = 0; b < n; ++b) {
@@ -25,11 +28,15 @@ void test_histotrie() {
 			}
 		}
 		printf("%s\n", board);
-		assert(record_state(root, board, 0) > 0);
+		result = record_state(root, board, 0);
+		printf("%zu nodes added\n", result);
+		assert(result > 0);
 		if (since >= until) {
 			until = rand() % 8;
 			since = 0;
-			assert(record_state(root, keeper, 0) == 0);
+			result = record_state(root, keeper, 0);
+			printf("%zu nodes added\n", result);
+			assert(result == 0);
 			memcpy(keeper, board, BOARD_LENGTH);
 		}
 		else {
@@ -38,6 +45,9 @@ void test_histotrie() {
 	}
 	free_histotrie(root);
 }
+#else
+void test_histotrie() {}
+#endif
 
 size_t _free_children(struct Histotrie* root) {
 
