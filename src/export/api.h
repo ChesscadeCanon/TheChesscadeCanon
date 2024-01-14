@@ -50,7 +50,7 @@ EXPORT size_t get_board_length();
 /**
 * returns the branching factor of the trie structure used to identify repeated board states
 */
-EXPORT size_t get_trie_children();
+EXPORT size_t get_symbol_count();
     
 /**
 * returns the next piece that will spawn if the current piece lands right now
