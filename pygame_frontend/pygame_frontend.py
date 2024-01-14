@@ -20,7 +20,7 @@ if "REPL_OWNER" not in environ:
     port = pygame.midi.get_default_output_id()
     midi_out = pygame.midi.Output(port, 0)
     midi_out.set_instrument(0)
-    fall_notes = [[MIDINote(midi_out, n, 127) for n in s] for s in fall_notes]
+    fall_notes = [[MIDINote(midi_out, n, 64) for n in s] for s in fall_notes]
 
 RULES = ''.join([chr(b) for b in engine.get_rules()])
 BLACK = ( 0, 0, 0)
@@ -148,7 +148,7 @@ def draw_text(game):
             screen.blit(text, rect)
             y += text.get_rect().height
         y += text.get_rect().height
-    controls = (("arrow keys: move"), ("space: drop"), ("p: pause/help"), ("q: quit"))
+    controls = (("arrow keys: move"), ("space: drop"), ("p: pause/help"), ("backspace: back"), ("q: quit"))
     for control in controls:
         text = FONT_1.render(control, True, BLACK, WHITE)
         rect = text.get_rect()
