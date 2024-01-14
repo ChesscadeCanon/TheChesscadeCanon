@@ -1,22 +1,27 @@
 import ctypes
 import atexit
 import pygame
+from pygame.midi import MidiException
 from res import *
 from instrument import MIDINote
 
 pygame.init()
-pygame.midi.init()
 
-fall_notes = [
-    list(range(48, 64, 2)),
-    list(range(64, 80, 2)),
-    list(range(80, 96, 2)),
-    list(range(96, 112, 2))
-]
-port = pygame.midi.get_default_output_id()
-midi_out = pygame.midi.Output(port, 0)
-midi_out.set_instrument(0)
-fall_notes = [[MIDINote(midi_out, n, 127) for n in s] for s in fall_notes]
+try:
+    pygame.midi.init()
+
+    fall_notes = [
+        list(range(32, 48, 2)),
+        list(range(48, 64, 2)),
+        list(range(64, 80, 2)),
+        list(range(80, 96, 2))
+    ]
+    port = pygame.midi.get_default_output_id()
+    midi_out = pygame.midi.Output(port, 0)
+    midi_out.set_instrument(0)
+    fall_notes = [[MIDINote(midi_out, n, 127) for n in s] for s in fall_notes]
+except MidiException:
+    pass
 
 RULES = ''.join([chr(b) for b in engine.get_rules()])
 BLACK = ( 0, 0, 0)
@@ -154,12 +159,15 @@ def draw_text(game):
 
 def play_sounds(game, passed):
     
-    if game.contents.events & EVENT_FELL:
-        ease = maxtime=engine.get_ease(game)
-        note = fall_notes[game.contents.cursor_grade][game.contents.cursor_increment]
-        note.play(ease)
+    try:
+        if game.contents.events & EVENT_FELL:
+            ease = maxtime=engine.get_ease(game)
+            note = fall_notes[game.contents.cursor_grade][game.contents.cursor_increment]
+            note.play(ease)
     
-    [[n.pump(passed) for n in s] for s in fall_notes]
+        [[n.pump(passed) for n in s] for s in fall_notes]
+    except MidiException:
+        pass
 
 def take_input(game, passed):
     keys=pygame.key.get_pressed()
