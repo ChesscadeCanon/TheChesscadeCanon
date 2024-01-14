@@ -37,8 +37,8 @@
 		DEAD_PLAYER \
 )
 #define IN_BOUNDS(V, L, H) (V >= L && V < H)
-#define RAISE_FLOOR(G) (IS_SET(G->settings, WHITE_PAWN_LAND_HIGH) && (G->player == WHITE_PAWN) ? LINE_LENGTH + 1 : 0)
-#define ON_BOARD(G, I) (IN_BOUNDS(I, 0, BOARD_LENGTH) && G->board[I] != '\n')
+#define RAISE_FLOOR(G) (IS_SET(G->settings, WHITE_PAWN_LAND_HIGH) && (G->player == WHITE_PAWN) ? LINE_LENGTH : 0)
+#define ON_BOARD(G, I) (IN_BOUNDS(I, 0, BOARD_LENGTH) && G->board[I] != '\n' && G->board[I])
 #define CAN_CAPTURE(G, I) (\
 	ON_BOARD(G, I) &&\
 	IS_PIECE(GET_SQUARE(G->board, I)) &&\
