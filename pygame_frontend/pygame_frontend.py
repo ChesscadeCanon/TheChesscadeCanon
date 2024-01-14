@@ -4,14 +4,6 @@ import pygame
 from res import *
 
 pygame.init()
-engine = ctypes.CDLL(ENGINE_PATH)
-
-engine.get_rules_length.restype = ctypes.c_ulonglong
-engine.get_rules.restype = ctypes.c_char_p
-engine.get_ranks.restype = ctypes.c_ulonglong
-engine.get_files.restype = ctypes.c_ulonglong
-engine.get_trie_children.restype = ctypes.c_ulonglong
-engine.get_board_length.restype = ctypes.c_ulonglong
 
 RULES = ''.join([chr(b) for b in engine.get_rules()])
 BLACK = ( 0, 0, 0)
@@ -38,61 +30,18 @@ SQUARE = min(SIZE[0] // (FILES + SQUARES_OFF_LEFT), SIZE[1] // (RANKS + SQUARES_
 FONT_0 = pygame.font.Font('freesansbold.ttf', 11)
 FONT_1 = pygame.font.Font('freesansbold.ttf', 16)
 FONT_2 = pygame.font.Font('freesansbold.ttf', 32)
-                                                 
-class Histotrie(ctypes.Structure):
-    pass
-Histotrie._fields_ = [('children', ctypes.POINTER(Histotrie) * TRIE_CHILDREN)]
-
-class Game(ctypes.Structure):
-    _fields_ = [
-        ("score", ctypes.c_ulonglong),
-        ("combo", ctypes.c_ulonglong),
-        ("scored", ctypes.c_ulonglong),
-        ("time", ctypes.c_ulonglong),
-        ("fell", ctypes.c_ulonglong),
-        ("paused", ctypes.c_bool),
-        ("player", ctypes.c_char),
-        ("player_rank", ctypes.c_ushort),
-        ("player_file", ctypes.c_ushort),
-        ("cursor", ctypes.c_short),
-        ("cursor_rank", ctypes.c_ushort),
-        ("cursor_file", ctypes.c_ushort),
-        ("dropped", ctypes.c_bool),
-        ("moved_left", ctypes.c_long),
-        ("moved_right", ctypes.c_long),
-        ("moved_down", ctypes.c_long),
-        ("board", ctypes.c_char * BOARD_LENGTH),
-        ("captures", ctypes.c_char * FILES),
-        ("histotrie", ctypes.POINTER(Histotrie)),
-        ("repeat", ctypes.c_bool),
-        ("settings", ctypes.c_ulonglong)
-    ]
-
-engine.malloc_init_default_game.restype = ctypes.POINTER(Game)
-engine.increment_game.argtypes = [ctypes.POINTER(Game), ctypes.c_ulonglong]
-engine.begin_game.argtypes = [ctypes.POINTER(Game)]
-engine.is_game_over.argtypes = [ctypes.POINTER(Game)]
-engine.is_game_over.restype = ctypes.c_bool
-engine.delete_game.argtypes = [ctypes.POINTER(Game)]
-engine.get_next_piece.argtypes = [ctypes.POINTER(Game)]
-engine.get_next_piece.restype = ctypes.c_wchar
-engine.forecast_captures.argtypes = [ctypes.POINTER(Game)]
-engine.forecast_captures.restype = ctypes.c_ulonglong
-engine.get_forecast_piece.argtypes = [ctypes.POINTER(Game)]
-engine.get_forecast_piece.restype = ctypes.c_wchar
-engine.get_forecast_rank.argtypes = [ctypes.POINTER(Game)]
-engine.get_forecast_rank.restype = ctypes.c_ulonglong
-engine.attack_pattern.argtypes = [ctypes.POINTER(Game)]
-engine.attack_pattern.restype = ctypes.c_ulonglong
-engine.get_square_bit.argtypes = [ctypes.c_ulonglong, ctypes.c_ulonglong]
-engine.get_square_bit.restype = ctypes.c_ulonglong
-engine.get_deck.argtypes = [ctypes.c_ulonglong]
-engine.get_deck.restype = ctypes.c_char_p
-engine.is_on_brink.argtypes = [ctypes.POINTER(Game)]
-engine.is_on_brink.restype = ctypes.c_bool
 
 screen = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Chesscade")
+
+note = lambda n: pygame.mixer.Sound(f"assets/tedagame_piano/{n}.ogg")
+fall_notes = [
+    ["C3", "D3", "E3", "F3", "G3", "A4", "B4", "C4"],
+    ["C4", "D4", "E4", "F4", "G4", "A5", "B5", "C5"],
+    ["C5", "D5", "E5", "F5", "G5", "A6", "B6", "C6"],
+    ["C6", "D6", "E6", "F6", "G6", "A7", "B7", "C7"],
+    ]
+fall_notes = [[note(n) for n in s] for s in fall_notes]
 
 PIECES = ['p', 'q', 'k', 'n', 'b', 'r']
 piece_path = lambda p, d: (d + ('w' + p if p.isupper() else 'b' + p)).lower() + ".png"
@@ -165,14 +114,14 @@ def draw_player(game):
     draw_piece_on_square(player_pieces, player, rank, file)
 
 def draw_next(game):
-    cursor_rank = game.contents.cursor_rank
-    cursor_file = game.contents.cursor_file
+    cursor_grade = game.contents.cursor_grade
+    cursor_increment = game.contents.cursor_increment
     next_piece = engine.get_next_piece(game)
     for g in range(SQUARES_OFF_TOP):
         deck = [chr(c) for c in engine.get_deck(g)]
         draw_piece_on_deck(deck_pieces, deck[0], g, 0)
         [draw_piece_on_deck(deck_pieces, deck[i], g, i) for i in range(FILES)]
-    draw_piece_on_deck(next_pieces, next_piece, cursor_rank, cursor_file)
+    draw_piece_on_deck(next_pieces, next_piece, cursor_grade, cursor_increment)
 
 def draw_shadow(game):
     piece = engine.get_forecast_piece(game)
@@ -198,7 +147,16 @@ def draw_text(game):
         rect.topleft = (0, y)
         screen.blit(text, rect)
         y += text.get_rect().height
+
+def play_sounds(game):
     
+    if game.contents.events & EVENT_FELL:
+        ease = maxtime=engine.get_ease(game)
+        sound = fall_notes[game.contents.cursor_grade][game.contents.cursor_increment]
+        sound.set_volume(0.05)
+        sound.play(maxtime=ease)
+        sound.fadeout(ease)
+
 def take_input(game, passed):
     keys=pygame.key.get_pressed()
     
@@ -326,6 +284,7 @@ def play():
         else:
             draw_game(game)
         draw_game_over(game)
+        play_sounds(game)
         pygame.display.flip()
         clock.tick(60)
     update_high_score(game.contents.score)

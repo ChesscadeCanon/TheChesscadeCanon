@@ -23,6 +23,11 @@ extern "C" {
 EXPORT const char* get_rules();
 
 /**
+* returns the number of milliseconds it currently takes for the piece to fall
+*/
+EXPORT size_t get_ease(struct Game* game);
+
+/**
 * returns the full text of the rules of Chesscade
 */
 EXPORT size_t get_rules_length();

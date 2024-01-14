@@ -3,11 +3,12 @@
 #include <sys/timeb.h>
 
 typedef size_t Settings;
+typedef size_t Events;
 
 #define FPS 60
 #define PLAYER_SQUARE(G) SQUARE_INDEX(G->player_rank, G->player_file)
 #define SET(B, V) (B |= V)
-#define IS_SET(B, V) (B & V)
+#define IS_SET(S, V) (S & V)
 #define COUNT_INTERVALS(A, Z, N) (((Z) - (A)) / (N))
 #define SPF (1.0 / ((long double) FPS))
 #define MPF ((time_t) (1000.0 * SPF))
@@ -23,7 +24,18 @@ enum Setting {
 	DOUBLE_BISHOPS = 1 << 5,
 	CHECKMATE = 1 << 6,
 	DIAGONALS = 1 << 7,
-	DEFAULT_SETTINGS = WHITE_PAWN_HIT_UP | BLACK_PAWN_SPAWN_LOW | WHITE_PAWN_LAND_HIGH | PAWNS_PROMOTE | NO_CAPTURE_ON_REPEAT | DOUBLE_BISHOPS | CHECKMATE | DIAGONALS
+	KING_ON_REPEAT = 1 << 8,
+	DEFAULT_SETTINGS = WHITE_PAWN_HIT_UP | BLACK_PAWN_SPAWN_LOW | WHITE_PAWN_LAND_HIGH | PAWNS_PROMOTE | KING_ON_REPEAT | DOUBLE_BISHOPS | CHECKMATE | DIAGONALS
+};
+
+enum Event {
+
+	EVENT_FELL = 1 << 0,
+	EVENT_LEFT = 1 << 2,
+	EVENT_RIGHT = 1 << 3,
+	EVENT_DOWN = 1 << 4,
+	EVENT_DROPPED = 1 << 5,
+	EVENT_WRAPPED = 1 << 6
 };
 
 struct Game {
@@ -49,6 +61,7 @@ struct Game {
 	struct Histotrie* histotrie;
 	bool repeat;
 	Settings settings;
+	Events events;
 };
 
 void print_rules();

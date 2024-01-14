@@ -55,7 +55,7 @@
 #define CAN_STRIKE(G, I) (ON_BOARD(G, I + RAISE_FLOOR(G)) && EMPTY_SQUARE(G->board, I))
 #define CAN_MOVE(G, I) (CAN_STRIKE(G, I) && !PACMAN(G, I))
 #define CURSOR_WRAPPED(G) (G->cursor_grade > 1)
-#define CURSOR_GRADE(G, W) (!HAS_CAPTURED(G->captures) + (W) * 2)
+#define CURSOR_GRADE(G, K) (!HAS_CAPTURED(G->captures) + (K) * 2)
 #define CURSOR_INCREMENT(G) (\
 	(G->cursor > 0 && G->cursor_increment < LAST_FILE) ||\
 	(G->cursor < 0 && G->cursor_increment > 0) ?\
@@ -75,8 +75,10 @@ void print_rules() {
 unsigned short _update_cursor(struct Game* game) {
 
 	const short inc = CURSOR_INCREMENT(game);
+	const bool wrapped = abs(inc) > 1;
 	game->cursor_increment += inc;
-	game->cursor_grade = CURSOR_GRADE(game, abs(inc) > 1 || CURSOR_WRAPPED(game));
+	game->cursor_grade = CURSOR_GRADE(game, wrapped || CURSOR_WRAPPED(game));
+	game->events |= EVENT_WRAPPED * wrapped;
 	return game->cursor;
 }
 
@@ -188,7 +190,7 @@ size_t _judge(struct Game* game) {
 size_t _chronicle(struct Game* game) {
 
 	if (!game->histotrie) return false;
-	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT)) return false;
+	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT & KING_ON_REPEAT)) return false;
 
 	const size_t ret = record_state(game->histotrie, game->board, 0);
 	MEMLOGF("created %llu histotrie nodes\n", ret);
@@ -202,15 +204,14 @@ void _resolve(struct Game* game) {
 	game->player = QUEEN_ME(game, from_rank);
 	const size_t captures = attack(game, true, false, false);
 	LAND(game);
-	game->cursor_grade = CURSOR_GRADE(game, 0);
 	_judge(game);
+	_chronicle(game);
+	game->cursor_grade = CURSOR_GRADE(game, game->repeat && IS_SET(game->settings, KING_ON_REPEAT));
 
 	if (captures) {
 
 		REVERSE_CURSOR(game);
 	}
-
-	_chronicle(game);
 }
 
 bool _move_player(struct Game* game, size_t to) {
@@ -246,6 +247,7 @@ void _drop(struct Game* game) {
 	const size_t from = PLAYER_SQUARE(game);
 	const size_t to = _drop_to(game, from);
 	_move_player(game, to);
+	game->events = EVENT_DROPPED;
 }
 
 void _move(struct Game* game, time_t steps, const short by_rank, const short by_file) {
@@ -266,6 +268,7 @@ void _fall(struct Game* game, time_t falls) {
 	
 	if (_move_player(game, to)) {
 
+		game->events = EVENT_FELL;
 		_update_cursor(game);
 		_fall(game, falls - 1);
 	}
@@ -289,13 +292,18 @@ void _take_input(struct Game* game) {
 	const time_t left = _buy_move(game, &game->moved_left, multiplier);
 	const time_t right = _buy_move(game, &game->moved_right, multiplier);
 
+	game->events |= (EVENT_LEFT * (left > 0)) | (EVENT_RIGHT * (right > 0)) | (EVENT_DOWN * (down > 0));
+
 	if (diagonals && left > 0 && down > 0 && right == 0) {
+
 		_move(game, min(left - right, down), 1, -1);
 	}
 	else if (diagonals && left == 0 && down > 0 && right > 0) {
+
 		_move(game, min(right - left, down), 1, 1);
 	}
 	else if (left > 0 || right > 0 || down > 0) {
+
 		_move(game, max(0, right - left), 0, 1);
 		_move(game, max(0, left - right), 0, -1);
 		_move(game, max(0, down), 1, 0);
@@ -322,6 +330,7 @@ void _init_game(struct Game* game) {
 	game->moved_right = -1;
 	game->moved_down = -1;
 	game->settings = 0;
+	game->events = 0;
 	init_board(game->board);
 	init_captures(game->captures);
 }
@@ -401,7 +410,7 @@ void free_game(struct Game* game) {
 
 size_t attack(struct Game* game, const bool execute, const bool forecast, const bool pattern) {
 
-	if (game->repeat) return 0;
+	if (game->repeat && IS_SET(game->settings, NO_CAPTURE_ON_REPEAT)) return 0;
 
 	Piece piece = game->player;
 	size_t rank = game->player_rank;
@@ -437,6 +446,7 @@ char forecast_piece(struct Game* game) {
 
 void exist(struct Game* game, const time_t falls) {
 
+	game->events = 0;
 	_take_input(game);
 	_fall(game, falls);
 }

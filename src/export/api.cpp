@@ -13,6 +13,11 @@ size_t get_rules_length() {
 	return RULES_LENGTH;
 }
 
+size_t get_ease(struct Game* game) {
+
+	return ease(game);
+}
+
 size_t get_ranks() {
 
 	return RANKS;
