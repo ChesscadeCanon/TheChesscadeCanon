@@ -1,5 +1,6 @@
 import ctypes
 import pygame
+import pygame.midi
 from res import *
 
 pygame.init()
