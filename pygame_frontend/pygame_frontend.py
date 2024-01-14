@@ -1,13 +1,12 @@
 import ctypes
 import atexit
 import pygame
-from pygame.midi import MidiException
 from res import *
-from instrument import MIDINote
 
 pygame.init()
 
 try:
+    from instrument import MIDINote
     pygame.midi.init()
 
     fall_notes = [
@@ -20,7 +19,7 @@ try:
     midi_out = pygame.midi.Output(port, 0)
     midi_out.set_instrument(0)
     fall_notes = [[MIDINote(midi_out, n, 127) for n in s] for s in fall_notes]
-except MidiException:
+except pygame.midi.MidiException:
     pass
 
 RULES = ''.join([chr(b) for b in engine.get_rules()])
