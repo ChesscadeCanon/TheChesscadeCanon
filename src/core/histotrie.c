@@ -6,8 +6,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-#define SYMBOL_INDEX(P) (PIECE_MAP[P] == NO_PIECE ? SYMBOL_COUNT - 1 : PIECE_MAP[P] + NO_PIECE * IS_WHITE(P))
-
 void test_histotrie() {
 
 	const size_t n = 1024;
