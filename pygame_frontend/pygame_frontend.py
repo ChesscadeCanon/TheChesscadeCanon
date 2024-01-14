@@ -1,12 +1,11 @@
 import ctypes
 import pygame
 from res import *
+from os import environ
 
 pygame.init()
 
-try:
-    import replit
-except ImportError:
+if "REPL_OWNER" not in environ:
     import pygame.midi
     pygame.midi.init()
     from instrument import MIDINote
@@ -158,9 +157,7 @@ def draw_text(game):
 
 def play_sounds(game, passed):
     
-    try:
-        import replit
-    except ImportError:
+    if "REPL_OWNER" not in environ:
         if game.contents.events & EVENT_FELL:
             ease = maxtime=engine.get_ease(game)
             note = fall_notes[game.contents.cursor_grade][game.contents.cursor_increment]
