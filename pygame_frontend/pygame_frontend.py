@@ -4,6 +4,17 @@ from res import *
 from os import environ
 
 pygame.init()
+high_score = 0
+def update_high_score(score):
+    global high_score
+    with open('high_score.txt', 'r') as file:
+        line = file.readline()
+        high_score = int(line) if line else high_score
+    with open('high_score.txt', 'w') as file:
+        if score > high_score:
+            high_score = score
+        file.write(str(high_score))
+    return high_score
 
 if "REPL_OWNER" not in environ:
     import pygame.midi
@@ -185,17 +196,15 @@ def take_input(game, passed):
         game.contents.moved_down = -1    
 
 def draw_title():
+    global high_score
     title_label = FONT_2.render("Chesscade", True, BLACK, WHITE)
     title_rect = title_label.get_rect()
     title_rect.center = SIZE[0] / 2, SIZE[1] / 4
     screen.blit(title_label, title_rect)
-    with open('high_score.txt', 'r') as file:
-        line = file.readline()
-        if line:
-            score_label = FONT_1.render(f"High Score: {line}", True, BLACK)
-            score_rect = score_label.get_rect()
-            score_rect.center = SIZE[0] / 2, SIZE[1] / 3
-            screen.blit(score_label, score_rect)
+    score_label = FONT_1.render(f"High Score: {str(high_score)}", True, BLACK)
+    score_rect = score_label.get_rect()
+    score_rect.center = SIZE[0] / 2, SIZE[1] / 3
+    screen.blit(score_label, score_rect)
     help_label = FONT_1.render("press ENTER to play, h for help, or q to quit", True, BLACK)
     help_rect = help_label.get_rect()
     help_rect.center = SIZE[0] / 2, SIZE[1] / 2
@@ -308,15 +317,8 @@ def play():
     engine.delete_game(game)
     return go
 
-def update_high_score(score):
-    with open('high_score.txt', 'w+') as file:
-        line = file.readline()
-        high_score = int(line) if line else 0
-        if score > high_score:
-            high_score = score
-        file.write(str(high_score))
-            
 while True:
+    update_high_score(high_score)
     do = title()
     if do > 0:
         do = play()

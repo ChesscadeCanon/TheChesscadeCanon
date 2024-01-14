@@ -20,7 +20,7 @@
 #define DOUBLE_BISHOP(G) (PIECE_MAP[G->player] == BISHOP && IS_SET(G->settings, DOUBLE_BISHOPS))
 #define BISHOP_SPEED(G, M) ((M) / (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_DOWN(G) SQUARE_INDEX(G->player_rank + (DOUBLE_BISHOP(G) + 1), G->player_file)
-#define EASE(G) max(1, 1024 - (1 << G->combo)) * (1 + DOUBLE_BISHOP(G))
+#define EASE(G) max(1, 1024 >> G->combo) * (1 + DOUBLE_BISHOP(G))
 #define QUEEN_ME(G, R) (\
 	IS_SET(G->settings, PAWNS_PROMOTE) ?\
 		G->player == WHITE_PAWN && (R) == 0 ? WHITE_QUEEN \
