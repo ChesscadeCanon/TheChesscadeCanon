@@ -34,7 +34,7 @@ FONT_2 = pygame.font.Font('freesansbold.ttf', 32)
 screen = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Chesscade")
 
-note = lambda n: pygame.mixer.Sound(f"assets/tedagame_piano/{n}.ogg")
+note = lambda n: pygame.mixer.Sound(f"assets/tedagame_piano/{n}.mp3")
 fall_notes = [
     ["C3", "D3", "E3", "F3", "G3", "A4", "B4", "C4"],
     ["C4", "D4", "E4", "F4", "G4", "A5", "B5", "C5"],
