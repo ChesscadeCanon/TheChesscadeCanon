@@ -1,13 +1,12 @@
 import ctypes
-import atexit
 import pygame
 from res import *
 
 pygame.init()
 
 try:
-    from instrument import MIDINote
     pygame.midi.init()
+    from instrument import MIDINote
 
     fall_notes = [
         list(range(32, 48, 2)),
@@ -19,7 +18,7 @@ try:
     midi_out = pygame.midi.Output(port, 0)
     midi_out.set_instrument(0)
     fall_notes = [[MIDINote(midi_out, n, 127) for n in s] for s in fall_notes]
-except Exception:
+except pygame.midi.MideException:
     pass
 
 RULES = ''.join([chr(b) for b in engine.get_rules()])
@@ -165,7 +164,7 @@ def play_sounds(game, passed):
             note.play(ease)
     
         [[n.pump(passed) for n in s] for s in fall_notes]
-    except Exception:
+    except pygame.midi.MideException:
         pass
 
 def take_input(game, passed):
