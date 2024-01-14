@@ -16,6 +16,7 @@ if "REPL_OWNER" not in environ:
         list(range(64, 80, 2)),
         list(range(80, 96, 2))
     ]
+    
     port = pygame.midi.get_default_output_id()
     midi_out = pygame.midi.Output(port, 0)
     midi_out.set_instrument(0)
