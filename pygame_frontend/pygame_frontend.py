@@ -4,6 +4,7 @@ import pygame
 from res import *
 
 pygame.init()
+pygame.mixer.init()
 
 RULES = ''.join([chr(b) for b in engine.get_rules()])
 BLACK = ( 0, 0, 0)
