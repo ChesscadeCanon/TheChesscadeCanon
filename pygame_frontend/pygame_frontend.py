@@ -19,7 +19,7 @@ try:
     midi_out = pygame.midi.Output(port, 0)
     midi_out.set_instrument(0)
     fall_notes = [[MIDINote(midi_out, n, 127) for n in s] for s in fall_notes]
-except pygame.midi.MidiException:
+except Exception:
     pass
 
 RULES = ''.join([chr(b) for b in engine.get_rules()])
@@ -165,7 +165,7 @@ def play_sounds(game, passed):
             note.play(ease)
     
         [[n.pump(passed) for n in s] for s in fall_notes]
-    except MidiException:
+    except Exception:
         pass
 
 def take_input(game, passed):
