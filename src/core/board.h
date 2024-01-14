@@ -71,6 +71,8 @@ struct MoveSet {
 
 extern const enum Square PIECE_MAP[128];
 extern const struct MoveSet MOVES[SQUARE_COUNT];
+#define SYMBOL_COUNT 13
+extern const char SYMBOLS[SYMBOL_COUNT];
 
 #define STANDARD_DECKS {\
 	"RnBqQbNr", \

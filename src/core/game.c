@@ -190,7 +190,7 @@ size_t _judge(struct Game* game) {
 size_t _chronicle(struct Game* game) {
 
 	if (!game->histotrie) return false;
-	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT & KING_ON_REPEAT)) return false;
+	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT | KING_ON_REPEAT)) return false;
 
 	const size_t ret = record_state(game->histotrie, game->board, 0);
 	MEMLOGF("created %llu histotrie nodes\n", ret);

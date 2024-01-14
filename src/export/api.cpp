@@ -33,9 +33,9 @@ size_t get_board_length() {
 	return BOARD_LENGTH;
 }
 
-size_t get_trie_children() {
+size_t get_symbol_count() {
 
-	return TRIE_CHILDREN;
+	return SYMBOL_COUNT;
 }
 
 Piece get_next_piece(struct Game* game) {

@@ -1,6 +1,22 @@
 #include "board.h"
 #include <string.h>
 
+const char SYMBOLS[SYMBOL_COUNT] = {
+	BLACK_PAWN,
+	BLACK_BISHOP,
+	BLACK_ROOK,
+	BLACK_KNIGHT,
+	BLACK_QUEEN,
+	BLACK_KING,
+	WHITE_PAWN,
+	WHITE_BISHOP,
+	WHITE_ROOK,
+	WHITE_KNIGHT,
+	WHITE_QUEEN,
+	WHITE_KING,
+	EMPTY,
+};
+
 const size_t PIECE_VALUES[SQUARE_COUNT] = {
 	[PAWN] = 1,
 	[BISHOP] = 3,

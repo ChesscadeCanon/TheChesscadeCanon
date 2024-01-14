@@ -24,12 +24,12 @@ engine.get_rules_length.restype = ctypes.c_ulonglong
 engine.get_rules.restype = ctypes.c_char_p
 engine.get_ranks.restype = ctypes.c_ulonglong
 engine.get_files.restype = ctypes.c_ulonglong
-engine.get_trie_children.restype = ctypes.c_ulonglong
+engine.get_symbol_count.restype = ctypes.c_ulonglong
 engine.get_board_length.restype = ctypes.c_ulonglong
 
 class Histotrie(ctypes.Structure):
     pass
-Histotrie._fields_ = [('children', ctypes.POINTER(Histotrie) * engine.get_trie_children())]
+Histotrie._fields_ = [('children', ctypes.POINTER(Histotrie) * engine.get_symbol_count())]
 
 class Game(ctypes.Structure):
     _fields_ = [
