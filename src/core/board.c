@@ -57,7 +57,7 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 		}
 	},
 	[KNIGHT] = {
-		.repeat = true,
+		.repeat = false,
 		.count = 8,
 		.moves = {
 			{1, 2},

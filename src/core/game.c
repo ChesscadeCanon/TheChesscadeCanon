@@ -20,7 +20,7 @@
 #define DOUBLE_BISHOP(G) (PIECE_MAP[G->player] == BISHOP && IS_SET(G->settings, DOUBLE_BISHOPS))
 #define BISHOP_SPEED(G, M) ((M) / (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_DOWN(G) SQUARE_INDEX(G->player_rank + (DOUBLE_BISHOP(G) + 1), G->player_file)
-#define EASE(G) (1024 - min(G->combo * 80, 8 * 80)) * (1 + DOUBLE_BISHOP(G))
+#define EASE(G) max(1, 1024 - (1 << G->combo)) * (1 + DOUBLE_BISHOP(G))
 #define QUEEN_ME(G, R) (\
 	IS_SET(G->settings, PAWNS_PROMOTE) ?\
 		G->player == WHITE_PAWN && (R) == 0 ? WHITE_QUEEN \
@@ -37,7 +37,7 @@
 		DEAD_PLAYER \
 )
 #define IN_BOUNDS(V, L, H) (V >= L && V < H)
-#define RAISE_FLOOR(G) (IS_SET(G->settings, WHITE_PAWN_LAND_HIGH) && (G->player == WHITE_PAWN) ? LINE_LENGTH : 0)
+#define RAISE_FLOOR(G) (IS_SET(G->settings, WHITE_PAWN_LAND_HIGH) && (G->player == WHITE_PAWN) ? LINE_LENGTH + 1 : 0)
 #define ON_BOARD(G, I) (IN_BOUNDS(I, 0, BOARD_LENGTH) && G->board[I] != '\n')
 #define CAN_CAPTURE(G, I) (\
 	ON_BOARD(G, I) &&\
