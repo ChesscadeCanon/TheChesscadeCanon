@@ -86,6 +86,7 @@ size_t record_state(struct Histotrie* root, const char* board, const size_t inde
 	Piece piece = board[index];
 	enum Square square = PIECE_MAP[piece];
 	size_t child = square == SYMBOL_INDEX(piece);
+	assert(child < SYMBOL_COUNT);
 
 	if (root->children[child]) {
 

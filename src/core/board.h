@@ -27,6 +27,7 @@
 #define CAPTURE_LENGTH 9ull
 #define EMPTY_CAPTURES "********"
 #define HAS_CAPTURED(C) (strncmp(EMPTY_CAPTURES, C, CAPTURE_LENGTH) != 0)
+#define LINE_LENGTH (FILES + 1ull)
 #define SQUARE_RANK(I) ((unsigned short)(I / LINE_LENGTH))
 #define SQUARE_FILE(I) ((unsigned short)(I % LINE_LENGTH))
 #define SQUARE_BIT(I) (1ull << (SQUARE_RANK(I) * FILES + SQUARE_FILE(I)))
@@ -34,7 +35,6 @@
 #define SET_SQUARE(B, I, V) (B[I] = V)
 #define IS_WHITE(P) (P <= 'Z')
 #define SQUARE_INDEX(R, F) ((R) * LINE_LENGTH + (F))
-#define LINE_LENGTH (FILES + 1ull)
 #define FOUR_LINES (LINE_LENGTH * 4ull)
 #define BOARD_LENGTH (LINE_LENGTH * RANKS + 1)
 #define CURSES_STATE_LENGTH (BOARD_LENGTH + RANKS)

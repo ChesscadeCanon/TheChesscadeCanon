@@ -92,7 +92,6 @@ draw_piece_on_deck = lambda P, p, r, f: draw_piece(P, p, (f + SQUARES_OFF_LEFT) 
 def draw_board(game):
     white = WHITE
     black = BLACK
-    color = WHITE
     pattern = engine.attack_pattern(game)
     if engine.is_on_brink(game):
         white = LIGHT_ORANGE
@@ -100,14 +99,16 @@ def draw_board(game):
     elif game.contents.repeat:
         white = LIGHT_BLUE
         black = DARK_BLUE
+    color = white
     for f in range(FILES):
         for r in range(RANKS):
-            i = r * FILES + f
-            b = 1 << i
+            bit = engine.get_square_bit(r, f)
             x = (SQUARES_OFF_LEFT + f) * SQUARE
             y = (SQUARES_OFF_TOP + r) * SQUARE
             pattern_color = LIGHT_RED if color == white else DARK_RED
-            pygame.draw.rect(screen, pattern_color if b & pattern else color, [x, y, SQUARE, SQUARE], 0)
+            in_pattern = bit & pattern
+            final_color = pattern_color if in_pattern else color
+            pygame.draw.rect(screen, final_color, [x, y, SQUARE, SQUARE], 0)
             color = black if color == white else white
         color = black if color == white else white
 

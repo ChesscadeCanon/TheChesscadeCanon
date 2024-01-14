@@ -135,12 +135,15 @@ size_t _hit(struct Game* game, enum Square piece_type, const size_t rank, const 
 	return ret;
 }
 
-size_t _strike(struct Game* game, const enum Square piece_type, const size_t rank, const size_t file, const size_t move, const bool execute, const bool pattern) {
+size_t _strike(struct Game* game, const enum Square piece_type, const size_t rank, const size_t file, const bool execute, const bool pattern) {
 
 	const struct MoveSet move_set = MOVES[piece_type];
-	if (move >= move_set.count) return 0;
-	const size_t ret = _hit(game, piece_type, rank, file, move, execute, pattern);
-	return ret | _strike(game, piece_type, rank, file, move + 1, execute, pattern);
+	size_t ret = 0;
+	for (size_t move = 0; move < move_set.count; ++move) {
+
+		ret |= _hit(game, piece_type, rank, file, move, execute, pattern);
+	}
+	return ret;
 }
 
 size_t _drop_to(struct Game* game, const size_t from) {
@@ -205,8 +208,12 @@ void _resolve(struct Game* game) {
 	const size_t captures = attack(game, true, false, false);
 	LAND(game);
 	_judge(game);
+	printf("%s\n", game->board);
 	_chronicle(game);
-	game->cursor_grade = CURSOR_GRADE(game, game->repeat && IS_SET(game->settings, KING_ON_REPEAT));
+	if (game->repeat) {
+		printf("Repeat!\n");
+	}
+	game->cursor_grade = CURSOR_GRADE(game, 0);// game->repeat&& IS_SET(game->settings, KING_ON_REPEAT));
 
 	if (captures) {
 
@@ -237,8 +244,8 @@ time_t _buy_move(struct Game* game, long int* moved, const unsigned short multip
 	if (*moved < 0) return 0;
 	const long int rate = MOVE_RATE(game) * multiplier;
 	const long int steps = *moved / rate;
-	*moved -= rate * steps;
 	assert(steps >= 0);
+	*moved -= rate * steps;
 	return (time_t)steps;
 }
 
@@ -258,7 +265,14 @@ void _move(struct Game* game, time_t steps, const short by_rank, const short by_
 	const size_t to_rank = game->player_rank + (by_rank * mult);
 	const size_t to_file = game->player_file + (by_file * mult);
 	const size_t to = SQUARE_INDEX(to_rank, to_file);
-	if(_move_player(game, to)) _move(game, steps - 1, by_rank, by_file);
+	if (_move_player(game, to)) {
+
+		if (IS_SET(game->settings, FLYING_PIECES)) {
+
+			game->fell += (game->time - game->fell) >> 1;
+		}
+		_move(game, steps - 1, by_rank, by_file);
+	}
 }
 
 void _fall(struct Game* game, time_t falls) {
@@ -428,7 +442,7 @@ size_t attack(struct Game* game, const bool execute, const bool forecast, const 
 	}
 
 	enum Square piece_type = PIECE_MAP[piece];
-	return _strike(game, piece_type, rank, file, 0, execute, pattern);
+	return _strike(game, piece_type, rank, file, execute, pattern);
 }
 
 size_t forecast_rank(struct Game* game) {
