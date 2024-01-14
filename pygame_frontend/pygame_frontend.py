@@ -1,11 +1,11 @@
 import ctypes
 import pygame
-import pygame.midi
 from res import *
 
 pygame.init()
 
 try:
+    import pygame.midi
     pygame.midi.init()
     from instrument import MIDINote
 
