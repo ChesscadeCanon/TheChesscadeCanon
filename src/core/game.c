@@ -42,8 +42,7 @@
 #define CAN_CAPTURE(G, I) (\
 	ON_BOARD(G, I) &&\
 	IS_PIECE(GET_SQUARE(G->board, I)) &&\
-	IS_WHITE(GET_SQUARE(G->board, I)) != IS_WHITE(G->player) &&\
-	(!G->repeat) \
+	IS_WHITE(GET_SQUARE(G->board, I)) != IS_WHITE(G->player) \
 )
 #define NEXT_PLAYER(G) (G->player = NEXT_PIECE(G)) 
 #define SPAWN(G) (\
@@ -116,20 +115,24 @@ size_t _capture(struct Game* game, const size_t square, const size_t move, const
 size_t _hit(struct Game* game, enum Square piece_type, const size_t rank, const size_t file, const size_t move, const bool execute, const bool pattern) {
 
 	struct MoveSet move_set = MOVES[piece_type];
-	const short reverse = piece_type == PAWN && IS_WHITE(game->player) && IS_SET(game->settings, WHITE_PAWN_HIT_UP) ? -1 : 1;
-	const size_t to_rank = rank + move_set.moves[move][0] * reverse;
-	const size_t to_file = file + move_set.moves[move][1];
-	const size_t square = SQUARE_INDEX(to_rank, to_file);
-	const bool open = CAN_STRIKE(game, square);
-	size_t ret = open && pattern ? SQUARE_BIT(square) : 0;
+	const short invert = piece_type == PAWN && IS_WHITE(game->player) && IS_SET(game->settings, WHITE_PAWN_HIT_UP) ? -1 : 1;
+	size_t to_rank = rank;
+	size_t to_file = file;
+	bool open = true;
+	size_t ret = 0;
 
-	if (move_set.repeat && open) {
+	while (open) {
 
-		return ret | _hit(game, piece_type, to_rank, to_file, move, execute, pattern);
-	}
-	else if (CAN_CAPTURE(game, square)) {
+		to_rank += move_set.moves[move][0] * invert;
+		to_file += move_set.moves[move][1];
+		const size_t square = SQUARE_INDEX(to_rank, to_file);
+		open = CAN_STRIKE(game, square);
+		ret |= open && pattern ? SQUARE_BIT(square) : 0;
+		if (CAN_CAPTURE(game, square)) {
 
-		return ret | _capture(game, square, move, execute);
+			ret |= _capture(game, square, move, execute);
+		}
+		if (!move_set.repeat) break;
 	}
 
 	return ret;
@@ -208,11 +211,7 @@ void _resolve(struct Game* game) {
 	const size_t captures = attack(game, true, false, false);
 	LAND(game);
 	_judge(game);
-	printf("%s\n", game->board);
 	_chronicle(game);
-	if (game->repeat) {
-		printf("Repeat!\n");
-	}
 	game->cursor_grade = CURSOR_GRADE(game, 0);// game->repeat&& IS_SET(game->settings, KING_ON_REPEAT));
 
 	if (captures) {

@@ -16,7 +16,7 @@ void test_histotrie() {
 	char keeper[BOARD_LENGTH];
 	init_board(keeper);
 	size_t result = record_state(root, keeper, 0);
-	printf("%zu nodes added\n", result);
+	ERRLOGF("%zu nodes added\n", result);
 	assert(result == RANKS * FILES);
 	size_t since = 0, until = 0;
 	for (size_t b = 0; b < n; ++b) {
@@ -27,15 +27,15 @@ void test_histotrie() {
 				board[SQUARE_INDEX(r, f)] = SYMBOLS[rand() % SYMBOL_COUNT];
 			}
 		}
-		printf("%s\n", board);
+		ERRLOGF("%s\n", board);
 		result = record_state(root, board, 0);
-		printf("%zu nodes added\n", result);
+		ERRLOGF("%zu nodes added\n", result);
 		assert(result > 0);
 		if (since >= until) {
 			until = rand() % 8;
 			since = 0;
 			result = record_state(root, keeper, 0);
-			printf("%zu nodes added\n", result);
+			ERRLOGF("%zu nodes added\n", result);
 			assert(result == 0);
 			memcpy(keeper, board, BOARD_LENGTH);
 		}
@@ -83,20 +83,20 @@ size_t record_state(struct Histotrie* root, const char* board, const size_t inde
 	if (index >= BOARD_LENGTH || !board[index]) return 0;
 	if (board[index] == '\n') return record_state(root, board, index + 1);
 
-	Piece piece = board[index];
-	enum Square square = PIECE_MAP[piece];
-	size_t child = square == SYMBOL_INDEX(piece);
-	assert(child < SYMBOL_COUNT);
+	const Piece piece = board[index];
+	const enum Square square = PIECE_MAP[piece];
+	const size_t symbol_index = SYMBOL_INDEX(piece);
+	assert(symbol_index < SYMBOL_COUNT);
 
-	if (root->children[child]) {
+	if (root->children[symbol_index]) {
 
-		return record_state(root->children[child], board, index + 1);
+		return record_state(root->children[symbol_index], board, index + 1);
 	}
 
-	root->children[child] = malloc(sizeof(struct Histotrie));
+	root->children[symbol_index] = malloc(sizeof(struct Histotrie));
 	MEMLOG("malloc histotrie node\n");
-	_init_histotrie(root->children[child]);
-	return 1 + record_state(root->children[child], board, index + 1);
+	_init_histotrie(root->children[symbol_index]);
+	return 1 + record_state(root->children[symbol_index], board, index + 1);
 }
 
 struct Histotrie* malloc_init_histotrie() {
