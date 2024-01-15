@@ -20,7 +20,7 @@
 #define DOUBLE_BISHOP(G) (PIECE_MAP[G->player] == BISHOP && IS_SET(G->settings, DOUBLE_BISHOPS))
 #define BISHOP_SPEED(G, M) ((M) / (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_DOWN(G) SQUARE_INDEX(G->player_rank + (DOUBLE_BISHOP(G) + 1), G->player_file)
-#define EASE(G) max(1, 1024 >> G->combo) * (1 + DOUBLE_BISHOP(G))
+#define EASE(G) max(1, 1024 - G->total_value) * (1 + DOUBLE_BISHOP(G))
 #define QUEEN_ME(G, R) (\
 	IS_SET(G->settings, PAWNS_PROMOTE) ?\
 		G->player == WHITE_PAWN && (R) == 0 ? WHITE_QUEEN \
@@ -48,7 +48,9 @@
 #define SPAWN(G) (\
 	NEXT_PLAYER(G) &\
 	(G->player_rank = SPAWN_RANK(G)) &\
-	(G->player_file = G->cursor_increment) \
+	(G->player_file = G->cursor_increment) &\
+	(++G->total_pieces) &\
+	(G->total_value += PIECE_VALUE(G->player)) \
 )
 #define PACMAN(G, I) (abs(SQUARE_FILE(I) - (G->player_file)) > 2)
 #define CAN_STRIKE(G, I) (ON_BOARD(G, I + RAISE_FLOOR(G)) && EMPTY_SQUARE(G->board, I))
@@ -264,6 +266,7 @@ void _move(struct Game* game, time_t steps, const short by_rank, const short by_
 	const size_t to_rank = game->player_rank + (by_rank * mult);
 	const size_t to_file = game->player_file + (by_file * mult);
 	const size_t to = SQUARE_INDEX(to_rank, to_file);
+
 	if (_move_player(game, to)) {
 
 		if (IS_SET(game->settings, FLYING_PIECES)) {
@@ -344,6 +347,8 @@ void _init_game(struct Game* game) {
 	game->moved_down = -1;
 	game->settings = 0;
 	game->events = 0;
+	game->total_pieces = 0;
+	game->total_value = 0;
 	init_board(game->board);
 	init_captures(game->captures);
 }

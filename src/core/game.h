@@ -63,6 +63,8 @@ struct Game {
 	bool repeat;
 	Settings settings;
 	Events events;
+	size_t total_pieces;
+	size_t total_value;
 };
 
 void print_rules();

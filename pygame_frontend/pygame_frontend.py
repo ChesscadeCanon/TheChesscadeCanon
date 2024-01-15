@@ -39,6 +39,8 @@ RULES = ''.join([chr(b) for b in engine.get_rules()])
 BLACK = ( 0, 0, 0)
 WHITE = ( 255, 255, 255)
 GREY = ( 127, 127, 127)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 DARK_GREY = (63, 63, 63)
 LIGHT_GREY = (171, 171, 171)
 DARK_ORANGE = (255, 127, 80)
@@ -162,7 +164,7 @@ def draw_shadow(game):
     draw_piece_on_square(shadow_pieces, piece, rank, file)
 
 def draw_text(game):
-    readouts = ("Score", f"{game.contents.score}"), ("Scored", f"{game.contents.scored}"), ("Combo", f"{game.contents.combo}")
+    readouts = ("Score", f"{game.contents.score}"), ("Scored", f"{game.contents.scored}"), ("Combo", f"{game.contents.combo}"), ("Delay", f"{engine.get_ease(game)}")
     y = 0
     for readout in readouts:
         for part in readout:    
@@ -179,6 +181,14 @@ def draw_text(game):
         rect.topleft = (0, y)
         screen.blit(text, rect)
         y += text.get_rect().height
+    warnings = ((game.contents.repeat, "REPEAT!", BLUE, WHITE), (engine.is_on_brink(game), "WATCH OUT!", RED, BLACK))
+    for warning in warnings:
+        if warning[0]:
+            text = FONT_1.render(warning[1], True, warning[2], warning[3])
+            rect = text.get_rect()
+            y += text.get_rect().height
+            rect.center = (SQUARE * SQUARES_OFF_LEFT * 0.5, y)
+            screen.blit(text, rect)
 
 def play_sounds(game, passed):
     

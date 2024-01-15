@@ -10,7 +10,7 @@ EVENT_WRAPPED = 1 << 6
 
 SYSTEM = platform.system().lower()
 ENGINE_PATH = 'bin/ChesscadeLib.dll' if "windows" in SYSTEM else 'bin/libChesscadeLib.so' if "linux" in SYSTEM else 'bin/cygChesscadeLib.dll' if 'cygwin' in SYSTEM else ''
-assert(len(ENGINE_PATH), f"Not compatible with {platform.system()} systems.")
+assert len(ENGINE_PATH), f"Not compatible with {platform.system()} systems."
 BOARD_PIECES_DIR = "assets/grey_pieces/"
 DECK_PIECES_DIR = "assets/black_white_pieces/"
 NEXT_PIECES_DIR = "assets/orange_pieces/"
@@ -54,7 +54,9 @@ class Game(ctypes.Structure):
         ("histotrie", ctypes.POINTER(Histotrie)),
         ("repeat", ctypes.c_bool),
         ("settings", ctypes.c_ulonglong),
-        ("events", ctypes.c_ulonglong)
+        ("events", ctypes.c_ulonglong),
+        ("total_pieces", ctypes.c_ulonglong),
+        ("total_value", ctypes.c_ulonglong)
     ]
 
 engine.malloc_init_default_game.restype = ctypes.POINTER(Game)
