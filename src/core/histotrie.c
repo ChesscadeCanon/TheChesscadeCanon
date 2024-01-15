@@ -15,8 +15,10 @@ void test_histotrie() {
 	srand((unsigned int)time(NULL));
 	char keeper[BOARD_LENGTH];
 	init_board(keeper);
+	size_t total = 0;
 	size_t result = record_state(root, keeper, 0);
-	ERRLOGF("%zu nodes added\n", result);
+	total += result;
+	printf("%zu nodes added\n", result);
 	assert(result == RANKS * FILES);
 	size_t since = 0, until = 0;
 	for (size_t b = 0; b < n; ++b) {
@@ -24,17 +26,19 @@ void test_histotrie() {
 		init_board(board);
 		for (size_t r = 0; r < RANKS; ++r) {
 			for (size_t f = 0; f < FILES; ++f) {
-				board[SQUARE_INDEX(r, f)] = SYMBOLS[rand() % SYMBOL_COUNT];
+				board[SQUARE_INDEX(r, f)] = SYMBOLS[rand() % RANKS > r ? SYMBOL_COUNT - 1 : rand() % SYMBOL_COUNT];
 			}
 		}
-		ERRLOGF("%s\n", board);
+		printf("%s\n", board);
 		result = record_state(root, board, 0);
-		ERRLOGF("%zu nodes added\n", result);
+		total += result;
+		printf("%zu nodes added\n", result);
 		assert(result > 0);
 		if (since >= until) {
 			until = rand() % 8;
 			since = 0;
 			result = record_state(root, keeper, 0);
+			total += result;
 			ERRLOGF("%zu nodes added\n", result);
 			assert(result == 0);
 			memcpy(keeper, board, BOARD_LENGTH);
@@ -43,6 +47,7 @@ void test_histotrie() {
 			++since;
 		}
 	}
+	printf("%zu total nodes\n", total);
 	free_histotrie(root);
 }
 #else

@@ -300,7 +300,7 @@ void _take_input(struct Game* game) {
 	const bool moving_right = game->moved_right >= MOVE_RATE(game);
 	const bool diagonals = IS_SET(game->settings, DIAGONALS);
 	const bool diagonal = diagonals && moving_down && moving_left != moving_right;
-	const unsigned short multiplier = (!diagonal && DOUBLE_BISHOP(game)) + 1;
+	const unsigned short multiplier = 1;
 	const time_t down = _buy_move(game, &game->moved_down, multiplier);
 	const time_t left = _buy_move(game, &game->moved_left, multiplier);
 	const time_t right = _buy_move(game, &game->moved_right, multiplier);

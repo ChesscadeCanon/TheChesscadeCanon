@@ -109,7 +109,7 @@ void run_pretty_text_game(size_t settings) {
 }
 
 int main(int argc, char** argv) {
-	
+
 	run_pretty_text_game(DEFAULT_SETTINGS);
 	return 0;
 }

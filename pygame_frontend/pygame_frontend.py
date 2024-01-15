@@ -3,6 +3,8 @@ import pygame
 from res import *
 from os import environ
 
+history = set()
+
 pygame.init()
 high_score = 0
 def update_high_score(score):
@@ -112,14 +114,24 @@ def draw_board(game):
             color = black if color == white else white
         color = black if color == white else white
 
+def get_board(game):
+    return ''.join([chr(c) for c in game.contents.board])
+
 def draw_pieces(game):
     index = 0
     threats = engine.forecast_captures(game)
+    board = get_board(game)
+    if game.contents.repeat:
+        if board in history:
+            print("Yup, that's a repeat!")
+        else:
+            print("False positive!")
+    history.add(board)
     for r in range(RANKS):
         for f in range(FILES):
-            while chr(game.contents.board[index]) == '\n':
+            while board[index] == '\n':
                 index += 1
-            square = chr(game.contents.board[index])
+            square = board[index]
             if square in board_pieces:
                 if threats & engine.get_square_bit(r, f):
                     draw_piece_on_square(threatened_pieces, square, r, f)
