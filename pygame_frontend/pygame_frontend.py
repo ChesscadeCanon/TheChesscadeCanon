@@ -204,19 +204,19 @@ def take_input(game, passed):
     keys=pygame.key.get_pressed()
     
     if keys[pygame.K_LEFT]:
-        game.contents.moved_left += passed
+        game.contents.moved_left = True
     else:
-        game.contents.moved_left = -1    
+        game.contents.moved_left = False  
         
     if keys[pygame.K_RIGHT]:
-        game.contents.moved_right += passed
+        game.contents.moved_right = True
     else:
-        game.contents.moved_right = -1     
+        game.contents.moved_right = False     
         
     if keys[pygame.K_DOWN]:
-        game.contents.moved_down += passed
+        game.contents.moved_down = True
     else:
-        game.contents.moved_down = -1    
+        game.contents.moved_down = False   
 
 def draw_title():
     global high_score
@@ -320,7 +320,7 @@ def play():
         if over:
             pass
         else:
-            engine.increment_game(game, passed)
+            engine.pump_game(game, passed)
         over = engine.is_game_over(game)
         screen.fill(GREY)
         if game.contents.paused:

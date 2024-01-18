@@ -15,23 +15,9 @@ enum Input {
 	RIGHT_INPUT,
 };
 
-void _add_move(long int* moved, const time_t passed) {
+void _control_move(bool* moved, const char key, const time_t passed) {
 
-	const bool was_up = *moved < 0;
-	*moved = max(*moved, 0);
-	*moved += (long int)passed;
-}
-
-void _control_move(long int* moved, const char key, const time_t passed) {
-
-	if (GETKEYSTATE(key) < 0) {
-
-		_add_move(moved, passed);
-	}
-	else {
-
-		*moved = -1;
-	}
+	*moved = GETKEYSTATE(key) < 0;
 }
 
 #if OS_WINDOWS

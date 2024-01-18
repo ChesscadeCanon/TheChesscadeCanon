@@ -65,17 +65,17 @@ void print_raw(struct Game* game) {
 #if OS_WINDOWS
 	printf("score %llu\n", game->score);
 	printf("time %llu\n", game->time);
-	printf("fell %llu\n", game->fell);
-	printf("left %ld\n", game->moved_left);
-	printf("right %ld\n", game->moved_right);
-	printf("down %ld\n", game->moved_down);
+	printf("last moved %llu\n", game->last_moved);
+	printf("left %d\n", game->moved_left);
+	printf("right %d\n", game->moved_right);
+	printf("down %d\n", game->moved_down);
 #else
 	printf("score %lu\n\r", game->score);
 	printf("time %lu\n\r", game->time);
-	printf("fell %lu\n\r", game->fell);
-	printf("left %ld\n\r", game->moved_left);
-	printf("right %ld\n\r", game->moved_right);
-	printf("down %ld\n\r", game->moved_down);
+	printf("last moved %lu\n\r", game->last_moved);
+	printf("left %d\n\r", game->moved_left);
+	printf("right %d\n\r", game->moved_right);
+	printf("down %d\n\r", game->moved_down);
 #endif
 	printf("%s", game->board);
 }

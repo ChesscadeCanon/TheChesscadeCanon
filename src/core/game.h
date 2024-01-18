@@ -41,22 +41,23 @@ enum Event {
 
 struct Game {
 
+	bool dropped;
+	bool moved_left;
+	bool moved_right;
+	bool moved_down;
+	bool paused;
 	size_t score;
 	size_t combo;
 	size_t scored;
 	time_t time;
-	time_t fell;
-	bool paused;
+	time_t last_moved;
+	time_t last_fell;
 	char player;
 	unsigned short player_rank;
 	unsigned short player_file;
 	short cursor;
 	unsigned short cursor_grade;
 	unsigned short cursor_increment;
-	bool dropped;
-	long int moved_left;
-	long int moved_right;
-	long int moved_down;
 	char board[BOARD_LENGTH];
 	char captures[CAPTURE_LENGTH];
 	struct Histotrie* histotrie;
@@ -74,7 +75,7 @@ size_t square_bit(size_t, size_t);
 struct Game* malloc_init_game(Settings);
 void free_game(struct Game*);
 void begin(struct Game*);
-void exist(struct Game* game, const time_t falls);
+void pump(struct Game* game, const time_t passed);
 Piece next_piece(struct Game*);
 size_t forecast_rank(struct Game*);
 char forecast_piece(struct Game*);

@@ -39,23 +39,19 @@ void tock(struct Game* game, struct timeb* then, struct timeb* now) {
 #endif
 }
 
-void default_model(struct Game* game, const time_t falls) {
+void default_model(struct Game* game, const time_t passed) {
 
-	exist(game, falls);
+	pump(game, passed);
 }
 
 bool tick(struct Game* game, const time_t passed, CONTROL_FUNCTOR(control), MODEL_FUNCTOR(model), VIEW_FUNCTOR(view)) {
 
-	const time_t falls = COUNT_INTERVALS(game->fell, game->time, ease(game));;
-
-	game->time += passed * !game->paused;
 	control(game, passed);
 
 	if (!game->paused) {
-		model(game, falls);
+		model(game, passed);
 		if (game_over(game)) return true;
 		view(game);
-		if (falls > 0) game->fell = game->time;
 	}
 
 	return false;

@@ -100,7 +100,7 @@ EXPORT void begin_game(struct Game*);
 /**
 * progresses the game by the given number of milliseconds
 */
-EXPORT void increment_game(struct Game*, time_t);
+EXPORT void pump_game(struct Game*, time_t);
 
 /**
 * returns whether the game has ended or not

@@ -107,6 +107,7 @@ size_t record_state(struct Histotrie* root, const char* board, const size_t inde
 struct Histotrie* malloc_init_histotrie() {
 	struct Histotrie* ret = malloc(sizeof(struct Histotrie));
 	MEMLOG("malloc histotrie\n");
+	assert(ret);
 	_init_histotrie(ret);
 	return ret;
 }

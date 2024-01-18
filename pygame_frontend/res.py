@@ -33,22 +33,23 @@ Histotrie._fields_ = [('children', ctypes.POINTER(Histotrie) * engine.get_symbol
 
 class Game(ctypes.Structure):
     _fields_ = [
+        ("dropped", ctypes.c_bool),
+        ("moved_left", ctypes.c_bool),
+        ("moved_right", ctypes.c_bool),
+        ("moved_down", ctypes.c_bool),
+        ("paused", ctypes.c_bool),
         ("score", ctypes.c_ulonglong),
         ("combo", ctypes.c_ulonglong),
         ("scored", ctypes.c_ulonglong),
         ("time", ctypes.c_ulonglong),
-        ("fell", ctypes.c_ulonglong),
-        ("paused", ctypes.c_bool),
+        ("last_moved", ctypes.c_ulonglong),
+        ("last_fell", ctypes.c_ulonglong),
         ("player", ctypes.c_char),
         ("player_rank", ctypes.c_ushort),
         ("player_file", ctypes.c_ushort),
         ("cursor", ctypes.c_short),
         ("cursor_grade", ctypes.c_ushort),
         ("cursor_increment", ctypes.c_ushort),
-        ("dropped", ctypes.c_bool),
-        ("moved_left", ctypes.c_long),
-        ("moved_right", ctypes.c_long),
-        ("moved_down", ctypes.c_long),
         ("board", ctypes.c_char * engine.get_board_length()),
         ("captures", ctypes.c_char * engine.get_files()),
         ("histotrie", ctypes.POINTER(Histotrie)),
@@ -60,7 +61,7 @@ class Game(ctypes.Structure):
     ]
 
 engine.malloc_init_default_game.restype = ctypes.POINTER(Game)
-engine.increment_game.argtypes = [ctypes.POINTER(Game), ctypes.c_ulonglong]
+engine.pump_game.argtypes = [ctypes.POINTER(Game), ctypes.c_ulonglong]
 engine.begin_game.argtypes = [ctypes.POINTER(Game)]
 engine.is_game_over.argtypes = [ctypes.POINTER(Game)]
 engine.is_game_over.restype = ctypes.c_bool
