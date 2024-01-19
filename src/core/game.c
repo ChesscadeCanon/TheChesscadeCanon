@@ -12,63 +12,63 @@
 #define min(A, B) (A < B ? A : B)
 #endif
 
-#define MOVE_RATE(G) (64)
-#define SINCE_MOVED(G) ((G->time) - G->last_moved)
-#define SINCE_FELL(G) ((G->time) - G->last_fell)
+#define MOVE_RATE(__game__) (64)
+#define SINCE_MOVED(__game__) ((__game__->time) - __game__->last_moved)
+#define SINCE_FELL(__game__) ((__game__->time) - __game__->last_fell)
 #define FPS 60
-#define PLACE_PLAYER(G) SET_SQUARE(G->board, PLAYER_SQUARE(G), G->player)
-#define REVERSE_CURSOR(G) (G->cursor *= -1)
-#define PLAYER_SQUARE(G) SQUARE_INDEX(G->player_rank, G->player_file)
-#define DOUBLE_BISHOP(G) (PIECE_MAP[G->player] == BISHOP && IS_SET(G->settings, DOUBLE_BISHOPS))
-#define BISHOP_SPEED(G, M) ((M) / (1 + DOUBLE_BISHOP(G)))
-#define PLAYER_DOWN(G) SQUARE_INDEX(G->player_rank + (DOUBLE_BISHOP(G) + 1), G->player_file)
-#define EASE(G) max(1, 512) * (1 + DOUBLE_BISHOP(G))
-#define QUEEN_ME(G, R) (\
-	IS_SET(G->settings, PAWNS_PROMOTE) ?\
-		G->player == WHITE_PAWN && (R) == 0 ? WHITE_QUEEN \
-		: ((G->player == BLACK_PAWN && (R) == LAST_RANK) ? BLACK_QUEEN \
-		: G->player) \
-	: G->player \
+#define PLACE_PLAYER(__game__) SET_SQUARE(__game__->board, PLAYER_SQUARE(__game__), __game__->player)
+#define REVERSE_CURSOR(__game__) (__game__->cursor *= -1)
+#define PLAYER_SQUARE(__game__) SQUARE_INDEX(__game__->player_rank, __game__->player_file)
+#define DOUBLE_BISHOP(__game__) (PIECE_MAP[__game__->player] == BISHOP && IS_SET(__game__->settings, DOUBLE_BISHOPS))
+#define BISHOP_SPEED(__game__, __moved__) ((__moved__) / (1 + DOUBLE_BISHOP(G)))
+#define PLAYER_DOWN(__game__) SQUARE_INDEX(__game__->player_rank + (DOUBLE_BISHOP(__game__) + 1), __game__->player_file)
+#define EASE(__game__) max(1, 512) * (1 + DOUBLE_BISHOP(__game__))
+#define QUEEN_ME(__game__, __rank__) (\
+	IS_SET(__game__->settings, PAWNS_PROMOTE) ?\
+		__game__->player == WHITE_PAWN && (__rank__) == 0 ? WHITE_QUEEN \
+		: ((__game__->player == BLACK_PAWN && (__rank__) == LAST_RANK) ? BLACK_QUEEN \
+		: __game__->player) \
+	: __game__->player \
 )
-#define DRAW_NEXT(G) DECKS[G->cursor_grade][G->cursor_increment]
-#define SPAWN_RANK(G) (IS_SET(G->settings, BLACK_PAWN_SPAWN_LOW) && DRAW_NEXT(G) == BLACK_PAWN ? 1 : 0)
-#define NEXT_PIECE(G) (\
-	EMPTY_SQUARE(G->board, SQUARE_INDEX(SPAWN_RANK(G), G->cursor_increment)) ?\
-		DRAW_NEXT(G) \
+#define DRAW_NEXT(__game__) DECKS[__game__->cursor_grade][__game__->cursor_increment]
+#define SPAWN_RANK(__game__) (IS_SET(__game__->settings, BLACK_PAWN_SPAWN_LOW) && DRAW_NEXT(__game__) == BLACK_PAWN ? 1 : 0)
+#define NEXT_PIECE(__game__) (\
+	EMPTY_SQUARE(__game__->board, SQUARE_INDEX(SPAWN_RANK(__game__), __game__->cursor_increment)) ?\
+		DRAW_NEXT(__game__) \
 	:\
 		DEAD_PLAYER \
 )
-#define IN_BOUNDS(V, L, H) (V >= L && V < H)
-#define RAISE_FLOOR(G) (IS_SET(G->settings, WHITE_PAWN_LAND_HIGH) && (G->player == WHITE_PAWN) ? LINE_LENGTH : 0)
-#define ON_BOARD(G, I) (IN_BOUNDS(I, 0, BOARD_LENGTH) && G->board[I] != '\n' && G->board[I])
-#define CAN_CAPTURE(G, I) (\
-	ON_BOARD(G, I) &&\
-	IS_PIECE(GET_SQUARE(G->board, I)) &&\
-	IS_WHITE(GET_SQUARE(G->board, I)) != IS_WHITE(G->player) \
+#define IN_BOUNDS(__value__, __low__, __high__) (__value__ >= __low__ && __value__ < __high__)
+#define RAISE_FLOOR(__game__) (IS_SET(__game__->settings, WHITE_PAWN_LAND_HIGH) && (__game__->player == WHITE_PAWN) ? LINE_LENGTH : 0)
+#define ON_BOARD(__game__, __index__) (IN_BOUNDS(__index__, 0, BOARD_LENGTH) && __game__->board[__index__] != '\n' && __game__->board[__index__])
+#define CAN_CAPTURE(__game__, __index__) (\
+	ON_BOARD(__game__, __index__) &&\
+	IS_PIECE(GET_SQUARE(__game__->board, __index__)) &&\
+	IS_WHITE(GET_SQUARE(__game__->board, __index__)) != IS_WHITE(__game__->player) \
 )
-#define NEXT_PLAYER(G) (G->player = NEXT_PIECE(G)) 
-#define SPAWN(G) (\
-	NEXT_PLAYER(G) &\
-	(G->player_rank = SPAWN_RANK(G)) &\
-	(G->player_file = G->cursor_increment) &\
-	(++G->total_pieces) &\
-	(G->total_value += PIECE_VALUE(G->player)) \
+#define NEXT_PLAYER(__game__) (__game__->player = NEXT_PIECE(__game__)) 
+#define SPAWN(__game__) (\
+	NEXT_PLAYER(__game__) &\
+	(__game__->player_rank = SPAWN_RANK(__game__)) &\
+	(__game__->player_file = __game__->cursor_increment) &\
+	(++__game__->total_pieces) &\
+	(__game__->total_value += PIECE_VALUE(__game__->player)) \
 )
-#define PACMAN(G, I) (abs(SQUARE_FILE(I) - (G->player_file)) > 2)
-#define CAN_STRIKE(G, I) (ON_BOARD(G, I + RAISE_FLOOR(G)) && EMPTY_SQUARE(G->board, I))
-#define CAN_MOVE(G, I) (CAN_STRIKE(G, I) && !PACMAN(G, I))
-#define CURSOR_WRAPPED(G) (G->cursor_grade > 1)
-#define CURSOR_GRADE(G, K) (!HAS_CAPTURED(G->captures) + (K) * 2)
-#define CURSOR_INCREMENT(G) (\
-	(G->cursor > 0 && G->cursor_increment < LAST_FILE) ||\
-	(G->cursor < 0 && G->cursor_increment > 0) ?\
-	G->cursor : -G->cursor * LAST_FILE \
+#define PACMAN(__game__, __index__) (abs(SQUARE_FILE(__index__) - (__game__->player_file)) > 2)
+#define CAN_STRIKE(__game__, __index__) (ON_BOARD(__game__, __index__ + RAISE_FLOOR(__game__)) && EMPTY_SQUARE(__game__->board, __index__))
+#define CAN_MOVE(__game__, __index__) (CAN_STRIKE(__game__, __index__) && !PACMAN(__game__, __index__))
+#define CURSOR_WRAPPED(__game__) (__game__->cursor_grade > 1)
+#define CURSOR_GRADE(__game__, __king__) (!HAS_CAPTURED(__game__->captures) + (__king__) * 2)
+#define CURSOR_INCREMENT(__game__) (\
+	(__game__->cursor > 0 && __game__->cursor_increment < LAST_FILE) ||\
+	(__game__->cursor < 0 && __game__->cursor_increment > 0) ?\
+	__game__->cursor : -__game__->cursor * LAST_FILE \
 )
-#define LAND(G) (\
-	PLACE_PLAYER(G) &\
-	SPAWN(G) \
+#define LAND(__game__) (\
+	PLACE_PLAYER(__game__) &\
+	SPAWN(__game__) \
 )
-#define GAME_OVER(G) (G->player == DEAD_PLAYER)
+#define GAME_OVER(__game__) (__game__->player == DEAD_PLAYER)
 
 void print_rules() {
 

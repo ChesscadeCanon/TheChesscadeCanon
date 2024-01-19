@@ -33,11 +33,11 @@ Histotrie._fields_ = [('children', ctypes.POINTER(Histotrie) * engine.get_symbol
 
 class Game(ctypes.Structure):
     _fields_ = [
+        ("paused", ctypes.c_bool),
         ("dropped", ctypes.c_bool),
         ("moved_left", ctypes.c_bool),
         ("moved_right", ctypes.c_bool),
         ("moved_down", ctypes.c_bool),
-        ("paused", ctypes.c_bool),
         ("score", ctypes.c_ulonglong),
         ("combo", ctypes.c_ulonglong),
         ("scored", ctypes.c_ulonglong),
@@ -52,12 +52,12 @@ class Game(ctypes.Structure):
         ("cursor_increment", ctypes.c_ushort),
         ("board", ctypes.c_char * engine.get_board_length()),
         ("captures", ctypes.c_char * engine.get_files()),
-        ("histotrie", ctypes.POINTER(Histotrie)),
         ("repeat", ctypes.c_bool),
         ("settings", ctypes.c_ulonglong),
         ("events", ctypes.c_ulonglong),
         ("total_pieces", ctypes.c_ulonglong),
-        ("total_value", ctypes.c_ulonglong)
+        ("total_value", ctypes.c_ulonglong),
+        ("histotrie", ctypes.POINTER(Histotrie)),
     ]
 
 engine.malloc_init_default_game.restype = ctypes.POINTER(Game)

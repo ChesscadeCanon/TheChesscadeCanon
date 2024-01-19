@@ -41,11 +41,11 @@ enum Event {
 
 struct Game {
 
+	bool paused;
 	bool dropped;
 	bool moved_left;
 	bool moved_right;
 	bool moved_down;
-	bool paused;
 	size_t score;
 	size_t combo;
 	size_t scored;
@@ -60,12 +60,12 @@ struct Game {
 	unsigned short cursor_increment;
 	char board[BOARD_LENGTH];
 	char captures[CAPTURE_LENGTH];
-	struct Histotrie* histotrie;
 	bool repeat;
 	Settings settings;
 	Events events;
 	size_t total_pieces;
 	size_t total_value;
+	struct Histotrie* histotrie;
 };
 
 void print_rules();
