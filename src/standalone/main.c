@@ -31,7 +31,7 @@ void tock(struct Game* game, struct timeb* then, struct timeb* now) {
 
 #if OS_WINDOWS
 	Sleep(MPF);
-	if(!game->paused) system("cls");
+	if(!game->pause) system("cls");
 #else
 	refresh();
 	sleep(SPF);
@@ -48,7 +48,7 @@ bool tick(struct Game* game, const time_t passed, CONTROL_FUNCTOR(control), MODE
 
 	control(game, passed);
 
-	if (!game->paused) {
+	if (!game->pause) {
 		model(game, passed);
 		if (game_over(game)) return true;
 		view(game);

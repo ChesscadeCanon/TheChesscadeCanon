@@ -22,7 +22,7 @@
 #define DOUBLE_BISHOP(__game__) (PIECE_MAP[__game__->player] == BISHOP && IS_SET(__game__->settings, DOUBLE_BISHOPS))
 #define BISHOP_SPEED(__game__, __moved__) ((__moved__) / (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_DOWN(__game__) SQUARE_INDEX(__game__->player_rank + (DOUBLE_BISHOP(__game__) + 1), __game__->player_file)
-#define EASE(__game__) max(1, 512) * (1 + DOUBLE_BISHOP(__game__))
+#define EASE(__game__) max(1, 1024) * (1 + DOUBLE_BISHOP(__game__))
 #define QUEEN_ME(__game__, __rank__) (\
 	IS_SET(__game__->settings, PAWNS_PROMOTE) ?\
 		__game__->player == WHITE_PAWN && (__rank__) == 0 ? WHITE_QUEEN \
@@ -249,7 +249,6 @@ time_t _buy_move(struct Game* game, bool* moved) {
 	const time_t since = SINCE_MOVED(game);
 	const time_t steps = since / rate;
 	assert(steps >= 0);
-	printf("steps %lld\n", steps);
 	//*moved = false;
 	return steps;
 }
@@ -265,7 +264,6 @@ void _drop(struct Game* game) {
 time_t _move(struct Game* game, time_t steps, const short by_rank, const short by_file) {
 
 	if (steps == 0) return 0;
-	printf("move %lld steps\n", steps);
 	const bool orthogonal = !by_rank != !by_file;
 	const size_t multiplier = (DOUBLE_BISHOP(game) + orthogonal);
 	time_t ret = 0;
@@ -357,7 +355,7 @@ void _init_game(struct Game* game) {
 	game->last_moved = 0;
 	game->last_fell = 0;
 	game->repeat = false;
-	game->paused = false;
+	game->pause = false;
 	game->player = 'W';
 	game->player_rank = 1;
 	game->player_file = 7;
@@ -487,8 +485,7 @@ char forecast_piece(struct Game* game) {
 
 void pump(struct Game* game, const time_t passed) {
 
-	if (game_over(game) || game->paused) return;
-	printf("PUMP\n");
+	if (game_over(game) || game->pause) return;
 	game->events = 0;
 	game->time += passed;
 	game->last_moved += _take_input(game);

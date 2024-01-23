@@ -27,12 +27,12 @@ void _control_tap(struct Game* game) {
 
 		const char key = GETCH();
 		switch (key) {
-		case DROP_KEY: if (!game->paused) game->dropped = true; break;
+		case DROP_KEY: if (!game->pause) game->dropped = true; break;
 		case QUIT_KEY: QUIT(); break;
 		case PAUSE_KEY: {
 
-			if (!game->paused) print_rules();
-			game->paused = !game->paused;
+			if (!game->pause) print_rules();
+			game->pause = !game->pause;
 			break;
 		}
 		default: break;
@@ -45,7 +45,7 @@ void key_control(struct Game* game, const time_t passed) {
 
 #if OS_WINDOWS
 	_control_tap(game);
-	if(game->paused) return;
+	if(game->pause) return;
 	_control_move(&(game->moved_right), RIGHT_KEY, passed);
 	_control_move(&(game->moved_left), LEFT_KEY, passed);
 	_control_move(&(game->moved_down), DOWN_KEY, passed);

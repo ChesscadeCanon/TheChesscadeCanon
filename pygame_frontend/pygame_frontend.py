@@ -312,7 +312,7 @@ def play():
                 elif event.key == pygame.K_SPACE:
                     game.contents.dropped = True
                 elif event.key == pygame.K_p:
-                    game.contents.paused = not game.contents.paused
+                    engine.input_toggle_pause(game)
                 elif event.key == pygame.K_q:
                     go = QUIT
         passed = clock.tick(30)
@@ -323,7 +323,7 @@ def play():
             engine.pump_game(game, passed)
         over = engine.is_game_over(game)
         screen.fill(GREY)
-        if game.contents.paused:
+        if engine.is_paused(game):
             label = FONT_2.render("paused", True, BLACK)
             rect = label.get_rect()
             rect.center = SIZE[0] / 2, SIZE[1] / 8

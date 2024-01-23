@@ -41,7 +41,7 @@ enum Event {
 
 struct Game {
 
-	bool paused;
+	bool pause;
 	bool dropped;
 	bool moved_left;
 	bool moved_right;

@@ -17,6 +17,8 @@
 extern "C" {
 #include "game.h"
 
+EXPORT void input_toggle_pause(struct Game*);
+
 /**
 * returns the full text of the rules of Chesscade
 */
@@ -111,6 +113,11 @@ EXPORT bool is_game_over(struct Game*);
 * returns whether dropping the current piece now would result in a game over
 */
 EXPORT bool is_on_brink(struct Game* game);
+
+/**
+* returns whether not the game is paused
+*/
+EXPORT bool is_paused(struct Game* game);
 
 /**
 * frees all memory allocated on behalf of the given game object

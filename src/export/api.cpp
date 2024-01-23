@@ -4,6 +4,12 @@
 #include <ctype.h>
 #include <assert.h>
 
+void input_toggle_pause(struct Game* game) {
+
+	assert(game);
+	game->pause = !game->pause;
+}
+
 const char* get_rules() {
 
 	return RULES;
@@ -108,6 +114,12 @@ bool is_on_brink(struct Game* game) {
 
 	assert(game);
 	return on_brink(game);
+}
+
+bool is_paused(struct Game* game) {
+
+	assert(game);
+	return game->pause;
 }
 
 void delete_game(struct Game* game) {

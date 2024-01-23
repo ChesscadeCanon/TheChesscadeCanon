@@ -33,7 +33,7 @@ Histotrie._fields_ = [('children', ctypes.POINTER(Histotrie) * engine.get_symbol
 
 class Game(ctypes.Structure):
     _fields_ = [
-        ("paused", ctypes.c_bool),
+        ("pause", ctypes.c_bool),
         ("dropped", ctypes.c_bool),
         ("moved_left", ctypes.c_bool),
         ("moved_right", ctypes.c_bool),
@@ -61,6 +61,7 @@ class Game(ctypes.Structure):
     ]
 
 engine.malloc_init_default_game.restype = ctypes.POINTER(Game)
+engine.input_toggle_pause.argtypes = [ctypes.POINTER(Game)]
 engine.pump_game.argtypes = [ctypes.POINTER(Game), ctypes.c_ulonglong]
 engine.begin_game.argtypes = [ctypes.POINTER(Game)]
 engine.is_game_over.argtypes = [ctypes.POINTER(Game)]
@@ -82,5 +83,7 @@ engine.get_deck.argtypes = [ctypes.c_ulonglong]
 engine.get_deck.restype = ctypes.c_char_p
 engine.is_on_brink.argtypes = [ctypes.POINTER(Game)]
 engine.is_on_brink.restype = ctypes.c_bool
+engine.is_paused.argtypes = [ctypes.POINTER(Game)]
+engine.is_paused.restype = ctypes.c_bool
 engine.get_ease.argtypes = [ctypes.POINTER(Game)]
 engine.get_ease.restype = ctypes.c_ulonglong
