@@ -64,7 +64,7 @@ void play(struct Game* game, struct timeb* then, CONTROL_FUNCTOR(control), MODEL
 
 		struct timeb now;
 		ftime(&now);
-		const time_t passed = MILLISECONDS_DIFFERENCE((*then), (now));
+		const time_t passed = MILLISECONDS_DIFFERENCE(*then, now);
 		if (tick(game, passed, control, model, view)) return;
 		tock(game, then, &now);
 	}
