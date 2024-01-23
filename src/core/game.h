@@ -7,7 +7,6 @@ typedef size_t Events;
 
 #define SET(__settings__, __setting__) (__settings__ |= __setting__)
 #define IS_SET(__settings__, __setting__) (__settings__ & __setting__)
-#define MILLISECONDS_DIFFERENCE(__from_time__, __to_time__) ((time_t)(1000.0 * ((__to_time__).time - (__from_time__).time) + ((__to_time__).millitm - (__from_time__).millitm)));
 
 enum Setting {
 

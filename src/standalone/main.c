@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#define MILLISECONDS_DIFFERENCE(__from_time__, __to_time__) ((time_t)(1000.0 * ((__to_time__).time - (__from_time__).time) + ((__to_time__).millitm - (__from_time__).millitm)));
 #define VIEW_FUNCTOR(VAR) void (*VAR)(struct Game*)
 #define MODEL_FUNCTOR(VAR) void (*VAR)(struct Game*, const time_t)
 #define CONTROL_FUNCTOR(VAR) void (*VAR)(struct Game*, const time_t)
@@ -64,7 +65,6 @@ void play(struct Game* game, struct timeb* then, CONTROL_FUNCTOR(control), MODEL
 		struct timeb now;
 		ftime(&now);
 		const time_t passed = MILLISECONDS_DIFFERENCE((*then), (now));
-
 		if (tick(game, passed, control, model, view)) return;
 		tock(game, then, &now);
 	}
