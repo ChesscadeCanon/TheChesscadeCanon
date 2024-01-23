@@ -5,6 +5,10 @@
 typedef size_t Settings;
 typedef size_t Events;
 
+#define FPS 60
+#define SPF (1.0 / ((long double) FPS))
+#define MPF ((time_t) (1000.0 * SPF))
+#define PLAYER_SQUARE(__game__) SQUARE_INDEX(__game__->player_rank, __game__->player_file)
 #define SET(__settings__, __setting__) (__settings__ |= __setting__)
 #define IS_SET(__settings__, __setting__) (__settings__ & __setting__)
 

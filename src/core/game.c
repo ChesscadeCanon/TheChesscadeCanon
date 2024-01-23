@@ -16,12 +16,8 @@
 #define SINCE_MOVED(__game__) ((__game__->time) - __game__->last_moved)
 #define SINCE_FELL(__game__) ((__game__->time) - __game__->last_fell)
 #define DRAG(__drag__, __steps__) __drag__ = max(0, __drag__ - (long double)__steps__);
-#define FPS 60
-#define SPF (1.0 / ((long double) FPS))
-#define MPF ((time_t) (1000.0 * SPF))
 #define PLACE_PLAYER(__game__) SET_SQUARE(__game__->board, PLAYER_SQUARE(__game__), __game__->player)
 #define REVERSE_CURSOR(__game__) (__game__->cursor *= -1)
-#define PLAYER_SQUARE(__game__) SQUARE_INDEX(__game__->player_rank, __game__->player_file)
 #define DOUBLE_BISHOP(__game__) (PIECE_MAP[__game__->player] == BISHOP && IS_SET(__game__->settings, DOUBLE_BISHOPS))
 #define BISHOP_SPEED(__game__, __moved__) ((__moved__) / (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_DOWN(__game__) SQUARE_INDEX(__game__->player_rank + (DOUBLE_BISHOP(__game__) + 1), __game__->player_file)
