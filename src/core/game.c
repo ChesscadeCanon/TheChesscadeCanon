@@ -265,7 +265,7 @@ time_t _move(struct Game* game, time_t steps, const short by_rank, const short b
 
 	if (steps == 0) return 0;
 	const bool orthogonal = !by_rank != !by_file;
-	const size_t multiplier = (DOUBLE_BISHOP(game) + orthogonal);
+	const size_t multiplier = max(1, (DOUBLE_BISHOP(game) + orthogonal));
 	time_t ret = 0;
 
 	for (time_t s = 0; s < steps; ++s) {
