@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#define MILLISECONDS_DIFFERENCE(__from_time__, __to_time__) ((time_t)(1000.0 * ((__to_time__).time - (__from_time__).time) + ((__to_time__).millitm - (__from_time__).millitm)));
+#define MILLISECONDS_DIFFERENCE(__from_time__, __to_time__) ((time_t)(1000.0 * ((__to_time__).time - (__from_time__).time) + ((__to_time__).millitm - (__from_time__).millitm)))
 #define VIEW_FUNCTOR(VAR) void (*VAR)(struct Game*)
 #define MODEL_FUNCTOR(VAR) void (*VAR)(struct Game*, const time_t)
 #define CONTROL_FUNCTOR(VAR) void (*VAR)(struct Game*, const time_t)
