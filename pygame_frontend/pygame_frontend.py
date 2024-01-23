@@ -352,7 +352,8 @@ while True:
     else:
         break
 
-pygame.midi.quit()
+if "REPL_OWNER" not in environ:
+    pygame.midi.quit()
 pygame.quit()
 
     
