@@ -46,6 +46,9 @@ struct Game {
 	bool moved_left;
 	bool moved_right;
 	bool moved_down;
+	long double dragged_left;
+	long double dragged_right;
+	long double dragged_down;
 	size_t score;
 	size_t combo;
 	size_t scored;

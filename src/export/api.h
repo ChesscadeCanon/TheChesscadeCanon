@@ -20,6 +20,7 @@ extern "C" {
 EXPORT void input_toggle_pause(struct Game*);
 EXPORT void input_drop(struct Game*);
 EXPORT void input_digital_move(struct Game*, bool, bool, bool);
+EXPORT void input_analog_move(struct Game*, long double, long double);
 
 /**
 * returns the full text of the rules of Chesscade

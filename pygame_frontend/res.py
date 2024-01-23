@@ -38,6 +38,9 @@ class Game(ctypes.Structure):
         ("moved_left", ctypes.c_bool),
         ("moved_right", ctypes.c_bool),
         ("moved_down", ctypes.c_bool),
+        ("dragged_left", ctypes.c_longdouble),
+        ("dragged_right", ctypes.c_longdouble),
+        ("dragged_down", ctypes.c_longdouble),
         ("score", ctypes.c_ulonglong),
         ("combo", ctypes.c_ulonglong),
         ("scored", ctypes.c_ulonglong),
@@ -64,6 +67,7 @@ engine.malloc_init_default_game.restype = ctypes.POINTER(Game)
 engine.input_toggle_pause.argtypes = [ctypes.POINTER(Game)]
 engine.input_drop.argtypes = [ctypes.POINTER(Game)]
 engine.input_digital_move.argtypes = [ctypes.POINTER(Game), ctypes.c_bool, ctypes.c_bool, ctypes.c_bool]
+engine.input_analog_move.argtypes = [ctypes.POINTER(Game), ctypes.c_longdouble, ctypes.c_longdouble]
 engine.pump_game.argtypes = [ctypes.POINTER(Game), ctypes.c_ulonglong]
 engine.begin_game.argtypes = [ctypes.POINTER(Game)]
 engine.is_game_over.argtypes = [ctypes.POINTER(Game)]

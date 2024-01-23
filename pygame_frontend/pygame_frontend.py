@@ -60,7 +60,7 @@ SQUARES_OFF_TOP = 4
 SIZE = (FILES + SQUARES_OFF_LEFT) * SQUARE, (RANKS + SQUARES_OFF_TOP) * SQUARE
 SQUARE = min(SIZE[0] // (FILES + SQUARES_OFF_LEFT), SIZE[1] // (RANKS + SQUARES_OFF_TOP))
 FONT_0 = pygame.font.Font('freesansbold.ttf', 11)
-FONT_1 = pygame.font.Font('freesansbold.ttf', 16)
+FONT_1 = pygame.font.Font('freesansbold.ttf', 14)
 FONT_2 = pygame.font.Font('freesansbold.ttf', 32)
 
 screen = pygame.display.set_mode(SIZE)
@@ -174,7 +174,15 @@ def draw_text(game):
             screen.blit(text, rect)
             y += text.get_rect().height
         y += text.get_rect().height
-    controls = (("arrow keys: move"), ("space: drop"), ("p: pause/help"), ("backspace: back"), ("q: quit"))
+    controls = [
+        ("arrow keys: move"), 
+        ("left click and drag:"), 
+        ("    move"),
+        ("space/right_click: drop"), 
+        ("p: pause/help"), 
+        ("backspace: back"),
+        ("q: quit"),
+        ]
     for control in controls:
         text = FONT_1.render(control, True, BLACK, WHITE)
         rect = text.get_rect()
@@ -203,6 +211,11 @@ def play_sounds(game, passed):
 def take_input(game, passed):
     keys=pygame.key.get_pressed()
     engine.input_digital_move(game, keys[pygame.K_LEFT], keys[pygame.K_RIGHT], keys[pygame.K_DOWN])
+    if pygame.mouse.get_focused() and pygame.mouse.get_pressed(3)[0]:
+        rel = pygame.mouse.get_rel()
+        x = rel[0] / SQUARE
+        y = rel[1] / SQUARE
+        engine.input_analog_move(game, x, y)
 
 def draw_title():
     global high_score
@@ -301,6 +314,10 @@ def play():
                     engine.input_toggle_pause(game)
                 elif event.key == pygame.K_q:
                     go = QUIT
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 3:
+                    if pygame.mouse.get_focused():
+                        engine.input_drop(game)
         passed = clock.tick(30)
         take_input(game, passed)
         if over:

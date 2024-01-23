@@ -23,6 +23,34 @@ void input_digital_move(struct Game* game, bool left, bool right, bool down) {
 	game->moved_down = down;
 }
 
+void input_analog_move(struct Game* game, long double x, long double y) {
+
+	if (x > 0) {
+
+		game->dragged_left = 0;
+		game->dragged_right += x;
+	}
+	else if (x < 0) {
+
+		game->dragged_left += -x;
+		game->dragged_right = 0;
+	}
+	else {
+
+		game->dragged_left = 0;
+		game->dragged_right = 0;
+	}
+
+	if (y > 0) {
+
+		game->dragged_down += y;
+	}
+	else {
+
+		game->dragged_down = 0;
+	}
+}
+
 const char* get_rules() {
 
 	return RULES;

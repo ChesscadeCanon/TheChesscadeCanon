@@ -15,6 +15,7 @@
 #define MOVE_RATE(__game__) (64)
 #define SINCE_MOVED(__game__) ((__game__->time) - __game__->last_moved)
 #define SINCE_FELL(__game__) ((__game__->time) - __game__->last_fell)
+#define DRAG(__drag__, __steps__) __drag__ = max(0, __drag__ - (long double)__steps__);
 #define FPS 60
 #define PLACE_PLAYER(__game__) SET_SQUARE(__game__->board, PLAYER_SQUARE(__game__), __game__->player)
 #define REVERSE_CURSOR(__game__) (__game__->cursor *= -1)
@@ -249,7 +250,6 @@ time_t _buy_move(struct Game* game, bool* moved) {
 	const time_t since = SINCE_MOVED(game);
 	const time_t steps = since / rate;
 	assert(steps >= 0);
-	//*moved = false;
 	return steps;
 }
 
@@ -324,23 +324,32 @@ time_t _take_input(struct Game* game) {
 
 	if (diagonals && left > 0 && down > 0 && right == 0) {
 
-		count = _move(game, min(left, down), 1, -1);
+		const time_t steps = min(left, down);
+		count = _move(game, steps, 1, -1);
+		DRAG(game->dragged_left, count);
+		DRAG(game->dragged_down, count);
 	}
 	else if (diagonals && left == 0 && down > 0 && right > 0) {
 
-		count = _move(game, min(right, down), 1, 1);
+		const time_t steps = min(right, down);
+		count = _move(game, steps, 1, 1);
+		DRAG(game->dragged_right, count);
+		DRAG(game->dragged_down, count);
 	}
 	else if (left == 0 && right > 0 && down == 0) {
 
 		count = _move(game, right, 0, 1);
+		DRAG(game->dragged_right, count);
 	}
 	else if (left > 0 && right == 0 && down == 0) {
 
 		count = _move(game, left, 0, -1);
+		DRAG(game->dragged_left, count);
 	}
 	else if(left == 0 && right == 0 && down > 0) {
 
 		count = _move(game, max(0, down), 1, 0);
+		DRAG(game->dragged_down, count);
 	}
 
 	return count * MOVE_RATE(game);
@@ -363,9 +372,12 @@ void _init_game(struct Game* game) {
 	game->cursor_grade = 1;
 	game->cursor_increment = LAST_FILE;
 	game->dropped = false;
-	game->moved_left = -1;
-	game->moved_right = -1;
-	game->moved_down = -1;
+	game->moved_left = 0;
+	game->moved_right = 0;
+	game->moved_down = 0;
+	game->dragged_left = 0;
+	game->dragged_right = 0;
+	game->dragged_down = 0;
 	game->settings = 0;
 	game->events = 0;
 	game->total_pieces = 0;
@@ -488,6 +500,21 @@ void pump(struct Game* game, const time_t passed) {
 	if (game_over(game) || game->pause) return;
 	game->events = 0;
 	game->time += passed;
+
+	if (game->dragged_right >= 1.0) {
+
+		game->moved_right = true;
+	}
+	else if (game->dragged_left >= 1.0) {
+
+		game->moved_left = true;
+	}
+
+	if (game->dragged_down >= 1.0) {
+
+		game->moved_down = true;
+	}
+
 	game->last_moved += _take_input(game);
 
 	if (!game->moved_left && !game->moved_right && !game->moved_down) {
