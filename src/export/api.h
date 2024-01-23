@@ -17,9 +17,32 @@
 extern "C" {
 #include "game.h"
 
+/**
+* pauses the game if it's unpaused and vice versa
+*/
 EXPORT void input_toggle_pause(struct Game*);
+
+/**
+* drops the current piece
+*/
 EXPORT void input_drop(struct Game*);
+
+/**
+* On any given frame, call input_digital_move() with boolean values denoting whether
+* to try and move the piece left, right and/or down, as indicated by key inputs. For
+* instance, if the right and down keys were being held, you would call:
+* input_digital_move(game, false, true, true);
+*/
 EXPORT void input_digital_move(struct Game*, bool, bool, bool);
+
+/**
+* On any given frame, call input_analog_move() with floating point values
+* constituting a vector denoting how far the mouse or touch has moved on the x and y
+* axes in terms of what fraction of a square width it has moved. For instance, if
+* the squares were 64 pixels across in your interface, and on some frame the player
+* dragged the mouse 96 pixels to the left and 16 pixels down, you would call:
+* input_analog_move(game, -1.5, 0.25);
+*/
 EXPORT void input_analog_move(struct Game*, long double, long double);
 
 /**

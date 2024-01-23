@@ -217,7 +217,7 @@ void _resolve(struct Game* game) {
 	LAND(game);
 	_judge(game);
 	_chronicle(game);
-	game->cursor_grade = CURSOR_GRADE(game, 0);// game->repeat&& IS_SET(game->settings, KING_ON_REPEAT));
+	game->cursor_grade = CURSOR_GRADE(game, 0);
 
 	if (captures) {
 

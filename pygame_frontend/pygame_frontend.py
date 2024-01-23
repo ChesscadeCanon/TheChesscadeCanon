@@ -233,7 +233,7 @@ def draw_title():
     screen.blit(help_label, help_rect)
 
 def draw_help():
-    lines = ["arrow keys to move, space to drop"]
+    lines = ["arrow keys or left click and drag to move, space or right click to drop"]
     lines += ["p to pause, q to quit, backspace to go back", ""]
     lines += RULES.split('\n')
     x = SIZE[0] / 2
