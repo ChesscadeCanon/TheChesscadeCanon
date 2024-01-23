@@ -174,15 +174,14 @@ def draw_text(game):
             screen.blit(text, rect)
             y += text.get_rect().height
         y += text.get_rect().height
-    controls = [
+    controls = (
         ("arrow keys: move"), 
-        ("left click and drag:"), 
-        ("    move"),
-        ("space/right_click: drop"), 
+        ("left click + drag: move"), 
+        ("space/right click: drop"), 
         ("p: pause/help"), 
         ("backspace: back"),
         ("q: quit"),
-        ]
+        )
     for control in controls:
         text = FONT_1.render(control, True, BLACK, WHITE)
         rect = text.get_rect()
