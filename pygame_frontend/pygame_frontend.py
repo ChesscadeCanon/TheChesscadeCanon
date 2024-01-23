@@ -202,21 +202,7 @@ def play_sounds(game, passed):
 
 def take_input(game, passed):
     keys=pygame.key.get_pressed()
-    
-    if keys[pygame.K_LEFT]:
-        game.contents.moved_left = True
-    else:
-        game.contents.moved_left = False  
-        
-    if keys[pygame.K_RIGHT]:
-        game.contents.moved_right = True
-    else:
-        game.contents.moved_right = False     
-        
-    if keys[pygame.K_DOWN]:
-        game.contents.moved_down = True
-    else:
-        game.contents.moved_down = False   
+    engine.input_digital_move(game, keys[pygame.K_LEFT], keys[pygame.K_RIGHT], keys[pygame.K_DOWN])
 
 def draw_title():
     global high_score
@@ -310,7 +296,7 @@ def play():
                 if event.key == pygame.K_BACKSPACE:
                     go = BACK
                 elif event.key == pygame.K_SPACE:
-                    game.contents.dropped = True
+                    engine.input_drop(game)
                 elif event.key == pygame.K_p:
                     engine.input_toggle_pause(game)
                 elif event.key == pygame.K_q:

@@ -10,6 +10,19 @@ void input_toggle_pause(struct Game* game) {
 	game->pause = !game->pause;
 }
 
+void input_drop(struct Game* game) {
+
+	assert(game);
+	game->dropped = true;
+}
+
+void input_digital_move(struct Game* game, bool left, bool right, bool down) {
+
+	game->moved_left = left;
+	game->moved_right = right;
+	game->moved_down = down;
+}
+
 const char* get_rules() {
 
 	return RULES;
