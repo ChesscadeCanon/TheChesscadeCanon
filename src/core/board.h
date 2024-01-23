@@ -28,8 +28,8 @@
 #define EMPTY_CAPTURES "********"
 #define HAS_CAPTURED(__captures__) (strncmp(EMPTY_CAPTURES, __captures__, CAPTURE_LENGTH) != 0)
 #define LINE_LENGTH (FILES + 1ull)
-#define SQUARE_RANK(__index__) ((unsigned short)(__index__ / LINE_LENGTH))
-#define SQUARE_FILE(__index__) ((unsigned short)(__index__ % LINE_LENGTH))
+#define SQUARE_RANK(__index__) ((Index)(__index__ / LINE_LENGTH))
+#define SQUARE_FILE(__index__) ((Index)(__index__ % LINE_LENGTH))
 #define SQUARE_BIT(__index__) (1ull << (SQUARE_RANK(__index__) * FILES + SQUARE_FILE(__index__)))
 #define SET_CAPTURE(__captures__, __piece_index__, __value__) (__captures__[__piece_index__] = __value__)
 #define SET_SQUARE(__board__, __index__, __value__) (__board__[__index__] = __value__)
@@ -50,6 +50,7 @@
 typedef char* Board;
 typedef char* Captures;
 typedef char Piece;
+typedef unsigned short Index;
 
 enum Square {
 	PAWN,
@@ -65,7 +66,7 @@ enum Square {
 struct MoveSet {
 
 	const bool repeat;
-	const unsigned short count;
+	const Index count;
 	const short moves[8][2];
 };
 

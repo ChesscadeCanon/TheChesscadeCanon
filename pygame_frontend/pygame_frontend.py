@@ -100,7 +100,7 @@ def draw_board(game):
     if engine.is_on_brink(game):
         white = LIGHT_ORANGE
         black = DARK_ORANGE
-    elif game.contents.repeat:
+    elif engine.is_repeat(game):
         white = LIGHT_BLUE
         black = DARK_BLUE
     color = white
@@ -116,14 +116,11 @@ def draw_board(game):
             color = black if color == white else white
         color = black if color == white else white
 
-def get_board(game):
-    return ''.join([chr(c) for c in game.contents.board])
-
 def draw_pieces(game):
     index = 0
     threats = engine.forecast_captures(game)
-    board = get_board(game)
-    if game.contents.repeat:
+    board = engine.get_board(game)
+    if engine.is_repeat(game):
         if board in history:
             print("Yup, that's a repeat!")
         else:
@@ -142,14 +139,14 @@ def draw_pieces(game):
             index += 1
 
 def draw_player(game):
-    player = game.contents.player.decode('ascii')
-    rank = game.contents.player_rank
-    file = game.contents.player_file
+    player = engine.get_player(game).decode('ascii')
+    rank = engine.get_player_rank(game)
+    file = engine.get_player_file(game)
     draw_piece_on_square(player_pieces, player, rank, file)
 
 def draw_next(game):
-    cursor_grade = game.contents.cursor_grade
-    cursor_increment = game.contents.cursor_increment
+    cursor_grade = engine.get_cursor_grade(game)
+    cursor_increment = engine.get_cursor_increment(game)
     next_piece = engine.get_next_piece(game)
     for g in range(SQUARES_OFF_TOP):
         deck = [chr(c) for c in engine.get_deck(g)]
@@ -160,11 +157,11 @@ def draw_next(game):
 def draw_shadow(game):
     piece = engine.get_forecast_piece(game)
     rank = engine.get_forecast_rank(game)
-    file = game.contents.player_file
+    file = engine.get_player_file(game)
     draw_piece_on_square(shadow_pieces, piece, rank, file)
 
 def draw_text(game):
-    readouts = ("Score", f"{game.contents.score}"), ("Scored", f"{game.contents.scored}"), ("Combo", f"{game.contents.combo}"), ("Delay", f"{engine.get_ease(game)}")
+    readouts = ("Score", f"{engine.get_score(game)}"), ("Scored", f"{engine.get_scored(game)}"), ("Combo", f"{engine.get_combo(game)}"), ("Delay", f"{engine.get_ease(game)}")
     y = 0
     for readout in readouts:
         for part in readout:    
@@ -188,7 +185,7 @@ def draw_text(game):
         rect.topleft = (0, y)
         screen.blit(text, rect)
         y += text.get_rect().height
-    warnings = ((game.contents.repeat, "REPEAT!", BLUE, WHITE), (engine.is_on_brink(game), "WATCH OUT!", RED, BLACK))
+    warnings = ((engine.is_repeat(game), "REPEAT!", BLUE, WHITE), (engine.is_on_brink(game), "WATCH OUT!", RED, BLACK))
     for warning in warnings:
         if warning[0]:
             text = FONT_1.render(warning[1], True, warning[2], warning[3])
@@ -198,13 +195,11 @@ def draw_text(game):
             screen.blit(text, rect)
 
 def play_sounds(game, passed):
-    
     if "REPL_OWNER" not in environ:
-        if game.contents.events & EVENT_FELL:
+        if engine.get_events(game) & EVENT_FELL:
             ease = maxtime=engine.get_ease(game)
-            note = fall_notes[game.contents.cursor_grade][game.contents.cursor_increment]
+            note = fall_notes[engine.get_cursor_grade(game)][engine.get_cursor_increment(game)]
             note.play(ease)
-    
         [[n.pump(passed) for n in s] for s in fall_notes]
 
 def take_input(game, passed):
@@ -337,7 +332,7 @@ def play():
         draw_game_over(game)
         pygame.display.flip()
         clock.tick(60)
-    update_high_score(game.contents.score)
+    update_high_score(engine.get_score(game))
     over = engine.is_game_over(game)
     engine.delete_game(game)
     return go

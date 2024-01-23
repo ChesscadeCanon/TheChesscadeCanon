@@ -2,8 +2,8 @@
 #include "histotrie.h"
 #include <sys/timeb.h>
 
-typedef size_t Settings;
-typedef size_t Events;
+typedef unsigned int Settings;
+typedef unsigned int Events;
 
 #define FPS 60
 #define SPF (1.0 / ((long double) FPS))
@@ -37,6 +37,11 @@ enum Event {
 	EVENT_WRAPPED = 1 << 6
 };
 
+/**
+* All game attributes should be considered private by any programs using the Chesscade
+* library. Use the API functions instead. There's nothing to stop you from breaking
+* this rule except that it would be cheating and you might not know what you're doing.
+*/
 struct Game {
 
 	bool pause;
@@ -54,11 +59,11 @@ struct Game {
 	time_t last_moved;
 	time_t last_fell;
 	char player;
-	unsigned short player_rank;
-	unsigned short player_file;
+	Index player_rank;
+	Index player_file;
 	short cursor;
-	unsigned short cursor_grade;
-	unsigned short cursor_increment;
+	Index cursor_grade;
+	Index cursor_increment;
 	char board[BOARD_LENGTH];
 	char captures[CAPTURE_LENGTH];
 	bool repeat;

@@ -74,7 +74,7 @@ void print_rules() {
 	printf("%s", RULES);
 }
 
-unsigned short _update_cursor(struct Game* game) {
+Index _update_cursor(struct Game* game) {
 
 	const short inc = CURSOR_INCREMENT(game);
 	const bool wrapped = abs(inc) > 1;
@@ -209,7 +209,7 @@ size_t _chronicle(struct Game* game) {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                const char* LICENSE = "Chesscade is a falling block puzzle game with chess pieces.\nCopyright(C) 2024  George Cesana ne Guy\n\nThis program is free software : you can redistribute it and /or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.If not, see < https://www.gnu.org/licenses/>.";
 void _resolve(struct Game* game) {
 
-	const unsigned short from_rank = game->player_rank, from_file = game->player_file;
+	const Index from_rank = game->player_rank, from_file = game->player_file;
 	game->player = QUEEN_ME(game, from_rank);
 	const size_t captures = attack(game, true, false, false);
 	LAND(game);
@@ -225,7 +225,7 @@ void _resolve(struct Game* game) {
 
 bool _move_player(struct Game* game, size_t to) {
 
-	const unsigned short to_rank = SQUARE_RANK(to), to_file = SQUARE_FILE(to);
+	const Index to_rank = SQUARE_RANK(to), to_file = SQUARE_FILE(to);
 
 	if (CAN_MOVE(game, to)) {
 
@@ -534,11 +534,11 @@ void begin(struct Game* game) {
 
 struct Game* malloc_init_game(Settings settings) {
 
-	struct Game* game = malloc(sizeof(struct Game));
+	struct Game* ret = malloc(sizeof(struct Game));
 	MEMLOG("malloc game\n");
-	assert(game);
-	_init_game(game);
-	game->histotrie = malloc_init_histotrie();
-	game->settings = settings;
-	return game;
+	assert(ret);
+	_init_game(ret);
+	ret->histotrie = malloc_init_histotrie();
+	ret->settings = settings;
+	return ret;
 }

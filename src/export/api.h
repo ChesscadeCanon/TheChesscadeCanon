@@ -46,19 +46,24 @@ EXPORT void input_digital_move(struct Game*, bool, bool, bool);
 EXPORT void input_analog_move(struct Game*, long double, long double);
 
 /**
+* returns a bitset denoting what events took place in the last frame
+*/
+EXPORT Events get_events(struct Game*);
+
+/**
 * returns the full text of the rules of Chesscade
 */
 EXPORT const char* get_rules();
 
 /**
-* returns the number of milliseconds it currently takes for the piece to fall
-*/
-EXPORT size_t get_ease(struct Game* game);
-
-/**
 * returns the full text of the rules of Chesscade
 */
 EXPORT size_t get_rules_length();
+
+/**
+* returns the number of milliseconds it currently takes for the piece to fall
+*/
+EXPORT size_t get_ease(struct Game* game);
 
 /**
 * returns the height of the board
@@ -69,7 +74,12 @@ EXPORT size_t get_ranks();
 * returns the width of the board
 */
 EXPORT size_t get_files();
-    
+
+/**
+* seturns the current state of the board as a string
+*/
+EXPORT char* get_board(struct Game* game);
+
 /**
 * returns the number of squares on the board, plus newlines
 */
@@ -84,7 +94,47 @@ EXPORT size_t get_symbol_count();
 * returns the next piece that will spawn if the current piece lands right now
 */
 EXPORT Piece get_next_piece(struct Game*);
-    
+
+/**
+* returns a character denoting the type of the current falling piece
+*/
+EXPORT Piece get_player(struct Game*);
+
+/**
+* returns an unsigned short denoting the rank of the board where the falling piece currently is
+*/
+EXPORT Index get_player_rank(struct Game*);
+
+/**
+* returns an unsigned short denoting the file of the board where the falling piece currently is
+*/
+EXPORT Index get_player_file(struct Game*);
+
+/**
+* returns an unsigned short denoting the rank of the board where the falling piece currently is
+*/
+EXPORT Index get_cursor_grade(struct Game*);
+
+/**
+* returns an unsigned short denoting the file of the board where the falling piece currently is
+*/
+EXPORT Index get_cursor_increment(struct Game*);
+
+/**
+* returns the current score
+*/
+EXPORT size_t get_score(struct Game*);
+
+/**
+* returns the number of points scored on the last landing
+*/
+EXPORT size_t get_scored(struct Game*);
+
+/**
+* returns the number of consecutive captures
+*/
+EXPORT size_t get_combo(struct Game*);
+
 /**
 * returns a bitflag denoting which squares on the board are occupied by pieces that would be captured if the current piece landed right now
 */
@@ -119,6 +169,11 @@ EXPORT const char* get_deck(size_t);
 * returns a pointer to a newly allocated and initialized Game struct
 */
 EXPORT struct Game* malloc_init_default_game();
+
+/**
+* returns a pointer to a newly allocated and initialized Game struct
+*/
+EXPORT struct Game* malloc_init_custom_game(Settings);
     
 /**
 * begins the game by spawning the first piece
@@ -144,6 +199,11 @@ EXPORT bool is_on_brink(struct Game* game);
 * returns whether not the game is paused
 */
 EXPORT bool is_paused(struct Game* game);
+
+/**
+* returns whether not the game is paused
+*/
+EXPORT bool is_repeat(struct Game* game);
 
 /**
 * frees all memory allocated on behalf of the given game object

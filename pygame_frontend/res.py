@@ -27,41 +27,8 @@ engine.get_files.restype = ctypes.c_ulonglong
 engine.get_symbol_count.restype = ctypes.c_ulonglong
 engine.get_board_length.restype = ctypes.c_ulonglong
 
-class Histotrie(ctypes.Structure):
-    pass
-Histotrie._fields_ = [('children', ctypes.POINTER(Histotrie) * engine.get_symbol_count())]
-
 class Game(ctypes.Structure):
-    _fields_ = [
-        ("pause", ctypes.c_bool),
-        ("dropped", ctypes.c_bool),
-        ("moved_left", ctypes.c_bool),
-        ("moved_right", ctypes.c_bool),
-        ("moved_down", ctypes.c_bool),
-        ("dragged_left", ctypes.c_longdouble),
-        ("dragged_right", ctypes.c_longdouble),
-        ("dragged_down", ctypes.c_longdouble),
-        ("score", ctypes.c_ulonglong),
-        ("combo", ctypes.c_ulonglong),
-        ("scored", ctypes.c_ulonglong),
-        ("time", ctypes.c_longlong),
-        ("last_moved", ctypes.c_longlong),
-        ("last_fell", ctypes.c_longlong),
-        ("player", ctypes.c_char),
-        ("player_rank", ctypes.c_ushort),
-        ("player_file", ctypes.c_ushort),
-        ("cursor", ctypes.c_short),
-        ("cursor_grade", ctypes.c_ushort),
-        ("cursor_increment", ctypes.c_ushort),
-        ("board", ctypes.c_char * engine.get_board_length()),
-        ("captures", ctypes.c_char * engine.get_files()),
-        ("repeat", ctypes.c_bool),
-        ("settings", ctypes.c_ulonglong),
-        ("events", ctypes.c_ulonglong),
-        ("total_pieces", ctypes.c_ulonglong),
-        ("total_value", ctypes.c_ulonglong),
-        ("histotrie", ctypes.POINTER(Histotrie)),
-    ]
+    _fields_ = []
 
 engine.malloc_init_default_game.restype = ctypes.POINTER(Game)
 engine.input_toggle_pause.argtypes = [ctypes.POINTER(Game)]
@@ -73,8 +40,28 @@ engine.begin_game.argtypes = [ctypes.POINTER(Game)]
 engine.is_game_over.argtypes = [ctypes.POINTER(Game)]
 engine.is_game_over.restype = ctypes.c_bool
 engine.delete_game.argtypes = [ctypes.POINTER(Game)]
+engine.get_events.argtypes = [ctypes.POINTER(Game)]
+engine.get_events.restype = ctypes.c_ulonglong
+engine.get_board.argtypes = [ctypes.POINTER(Game)]
+engine.get_board.restype = ctypes.c_char_p
+engine.get_player.argtypes = [ctypes.POINTER(Game)]
+engine.get_player.restype = ctypes.c_char
+engine.get_player_rank.argtypes = [ctypes.POINTER(Game)]
+engine.get_player_rank.restype = ctypes.c_ushort
+engine.get_player_file.argtypes = [ctypes.POINTER(Game)]
+engine.get_player_file.restype = ctypes.c_ushort
+engine.get_cursor_grade.argtypes = [ctypes.POINTER(Game)]
+engine.get_cursor_grade.restype = ctypes.c_ushort
+engine.get_cursor_increment.argtypes = [ctypes.POINTER(Game)]
+engine.get_cursor_increment.restype = ctypes.c_ushort
 engine.get_next_piece.argtypes = [ctypes.POINTER(Game)]
 engine.get_next_piece.restype = ctypes.c_wchar
+engine.get_score.argtypes = [ctypes.POINTER(Game)]
+engine.get_score.restype = ctypes.c_ulonglong
+engine.get_scored.argtypes = [ctypes.POINTER(Game)]
+engine.get_scored.restype = ctypes.c_ulonglong
+engine.get_combo.argtypes = [ctypes.POINTER(Game)]
+engine.get_combo.restype = ctypes.c_ulonglong
 engine.forecast_captures.argtypes = [ctypes.POINTER(Game)]
 engine.forecast_captures.restype = ctypes.c_ulonglong
 engine.get_forecast_piece.argtypes = [ctypes.POINTER(Game)]
@@ -91,5 +78,7 @@ engine.is_on_brink.argtypes = [ctypes.POINTER(Game)]
 engine.is_on_brink.restype = ctypes.c_bool
 engine.is_paused.argtypes = [ctypes.POINTER(Game)]
 engine.is_paused.restype = ctypes.c_bool
+engine.is_repeat.argtypes = [ctypes.POINTER(Game)]
+engine.is_repeat.restype = ctypes.c_bool
 engine.get_ease.argtypes = [ctypes.POINTER(Game)]
 engine.get_ease.restype = ctypes.c_ulonglong
