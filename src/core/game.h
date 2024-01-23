@@ -5,14 +5,9 @@
 typedef size_t Settings;
 typedef size_t Events;
 
-#define FPS 60
-//#define PLAYER_SQUARE(G) SQUARE_INDEX(G->player_rank, G->player_file)
-#define SET(B, V) (B |= V)
-#define IS_SET(S, V) (S & V)
-#define COUNT_INTERVALS(A, Z, N) (((Z) - (A)) / (N))
-#define SPF (1.0 / ((long double) FPS))
-#define MPF ((time_t) (1000.0 * SPF))
-#define MILLISECONDS_DIFFERENCE(A, Z) ((time_t)(1000.0 * ((Z).time - (A).time) + ((Z).millitm - (A).millitm)));
+#define SET(__settings__, __setting__) (__settings__ |= __setting__)
+#define IS_SET(__settings__, __setting__) (__settings__ & __setting__)
+#define MILLISECONDS_DIFFERENCE(__from_time__, __to_time__) ((time_t)(1000.0 * ((__to_time__).time - (__from_time__).time) + ((__to_time__).millitm - (__from_time__).millitm)));
 
 enum Setting {
 
