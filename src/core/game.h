@@ -6,7 +6,7 @@ typedef size_t Settings;
 typedef size_t Events;
 
 #define FPS 60
-#define PLAYER_SQUARE(G) SQUARE_INDEX(G->player_rank, G->player_file)
+//#define PLAYER_SQUARE(G) SQUARE_INDEX(G->player_rank, G->player_file)
 #define SET(B, V) (B |= V)
 #define IS_SET(S, V) (S & V)
 #define COUNT_INTERVALS(A, Z, N) (((Z) - (A)) / (N))
