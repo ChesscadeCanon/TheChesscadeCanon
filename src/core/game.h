@@ -58,6 +58,7 @@ struct Game {
 	time_t time;
 	time_t last_moved;
 	time_t last_fell;
+	time_t last_spawned;
 	char player;
 	Index player_rank;
 	Index player_file;

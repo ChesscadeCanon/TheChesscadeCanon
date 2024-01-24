@@ -15,6 +15,7 @@
 #define MOVE_RATE(__game__) (64)
 #define SINCE_MOVED(__game__) ((__game__->time) - __game__->last_moved)
 #define SINCE_FELL(__game__) ((__game__->time) - __game__->last_fell)
+#define SINCE_SPAWNED(__game__) ((__game__->time) - __game__->last_spawned)
 #define DRAG(__drag__, __steps__) __drag__ = max(0, __drag__ - (long double)__steps__);
 #define PLACE_PLAYER(__game__) SET_SQUARE(__game__->board, PLAYER_SQUARE(__game__), __game__->player)
 #define REVERSE_CURSOR(__game__) (__game__->cursor *= -1)
@@ -222,6 +223,8 @@ void _resolve(struct Game* game) {
 
 		REVERSE_CURSOR(game);
 	}
+
+	game->last_spawned = game->time;
 }
 
 bool _move_player(struct Game* game, size_t to) {
@@ -361,6 +364,7 @@ void _init_game(struct Game* game) {
 	game->time = 0;
 	game->last_moved = 0;
 	game->last_fell = 0;
+	game->last_spawned = 0;
 	game->repeat = false;
 	game->pause = false;
 	game->player = 'W';
@@ -520,7 +524,7 @@ bool _take_drop(struct Game* game) {
 
 	bool ret = false;
 
-	if (game->dropped && SINCE_FELL(game) >= DROP_RATE(game)) {
+	if (game->dropped && SINCE_SPAWNED(game) >= DROP_RATE(game)) {
 
 		if (_drop(game)) {
 
@@ -540,7 +544,7 @@ void pump(struct Game* game, const time_t passed) {
 	game->events = 0;
 	game->time += passed;
 
-	if (_take_drop(game)) return;
+	_take_drop(game);
 	_take_drag(game);
 	game->last_moved += _take_input(game);
 
