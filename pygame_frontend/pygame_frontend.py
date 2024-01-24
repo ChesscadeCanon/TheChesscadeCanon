@@ -12,9 +12,9 @@ def update_high_score(score):
     with open('high_score.txt', 'r') as file:
         line = file.readline()
         high_score = int(line) if line else high_score
+    if score > high_score:
+        high_score = score
     with open('high_score.txt', 'w') as file:
-        if score > high_score:
-            high_score = score
         file.write(str(high_score))
     return high_score
 
@@ -92,6 +92,7 @@ player_pieces = load_pieces(PLAYER_PIECES_DIR)
 draw_piece = lambda P, p, x, y: p in P and screen.blit(P[p], (x, y))
 draw_piece_on_square = lambda P, p, r, f: draw_piece(P, p, (f + SQUARES_OFF_LEFT) * SQUARE, (r + SQUARES_OFF_TOP) * SQUARE)
 draw_piece_on_deck = lambda P, p, r, f: draw_piece(P, p, (f + SQUARES_OFF_LEFT) * SQUARE, r * SQUARE)
+get_board = lambda g: ''.join([chr(p) for p in engine.get_board(g)])
 
 def draw_board(game):
     white = WHITE
@@ -119,7 +120,7 @@ def draw_board(game):
 def draw_pieces(game):
     index = 0
     threats = engine.forecast_captures(game)
-    board = engine.get_board(game)
+    board = get_board(game)
     if engine.is_repeat(game):
         if board in history:
             print("Yup, that's a repeat!")
