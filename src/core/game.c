@@ -347,7 +347,7 @@ time_t _do_input(struct Game* game, bool left, bool right, bool down) {
 	return ret;
 }
 
-time_t _take_input(struct Game* game) {
+time_t _take_move(struct Game* game) {
 
 	const time_t down = _buy_move(game, &game->moved_down);
 	const time_t left = _buy_move(game, &game->moved_left);
@@ -546,7 +546,7 @@ void pump(struct Game* game, const time_t passed) {
 
 	_take_drop(game);
 	_take_drag(game);
-	game->last_moved += _take_input(game);
+	game->last_moved += _take_move(game);
 
 	if (!game->moved_left && !game->moved_right && !game->moved_down) {
 
