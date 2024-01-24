@@ -21,7 +21,8 @@
 #define DOUBLE_BISHOP(__game__) (PIECE_MAP[__game__->player] == BISHOP && IS_SET(__game__->settings, DOUBLE_BISHOPS))
 #define BISHOP_SPEED(__game__, __moved__) ((__moved__) / (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_DOWN(__game__) SQUARE_INDEX(__game__->player_rank + (DOUBLE_BISHOP(__game__) + 1), __game__->player_file)
-#define EASE(__game__) max(1, 1024) * (1 + DOUBLE_BISHOP(__game__))
+#define EASE(__game__) (max(1, 1024) * (1 + DOUBLE_BISHOP(__game__)))
+#define DROP_RATE(__game__) (EASE(__game__) >> 1) 
 #define QUEEN_ME(__game__, __rank__) (\
 	IS_SET(__game__->settings, PAWNS_PROMOTE) ?\
 		__game__->player == WHITE_PAWN && (__rank__) == 0 ? WHITE_QUEEN \
@@ -519,7 +520,7 @@ bool _take_drop(struct Game* game) {
 
 	bool ret = false;
 
-	if (game->dropped && SINCE_MOVED(game) >= MOVE_RATE(game)) {
+	if (game->dropped && SINCE_FELL(game) >= DROP_RATE(game)) {
 
 		if (_drop(game)) {
 
