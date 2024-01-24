@@ -19,17 +19,10 @@ void _print_instructions() {
 }
 
 void _print_info(struct Game* game) {
-#if OS_WINDOWS
 	printf("score %llu\n", game->score);
 	printf("combo %llu\n", game->combo);
 	printf("repeat %d\n", game->repeat);
 	printf("time %llu\n", game->time);
-#else
-	printf("score %lu\n\r", game->score);
-	printf("combo %lu\n\r", game->combo);
-	printf("repeat %d\n\r", game->repeat);
-	printf("time %lu\n\r", game->time);
-#endif
 }
 
 void _print_cursor(struct Game* game) {
@@ -40,7 +33,6 @@ void _print_cursor(struct Game* game) {
 	const char* d = deck(rank);
 	char next = d[file];
 	next = wrapped ? IS_WHITE(next) ? 'K' : 'k' : next;
-#if OS_WINDOWS
 	char cursor[FOUR_LINES + 1] = {
 		'*', '*', '*', '*', '*', '*', '*', '*', '\n',
 		'*', '*', '*', '*', '*', '*', '*', '*', '\n',
@@ -48,35 +40,18 @@ void _print_cursor(struct Game* game) {
 		'*', '*', '*', '*', '*', '*', '*', '*', '\n',
 		'\0'
 	};
-#else
-	char cursor[FOUR_LINES + 5] = {
-		'*', '*', '*', '*', '*', '*', '*', '*', '\n', '\r',
-		'*', '*', '*', '*', '*', '*', '*', '*', '\n', '\r',
-		'*', '*', '*', '*', '*', '*', '*', '*', '\n', '\r',
-		'*', '*', '*', '*', '*', '*', '*', '*', '\n', '\r',
-		'\0'
-	};
-#endif
-	cursor[rank * (LINE_LENGTH + !OS_WINDOWS) + file] = next;
+	cursor[rank * (LINE_LENGTH) + file] = next;
 	printf("%s", cursor);
 }
 
 void print_raw(struct Game* game) {
-#if OS_WINDOWS
+
 	printf("score %llu\n", game->score);
 	printf("time %llu\n", game->time);
 	printf("last moved %llu\n", game->last_moved);
 	printf("left %d\n", game->moved_left);
 	printf("right %d\n", game->moved_right);
 	printf("down %d\n", game->moved_down);
-#else
-	printf("score %lu\n\r", game->score);
-	printf("time %lu\n\r", game->time);
-	printf("last moved %lu\n\r", game->last_moved);
-	printf("left %d\n\r", game->moved_left);
-	printf("right %d\n\r", game->moved_right);
-	printf("down %d\n\r", game->moved_down);
-#endif
 	printf("%s", game->board);
 }
 

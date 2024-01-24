@@ -29,15 +29,8 @@ void default_control(struct Game* game, const time_t passed) {
 void tock(struct Game* game, struct timeb* then, struct timeb* now) {
 
 	memcpy(then, now, sizeof(struct timeb));
-
-#if OS_WINDOWS
 	Sleep(MPF);
 	if(!game->pause) system("cls");
-#else
-	refresh();
-	sleep(SPF);
-	if(!game->paused) system("clear");
-#endif
 }
 
 void default_model(struct Game* game, const time_t passed) {
@@ -86,22 +79,11 @@ void play_pretty(struct Game* game) {
 	play(game, &start, default_control, default_model, pretty_view);
 }
 
-void run_pretty_text_game(size_t settings) {
+void run_pretty_text_game(Settings settings) {
 
 	struct Game* game = malloc_init_game(settings);
-
-#if OS_WINDOWS
-#else
-	initscr();
-	nodelay(stdscr, TRUE);
-	//cbreak();
-#endif
 	play_pretty(game);
 	free_game(game);
-#if OS_WINDOWS
-#else
-	endwin();
-#endif
 }
 
 int main(int argc, char** argv) {
