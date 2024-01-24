@@ -23,20 +23,20 @@
 #define BLACK_KNIGHT 'n'
 #define WHITE_BISHOP 'B'
 #define BLACK_BISHOP 'b'
-#define FILES 8ull
-#define RANKS 8ull
-#define CAPTURE_LENGTH 9ull
+#define FILES 8
+#define RANKS 8
+#define CAPTURE_LENGTH 9
 #define EMPTY_CAPTURES "********"
 #define HAS_CAPTURED(__captures__) (strncmp(EMPTY_CAPTURES, __captures__, CAPTURE_LENGTH) != 0)
-#define LINE_LENGTH (FILES + 1ull)
+#define LINE_LENGTH (FILES + 1)
 #define SQUARE_RANK(__index__) ((Index)(__index__ / LINE_LENGTH))
 #define SQUARE_FILE(__index__) ((Index)(__index__ % LINE_LENGTH))
-#define SQUARE_BIT(__index__) (1ull << (SQUARE_RANK(__index__) * FILES + SQUARE_FILE(__index__)))
+#define SQUARE_BIT(__index__) (1ull << (size_t)(SQUARE_RANK(__index__) * FILES + SQUARE_FILE(__index__)))
 #define SET_CAPTURE(__captures__, __piece_index__, __value__) (__captures__[__piece_index__] = __value__)
 #define SET_SQUARE(__board__, __index__, __value__) (__board__[__index__] = __value__)
 #define IS_WHITE(__piece__) (__piece__ <= 'Z')
 #define SQUARE_INDEX(__rank__, __file__) ((__rank__) * LINE_LENGTH + (__file__))
-#define FOUR_LINES (LINE_LENGTH * 4ull)
+#define FOUR_LINES (LINE_LENGTH * 4)
 #define BOARD_LENGTH (LINE_LENGTH * RANKS + 1)
 #define CURSES_STATE_LENGTH (BOARD_LENGTH + RANKS)
 #define TERMINATOR_INDEX (BOARD_LENGTH - 1)
@@ -44,8 +44,8 @@
 #define GET_SQUARE(__board__, __index__) __board__[__index__]
 #define GET_CAPTURE(__captures__, __index__) (__captures__[__index__])
 #define EMPTY_SQUARE(__board__, __index__) (GET_SQUARE(__board__, __index__) == EMPTY)
-#define LAST_FILE (FILES - 1ull)
-#define LAST_RANK (RANKS - 1ull)
+#define LAST_FILE (FILES - 1)
+#define LAST_RANK (RANKS - 1)
 #define SQUARE_DOWN(__index__) (__index__ + LINE_LENGTH)
 
 typedef char* Board;

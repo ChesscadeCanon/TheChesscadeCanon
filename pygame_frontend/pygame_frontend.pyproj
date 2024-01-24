@@ -24,7 +24,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="audio_video.py" />
-    <Compile Include="lexicon.py" />
+    <Compile Include="style.py" />
     <Compile Include="librarian.py" />
     <Compile Include="instrument.py" />
     <Compile Include="pygame_frontend.py" />

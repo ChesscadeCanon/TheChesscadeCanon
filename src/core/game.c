@@ -98,14 +98,14 @@ size_t _bit_index(size_t bit) {
 	return i >= 64 ? 0 : i;
 }
 
-void _kill(struct Game* game, const size_t square, const size_t move) {
+void _kill(struct Game* game, const Index square, const Index move) {
 
 	Piece piece = GET_SQUARE(game->board, square);
 	SET_CAPTURE(game->captures, move, piece);
 	SET_SQUARE(game->board, square, EMPTY);
 }
 
-size_t _capture(struct Game* game, const size_t square, const size_t move, const bool execute) {
+size_t _capture(struct Game* game, const Index square, const Index move, const bool execute) {
 
 	if (execute) {
 
@@ -115,12 +115,12 @@ size_t _capture(struct Game* game, const size_t square, const size_t move, const
 	return SQUARE_BIT(square);
 }
 
-size_t _hit(struct Game* game, enum Square piece_type, const size_t rank, const size_t file, const size_t move, const bool execute, const bool pattern) {
+size_t _hit(struct Game* game, const enum Square piece_type, const Index rank, const Index file, const Index move, const bool execute, const bool pattern) {
 
 	struct MoveSet move_set = MOVES[piece_type];
 	const short invert = piece_type == PAWN && IS_WHITE(game->player) && IS_SET(game->settings, WHITE_PAWN_HIT_UP) ? -1 : 1;
-	size_t to_rank = rank;
-	size_t to_file = file;
+	Index to_rank = rank;
+	Index to_file = file;
 	bool open = true;
 	size_t ret = 0;
 
@@ -128,7 +128,7 @@ size_t _hit(struct Game* game, enum Square piece_type, const size_t rank, const 
 
 		to_rank += move_set.moves[move][0] * invert;
 		to_file += move_set.moves[move][1];
-		const size_t square = SQUARE_INDEX(to_rank, to_file);
+		const Index square = SQUARE_INDEX(to_rank, to_file);
 		open = CAN_STRIKE(game, square);
 		ret |= open && pattern ? SQUARE_BIT(square) : 0;
 		if (CAN_CAPTURE(game, square)) {
@@ -141,20 +141,20 @@ size_t _hit(struct Game* game, enum Square piece_type, const size_t rank, const 
 	return ret;
 }
 
-size_t _strike(struct Game* game, const enum Square piece_type, const size_t rank, const size_t file, const bool execute, const bool pattern) {
+size_t _strike(struct Game* game, const enum Square piece_type, const Index rank, const Index file, const bool execute, const bool pattern) {
 
 	const struct MoveSet move_set = MOVES[piece_type];
 	size_t ret = 0;
-	for (size_t move = 0; move < move_set.count; ++move) {
+	for (Index move = 0; move < move_set.count; ++move) {
 
 		ret |= _hit(game, piece_type, rank, file, move, execute, pattern);
 	}
 	return ret;
 }
 
-size_t _drop_to(struct Game* game, const size_t from) {
+Index _drop_to(struct Game* game, const Index from) {
 
-	size_t to = SQUARE_DOWN(from);
+	Index to = SQUARE_DOWN(from);
 
 	if (DOUBLE_BISHOP(game)) {
 
@@ -174,7 +174,7 @@ size_t _judge(struct Game* game) {
 	game->scored = 0;
 	size_t count = 0;
 
-	for (size_t i = 0; i < FILES; ++i) {
+	for (Index i = 0; i < FILES; ++i) {
 
 		Piece piece = GET_CAPTURE(game->captures, i);
 
@@ -251,14 +251,6 @@ time_t _buy_move(struct Game* game, bool* moved) {
 	return steps;
 }
 
-void _drop(struct Game* game) {
-
-	const size_t from = PLAYER_SQUARE(game);
-	const size_t to = _drop_to(game, from);
-	_move_player(game, to);
-	game->events = EVENT_DROPPED;
-}
-
 time_t _move(struct Game* game, time_t steps, const short by_rank, const short by_file) {
 
 	if (steps == 0) return 0;
@@ -275,6 +267,17 @@ time_t _move(struct Game* game, time_t steps, const short by_rank, const short b
 		++ret;
 	};
 
+	return ret;
+}
+
+bool _drop(struct Game* game) {
+
+	const Index from = PLAYER_SQUARE(game);
+	const Index to = _drop_to(game, from);
+	const bool ret = to != from;
+	_move_player(game, to);
+	_move(game, 1, 1, 0);
+	game->events |= EVENT_DROPPED * ret;
 	return ret;
 }
 
@@ -300,56 +303,52 @@ time_t _fall(struct Game* game) {
 	return ret;
 }
 
-time_t _take_input(struct Game* game) {
+time_t _do_input(struct Game* game, bool left, bool right, bool down) {
 
-	if (game->dropped) {
-
-		_drop(game);
-		game->dropped = false;
-	}
-
-	const bool moving_down = game->moved_down;
-	const bool moving_left = game->moved_left;
-	const bool moving_right = game->moved_right;
+	time_t ret = 0;
 	const bool diagonals = IS_SET(game->settings, DIAGONALS);
-	const bool diagonal = diagonals && moving_down && moving_left != moving_right;
-	const time_t down = _buy_move(game, &game->moved_down);
-	const time_t left = _buy_move(game, &game->moved_left);
-	const time_t right = _buy_move(game, &game->moved_right);
-	time_t count = 0;
 
 	game->events |= (EVENT_LEFT * (left > 0)) | (EVENT_RIGHT * (right > 0)) | (EVENT_DOWN * (down > 0));
 
 	if (diagonals && left > 0 && down > 0 && right == 0) {
 
 		const time_t steps = min(left, down);
-		count = _move(game, steps, 1, -1);
-		DRAG(game->dragged_left, count);
-		DRAG(game->dragged_down, count);
+		ret = _move(game, steps, 1, -1);
+		DRAG(game->dragged_left, ret);
+		DRAG(game->dragged_down, ret);
 	}
 	else if (diagonals && left == 0 && down > 0 && right > 0) {
 
 		const time_t steps = min(right, down);
-		count = _move(game, steps, 1, 1);
-		DRAG(game->dragged_right, count);
-		DRAG(game->dragged_down, count);
+		ret = _move(game, steps, 1, 1);
+		DRAG(game->dragged_right, ret);
+		DRAG(game->dragged_down, ret);
 	}
 	else if (left == 0 && right > 0 && down == 0) {
-
-		count = _move(game, right, 0, 1);
-		DRAG(game->dragged_right, count);
+		
+		ret = _move(game, right, 0, 1);
+		DRAG(game->dragged_right, ret);
 	}
 	else if (left > 0 && right == 0 && down == 0) {
 
-		count = _move(game, left, 0, -1);
-		DRAG(game->dragged_left, count);
+		ret = _move(game, left, 0, -1);
+		DRAG(game->dragged_left, ret);
 	}
-	else if(left == 0 && right == 0 && down > 0) {
+	else if (left == 0 && right == 0 && down > 0) {
 
-		count = _move(game, max(0, down), 1, 0);
-		DRAG(game->dragged_down, count);
+		ret = _move(game, max(0, down), 1, 0);
+		DRAG(game->dragged_down, ret);
 	}
 
+	return ret;
+}
+
+time_t _take_input(struct Game* game) {
+
+	const time_t down = _buy_move(game, &game->moved_down);
+	const time_t left = _buy_move(game, &game->moved_left);
+	const time_t right = _buy_move(game, &game->moved_right);
+	const time_t count = _do_input(game, left, right, down);
 	return count * MOVE_RATE(game);
 }
 
@@ -468,8 +467,8 @@ size_t attack(struct Game* game, const bool execute, const bool forecast, const 
 	if (game->repeat && IS_SET(game->settings, NO_CAPTURE_ON_REPEAT)) return 0;
 
 	Piece piece = game->player;
-	size_t rank = game->player_rank;
-	const size_t file = game->player_file;
+	Index rank = game->player_rank;
+	const Index file = game->player_file;
 
 	if (forecast) {
 
@@ -486,24 +485,20 @@ size_t attack(struct Game* game, const bool execute, const bool forecast, const 
 	return _strike(game, piece_type, rank, file, execute, pattern);
 }
 
-size_t forecast_rank(struct Game* game) {
+Index forecast_rank(struct Game* game) {
 
-	const size_t rank = game->player_rank;
-	const size_t file = game->player_file;
+	const Index rank = game->player_rank;
+	const Index file = game->player_file;
 	return SQUARE_RANK(_drop_to(game, SQUARE_INDEX(rank, file)));
 }
 
 char forecast_piece(struct Game* game) {
 
-	const size_t rank = forecast_rank(game);
+	const Index rank = forecast_rank(game);
 	return QUEEN_ME(game, rank);
 }
 
-void pump(struct Game* game, const time_t passed) {
-
-	if (game_over(game) || game->pause) return;
-	game->events = 0;
-	game->time += passed;
+void _take_drag(struct Game* game) {
 
 	if (game->dragged_right >= 1.0) {
 
@@ -518,7 +513,34 @@ void pump(struct Game* game, const time_t passed) {
 
 		game->moved_down = true;
 	}
+}
 
+bool _take_drop(struct Game* game) {
+
+	bool ret = false;
+
+	if (game->dropped && SINCE_MOVED(game) >= MOVE_RATE(game)) {
+
+		if (_drop(game)) {
+
+			game->last_moved = game->last_fell = game->time;
+			ret = true;
+		}
+	}
+
+	game->dropped = false;
+	return ret;
+}
+
+void pump(struct Game* game, const time_t passed) {
+
+	if (game_over(game) || game->pause) return;
+
+	game->events = 0;
+	game->time += passed;
+
+	if (_take_drop(game)) return;
+	_take_drag(game);
 	game->last_moved += _take_input(game);
 
 	if (!game->moved_left && !game->moved_right && !game->moved_down) {

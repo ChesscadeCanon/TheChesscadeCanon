@@ -1,10 +1,3 @@
-EVENT_FELL = 1 << 0
-EVENT_LEFT = 1 << 2
-EVENT_RIGHT = 1 << 3
-EVENT_DOWN = 1 << 4
-EVENT_DROPPED = 1 << 5
-EVENT_WRAPPED = 1 << 6
-
 BOARD_PIECES_DIR = "assets/grey_pieces/"
 DECK_PIECES_DIR = "assets/black_white_pieces/"
 NEXT_PIECES_DIR = "assets/orange_pieces/"

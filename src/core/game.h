@@ -83,7 +83,7 @@ void free_game(struct Game*);
 void begin(struct Game*);
 void pump(struct Game* game, const time_t passed);
 Piece next_piece(struct Game*);
-size_t forecast_rank(struct Game*);
+Index forecast_rank(struct Game*);
 char forecast_piece(struct Game*);
 size_t attack(struct Game*, const bool, const bool, const bool);
 bool cursor_wrapped(struct Game*);

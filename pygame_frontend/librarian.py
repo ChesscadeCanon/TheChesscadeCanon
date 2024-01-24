@@ -1,6 +1,13 @@
 import platform
 import ctypes
 
+EVENT_FELL = 1 << 0
+EVENT_LEFT = 1 << 2
+EVENT_RIGHT = 1 << 3
+EVENT_DOWN = 1 << 4
+EVENT_DROPPED = 1 << 5
+EVENT_WRAPPED = 1 << 6
+
 SYSTEM = platform.system().lower()
 ENGINE_PATH = 'bin/ChesscadeLib.dll' if "windows" in SYSTEM else 'bin/libChesscadeLib.so' if "linux" in SYSTEM else 'bin/cygChesscadeLib.dll' if 'cygwin' in SYSTEM else ''
 assert len(ENGINE_PATH), f"Not compatible with {platform.system()} systems."
