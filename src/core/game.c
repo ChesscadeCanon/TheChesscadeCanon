@@ -347,13 +347,25 @@ time_t _do_input(struct Game* game, bool left, bool right, bool down) {
 	return ret;
 }
 
-time_t _take_move(struct Game* game) {
+void _take_move(struct Game* game) {
 
 	const time_t down = _buy_move(game, &game->moved_down);
 	const time_t left = _buy_move(game, &game->moved_left);
 	const time_t right = _buy_move(game, &game->moved_right);
 	const time_t count = _do_input(game, left, right, down);
-	return count * MOVE_RATE(game);
+
+	game->last_moved += count * MOVE_RATE(game);
+
+	if (!game->moved_left && !game->moved_right && !game->moved_down) {
+
+		game->last_moved = game->time;
+	}
+	else if (IS_SET(game->settings, FLYING_PIECES) && game->last_fell < game->last_moved) {
+
+		game->last_fell = game->last_moved;
+	}
+
+	game->last_fell += _fall(game);
 }
 
 void _init_game(struct Game* game) {
@@ -520,21 +532,17 @@ void _take_drag(struct Game* game) {
 	}
 }
 
-bool _take_drop(struct Game* game) {
-
-	bool ret = false;
+void _take_drop(struct Game* game) {
 
 	if (game->dropped && SINCE_SPAWNED(game) >= DROP_RATE(game)) {
 
 		if (_drop(game)) {
 
 			game->last_moved = game->last_fell = game->time;
-			ret = true;
 		}
 	}
 
 	game->dropped = false;
-	return ret;
 }
 
 void pump(struct Game* game, const time_t passed) {
@@ -546,18 +554,7 @@ void pump(struct Game* game, const time_t passed) {
 
 	_take_drop(game);
 	_take_drag(game);
-	game->last_moved += _take_move(game);
-
-	if (!game->moved_left && !game->moved_right && !game->moved_down) {
-
-		game->last_moved = game->time;
-	}
-	else if (IS_SET(game->settings, FLYING_PIECES) && game->last_fell < game->last_moved) {
-
-		game->last_fell = game->last_moved;
-	}
-
-	game->last_fell += _fall(game);
+	_take_move(game);
 }
 
 void begin(struct Game* game) {
