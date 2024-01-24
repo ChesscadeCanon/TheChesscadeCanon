@@ -8,6 +8,7 @@
 //  GCC
 #include <stddef.h>
 #endif
+
 #define DEAD_PLAYER '!'
 #define EMPTY '_'
 #define WHITE_PAWN 'P'
