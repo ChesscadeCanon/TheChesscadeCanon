@@ -1,11 +1,6 @@
-import ctypes
-import pygame
-from res import *
-from os import environ
+from librarian import Engine
+from audio_video import *
 
-history = set()
-
-pygame.init()
 high_score = 0
 def update_high_score(score):
     global high_score
@@ -18,77 +13,19 @@ def update_high_score(score):
         file.write(str(high_score))
     return high_score
 
-if "REPL_OWNER" not in environ:
-    import pygame.midi
-    pygame.midi.init()
-    from instrument import MIDINote
-
-    fall_notes = [
-        list(range(32, 48, 2)),
-        list(range(48, 64, 2)),
-        list(range(64, 80, 2)),
-        list(range(80, 96, 2))
-    ]
-    
-    port = pygame.midi.get_default_output_id()
-    midi_out = pygame.midi.Output(port, 0)
-    midi_out.set_instrument(0)
-    fall_notes = [[MIDINote(midi_out, n, 64) for n in s] for s in fall_notes]
+engine = Engine()
 
 RULES = ''.join([chr(b) for b in engine.get_rules()])
-BLACK = ( 0, 0, 0)
-WHITE = ( 255, 255, 255)
-GREY = ( 127, 127, 127)
-RED = (255, 0, 0)
-BLUE = (0, 0, 255)
-DARK_GREY = (63, 63, 63)
-LIGHT_GREY = (171, 171, 171)
-DARK_ORANGE = (255, 127, 80)
-LIGHT_ORANGE = (255, 215, 0)
-DARK_BLUE = (0, 0, 64)
-LIGHT_BLUE = (191, 191, 255)
-DARK_RED = (64, 0, 0)
-LIGHT_RED = (255, 191, 191)
-SIZE = (400, 480)
 RANKS = engine.get_ranks()
 FILES = engine.get_files()
 SYMBOL_COUNT = engine.get_symbol_count()
 BOARD_LENGTH = engine.get_board_length()
-SQUARE = 40
-SQUARES_OFF_LEFT = 4
-SQUARES_OFF_TOP = 4
 SIZE = (FILES + SQUARES_OFF_LEFT) * SQUARE, (RANKS + SQUARES_OFF_TOP) * SQUARE
 SQUARE = min(SIZE[0] // (FILES + SQUARES_OFF_LEFT), SIZE[1] // (RANKS + SQUARES_OFF_TOP))
-FONT_0 = pygame.font.Font('freesansbold.ttf', 11)
-FONT_1 = pygame.font.Font('freesansbold.ttf', 14)
-FONT_2 = pygame.font.Font('freesansbold.ttf', 32)
 
 screen = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Chesscade")
 
-PIECES = ['p', 'q', 'k', 'n', 'b', 'r']
-piece_path = lambda p, d: (d + ('w' + p if p.isupper() else 'b' + p)).lower() + ".png"
-load_piece = lambda n, d: pygame.image.load(piece_path(n, d))
-scale_piece = lambda p: pygame.transform.scale(p, (SQUARE, SQUARE))
-setup_piece = lambda n, d: scale_piece(load_piece(n, d))
-
-def tint_piece(p, n):
-    pixels = pygame.PixelArray(p)
-    pixels.replace(BLACK if n.isupper() else WHITE, GREY)
-    del pixels
-    return p
-
-def load_pieces(directory):
-    ret = {}
-    [ret.update({p: setup_piece(p, directory)}) for p in PIECES + list([w.upper() for w in PIECES])]
-    return ret
-
-board_pieces = load_pieces(BOARD_PIECES_DIR)
-deck_pieces = load_pieces(DECK_PIECES_DIR)
-next_pieces = load_pieces(NEXT_PIECES_DIR)
-threatened_pieces = load_pieces(THREATENED_PIECES_DIR)
-shadow_pieces = load_pieces(SHADOW_PIECES_DIR)
-player_pieces = load_pieces(PLAYER_PIECES_DIR)
 draw_piece = lambda P, p, x, y: p in P and screen.blit(P[p], (x, y))
 draw_piece_on_square = lambda P, p, r, f: draw_piece(P, p, (f + SQUARES_OFF_LEFT) * SQUARE, (r + SQUARES_OFF_TOP) * SQUARE)
 draw_piece_on_deck = lambda P, p, r, f: draw_piece(P, p, (f + SQUARES_OFF_LEFT) * SQUARE, r * SQUARE)
@@ -121,12 +58,6 @@ def draw_pieces(game):
     index = 0
     threats = engine.forecast_captures(game)
     board = get_board(game)
-    if engine.is_repeat(game):
-        if board in history:
-            print("Yup, that's a repeat!")
-        else:
-            print("False positive!")
-    history.add(board)
     for r in range(RANKS):
         for f in range(FILES):
             while board[index] == '\n':

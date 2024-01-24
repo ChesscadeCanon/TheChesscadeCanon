@@ -23,9 +23,11 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="audio_video.py" />
+    <Compile Include="lexicon.py" />
+    <Compile Include="librarian.py" />
     <Compile Include="instrument.py" />
     <Compile Include="pygame_frontend.py" />
-    <Compile Include="res.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
