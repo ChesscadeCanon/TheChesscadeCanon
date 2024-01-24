@@ -37,7 +37,7 @@ void input_analog_move(struct Game* game, long double x, long double y) {
 	}
 	else if (x < 0) {
 
-		game->dragged_left += -x;
+		game->dragged_left -= x;
 		game->dragged_right = 0;
 	}
 	else {

@@ -389,12 +389,12 @@ bool game_over(struct Game* game) {
 	return GAME_OVER(game);
 }
 
-bool on_brink(struct Game* game) {
+bool _will_checkmate(struct Game* game) {
 
 	size_t hits = attack(game, false, true, false);
 	size_t b = 1;
 
-	if(hits) while (b) {
+	if (hits) while (b) {
 
 		if (b & hits) {
 
@@ -411,15 +411,21 @@ bool on_brink(struct Game* game) {
 		b <<= 1;
 	}
 
-	size_t spawn_rank = SPAWN_RANK(game);
-	size_t spawn_file = game->cursor_increment;
-
-	if (GET_SQUARE(game->board, SQUARE_INDEX(spawn_rank, spawn_file)) != EMPTY) {
-
-		return true;
-	}
-
 	return false;
+}
+
+bool _will_overflow(struct Game* game) {
+
+	const Index rank = SPAWN_RANK(game);
+	const Index file = game->cursor_increment;
+	const Index index = SQUARE_INDEX(rank, file);
+	const Index square = GET_SQUARE(game->board, index);
+	return square != EMPTY;
+}
+
+bool on_brink(struct Game* game) {
+
+	return _will_overflow(game) || _will_checkmate(game);
 }
 
 bool cursor_wrapped(struct Game* game) {
