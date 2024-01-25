@@ -22,7 +22,6 @@ FILES = engine.get_files()
 SYMBOL_COUNT = engine.get_symbol_count()
 BOARD_LENGTH = engine.get_board_length()
 SIZE = (FILES + style.SQUARES_OFF_LEFT) * style.SQUARE, (RANKS + style.SQUARES_OFF_TOP) * style.SQUARE
-#SQUARE = min(style.SIZE[0] // (style.FILES + style.SQUARES_OFF_LEFT), style.SIZE[1] // (style.RANKS + style.SQUARES_OFF_TOP))
 
 screen = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Chesscade")

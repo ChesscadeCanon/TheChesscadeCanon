@@ -13,7 +13,7 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:ChesscadeLib> ${PROJECT_SOURCE_DIR}/pygame_frontend/bin/
 	COMMENT "Copied library to pygame_frontend/bin"
 )
-IF(false) # Terminal app currently only works on Windows, and is turned off because the .exe gives Windows Defender a false positive. It's more of a debugging tool than a game anyway.
+IF(true) # Terminal app currently only works on Windows, and is turned off because the .exe gives Windows Defender a false positive. It's more of a debugging tool than a game anyway.
 	IF(WIN32) # Linux side of the terminal app never quite worked and I removed it, but this code for including Curses can stay in case I want it again.
 		add_executable(ChesscadeApp)
 		IF(WIN32)

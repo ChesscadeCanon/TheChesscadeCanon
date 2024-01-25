@@ -28,8 +28,8 @@ void _print_info(struct Game* game) {
 void _print_cursor(struct Game* game) {
 
 	const bool wrapped = cursor_wrapped(game);
-	const size_t rank = game->cursor_grade;
-	const size_t file = game->cursor_increment;
+	const Index rank = game->cursor_grade;
+	const Index file = game->cursor_increment;
 	const char* d = deck(rank);
 	char next = d[file];
 	next = wrapped ? IS_WHITE(next) ? 'K' : 'k' : next;

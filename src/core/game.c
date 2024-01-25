@@ -449,7 +449,7 @@ bool cursor_wrapped(struct Game* game) {
 	return CURSOR_WRAPPED(game);
 }
 
-size_t square_bit(size_t rank, size_t file) {
+size_t square_bit(Index rank, Index file) {
 
 	return SQUARE_BIT(SQUARE_INDEX(rank, file));
 }
@@ -459,7 +459,7 @@ time_t ease(struct Game* game) {
 	return EASE(game);
 }
 
-const char* deck(size_t d) {
+const char* deck(Index d) {
 
 	return DECKS[d];
 }

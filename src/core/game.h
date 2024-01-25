@@ -77,8 +77,8 @@ struct Game {
 
 void print_rules();
 time_t ease(struct Game*);
-const char* deck(size_t);
-size_t square_bit(size_t, size_t);
+const char* deck(Index);
+size_t square_bit(Index, Index);
 struct Game* malloc_init_game(Settings);
 void free_game(struct Game*);
 void begin(struct Game*);

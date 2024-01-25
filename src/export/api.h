@@ -158,12 +158,12 @@ EXPORT char get_forecast_piece(struct Game*);
 /**
 * gets the bit that represents the square at the given coordinates for purposes of finding it in a bitflag
 */
-EXPORT size_t get_square_bit(size_t, size_t);
+EXPORT size_t get_square_bit(Index, Index);
 
 /**
 * returns one of the four "decks" that new spawns are drawn from
 */
-EXPORT const char* get_deck(size_t);
+EXPORT const char* get_deck(Index);
 
 /**
 * returns a pointer to a newly allocated and initialized Game struct

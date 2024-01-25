@@ -183,12 +183,12 @@ char get_forecast_piece(struct Game* game) {
 	return forecast_piece(game);
 }
 
-size_t get_square_bit(size_t rank, size_t file) {
+size_t get_square_bit(Index rank, Index file) {
 
 	return square_bit(rank, file);
 }
 
-const char* get_deck(size_t d) {
+const char* get_deck(Index d) {
 
 	return deck(d);
 }
