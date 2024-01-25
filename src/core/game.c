@@ -259,14 +259,18 @@ time_t _move(struct Game* game, time_t steps, const short by_rank, const short b
 
 	if (steps == 0) return 0;
 	const bool orthogonal = !by_rank != !by_file;
-	const size_t multiplier = max(1, (DOUBLE_BISHOP(game) + orthogonal));
+	const short multiplier = max(1, (DOUBLE_BISHOP(game) + orthogonal));
 	time_t ret = 0;
 
 	for (time_t s = 0; s < steps; ++s) {
 
-		const size_t to_rank = game->player_rank + (by_rank * multiplier);
-		const size_t to_file = game->player_file + (by_file * multiplier);
-		const size_t to = SQUARE_INDEX(to_rank, to_file);
+		const short by_ranks = by_rank * multiplier;
+		if (abs(by_ranks) > game->player_rank && by_ranks < 0) break;
+		const short by_files = by_file * multiplier;
+		if (abs(by_files) > game->player_file && by_files < 0) break;
+		const Index to_rank = game->player_rank + by_ranks;
+		const Index to_file = game->player_file + by_files;
+		const Index to = SQUARE_INDEX(to_rank, to_file);
 		if (!_move_player(game, to)) break;
 		++ret;
 	};
