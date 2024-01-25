@@ -6,6 +6,11 @@
 #include <assert.h>
 #include <stdio.h>
 
+struct Histotrie {
+
+	struct Histotrie* children[SYMBOL_COUNT];
+};
+
 #define HISTOTRIE_TEST 0
 #if HISTOTRIE_TEST
 void test_histotrie() {

@@ -12,6 +12,39 @@
 #define min(A, B) (A < B ? A : B)
 #endif
 
+struct Game {
+
+	bool pause;
+	bool dropped;
+	bool moved_left;
+	bool moved_right;
+	bool moved_down;
+	long double dragged_left;
+	long double dragged_right;
+	long double dragged_down;
+	size_t score;
+	size_t combo;
+	size_t scored;
+	time_t time;
+	time_t last_moved;
+	time_t last_fell;
+	time_t last_spawned;
+	char player;
+	Index player_rank;
+	Index player_file;
+	short cursor;
+	Index cursor_grade;
+	Index cursor_increment;
+	char board[BOARD_LENGTH];
+	char captures[CAPTURE_LENGTH];
+	bool repeat;
+	Settings settings;
+	Events events;
+	size_t total_pieces;
+	size_t total_value;
+	struct Histotrie* histotrie;
+};
+
 #define MOVE_RATE(__game__) (64)
 #define SINCE_MOVED(__game__) ((__game__->time) - __game__->last_moved)
 #define SINCE_FELL(__game__) ((__game__->time) - __game__->last_fell)
@@ -446,6 +479,111 @@ bool _will_overflow(struct Game* game) {
 bool on_brink(struct Game* game) {
 
 	return _will_overflow(game) || _will_checkmate(game);
+}
+
+void toggle_pause(struct Game* game) {
+
+	game->pause = !game->pause;
+}
+
+bool paused(struct Game* game) {
+
+	return game->pause;
+}
+
+bool repeated(struct Game* game) {
+
+	return game->repeat;
+}
+
+void do_drop(struct Game* game) {
+
+	game->dropped = true;
+}
+
+void do_digital_move(struct Game* game, bool left, bool right, bool down) {
+
+	game->moved_left = left;
+	game->moved_right = right;
+	game->moved_down = down;
+}
+
+void do_analog_move(struct Game* game, long double x, long double y) {
+
+	if (x > 0) {
+
+		game->dragged_left = 0;
+		game->dragged_right += x;
+	}
+	else if (x < 0) {
+
+		game->dragged_left -= x;
+		game->dragged_right = 0;
+	}
+	else {
+
+		game->dragged_left = 0;
+		game->dragged_right = 0;
+	}
+
+	if (y > 0) {
+
+		game->dragged_down += y;
+	}
+	else {
+
+		game->dragged_down = 0;
+	}
+}
+
+Events current_events(struct Game* game) {
+
+	return game->events;
+}
+
+Board board_state(struct Game* game) {
+
+	return game->board;
+}
+
+Piece player_piece(struct Game* game) {
+
+	return game->player;
+}
+
+Index player_piece_rank(struct Game* game) {
+
+	return game->player_rank;
+}
+
+Index player_piece_file(struct Game* game) {
+
+	return game->player_file;
+}
+
+Index current_cursor_grade(struct Game* game) {
+
+	return game->cursor_grade;
+}
+
+Index current_cursor_increment(struct Game* game) {
+
+	return game->cursor_increment;
+}
+
+size_t current_score(struct Game* game) {
+
+	return game->score;
+}
+
+size_t last_scored(struct Game* game) {
+
+	return game->scored;
+}
+
+size_t current_combo(struct Game* game) {
+
+	return game->scored;
 }
 
 bool cursor_wrapped(struct Game* game) {

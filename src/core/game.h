@@ -37,44 +37,6 @@ enum Event {
 	EVENT_WRAPPED = 1 << 6
 };
 
-/**
-* All game attributes should be considered private by any programs using the Chesscade
-* library. Use the API functions instead. There's nothing to stop you from breaking
-* this rule except that it would be cheating and you might not know what you're doing.
-*/
-struct Game {
-
-	bool pause;
-	bool dropped;
-	bool moved_left;
-	bool moved_right;
-	bool moved_down;
-	long double dragged_left;
-	long double dragged_right;
-	long double dragged_down;
-	size_t score;
-	size_t combo;
-	size_t scored;
-	time_t time;
-	time_t last_moved;
-	time_t last_fell;
-	time_t last_spawned;
-	char player;
-	Index player_rank;
-	Index player_file;
-	short cursor;
-	Index cursor_grade;
-	Index cursor_increment;
-	char board[BOARD_LENGTH];
-	char captures[CAPTURE_LENGTH];
-	bool repeat;
-	Settings settings;
-	Events events;
-	size_t total_pieces;
-	size_t total_value;
-	struct Histotrie* histotrie;
-};
-
 void print_rules();
 time_t ease(struct Game*);
 const char* deck(Index);
@@ -90,3 +52,19 @@ size_t attack(struct Game*, const bool, const bool, const bool);
 bool cursor_wrapped(struct Game*);
 bool game_over(struct Game*);
 bool on_brink(struct Game*);
+void toggle_pause(struct Game*);
+bool paused(struct Game*);
+bool repeated(struct Game*);
+void do_drop(struct Game*);
+void do_digital_move(struct Game*, bool, bool, bool);
+void do_analog_move(struct Game*, long double, long double);
+Events current_events(struct Game*);
+Board board_state(struct Game*);
+Piece player_piece(struct Game*);
+Index player_piece_rank(struct Game*);
+Index player_piece_file(struct Game*);
+Index current_cursor_grade(struct Game*);
+Index current_cursor_increment(struct Game*);
+size_t current_score(struct Game*);
+size_t last_scored(struct Game*);
+size_t current_combo(struct Game*);

@@ -4,62 +4,36 @@
 #include <ctype.h>
 #include <assert.h>
 
-#define ASSERT_GAME(__game__) assert(dynamic_cast<struct Game*>(__game__))
+#define ASSERT_GAME(__game__) assert(static_cast<struct Game*>(__game__))
 
 void input_toggle_pause(struct Game* game) {
 
 	ASSERT_GAME(game);
-	game->pause = !game->pause;
+	toggle_pause(game);
 }
 
 void input_drop(struct Game* game) {
 
 	ASSERT_GAME(game);
-	game->dropped = true;
+	do_drop(game);
 }
 
 void input_digital_move(struct Game* game, bool left, bool right, bool down) {
 
 	ASSERT_GAME(game);
-	game->moved_left = left;
-	game->moved_right = right;
-	game->moved_down = down;
+	do_digital_move(game, left, right, down);
 }
 
 void input_analog_move(struct Game* game, long double x, long double y) {
 
 	ASSERT_GAME(game);
-
-	if (x > 0) {
-
-		game->dragged_left = 0;
-		game->dragged_right += x;
-	}
-	else if (x < 0) {
-
-		game->dragged_left -= x;
-		game->dragged_right = 0;
-	}
-	else {
-
-		game->dragged_left = 0;
-		game->dragged_right = 0;
-	}
-
-	if (y > 0) {
-
-		game->dragged_down += y;
-	}
-	else {
-
-		game->dragged_down = 0;
-	}
+	do_analog_move(game, x, y);
 }
 
 Events get_events(struct Game* game) {
 
 	ASSERT_GAME(game);
-	return game->events;
+	return current_events(game);
 }
 
 const char* get_rules() {
@@ -88,11 +62,12 @@ size_t get_files() {
 	return FILES;
 }
 
-char* get_board(struct Game* game) {
+Board get_board(struct Game* game) {
 
 	ASSERT_GAME(game);
-	assert(game->board[BOARD_LENGTH - 1] == '\0');
-	return game->board;
+	Board ret = board_state(game);
+	assert(ret[BOARD_LENGTH - 1] == '\0');
+	return ret;
 }
 
 size_t get_board_length() {
@@ -114,49 +89,49 @@ Piece get_next_piece(struct Game* game) {
 Piece get_player(struct Game* game) {
 
 	ASSERT_GAME(game);
-	return game->player;
+	return player_piece(game);
 }
 
 Index get_player_rank(struct Game* game) {
 
 	ASSERT_GAME(game);
-	return game->player_rank;
+	return player_piece_rank(game);
 }
 
 Index get_player_file(struct Game* game) {
 
 	ASSERT_GAME(game);
-	return game->player_file;
+	return player_piece_file(game);
 }
 
 Index get_cursor_grade(struct Game* game) {
 
 	ASSERT_GAME(game);
-	return game->cursor_grade;
+	return current_cursor_grade(game);
 }
 
 Index get_cursor_increment(struct Game* game) {
 
 	ASSERT_GAME(game);
-	return game->cursor_increment;
+	return current_cursor_increment(game);
 }
 
 size_t get_score(struct Game* game) {
 
 	ASSERT_GAME(game);
-	return game->score;
+	return current_score(game);
 }
 
 size_t get_scored(struct Game* game) {
 
 	ASSERT_GAME(game);
-	return game->scored;
+	return last_scored(game);
 }
 
 size_t get_combo(struct Game* game) {
 
 	ASSERT_GAME(game);
-	return game->combo;
+	return current_combo(game);
 }
 
 size_t forecast_captures(struct Game* game) {
@@ -234,13 +209,13 @@ bool is_on_brink(struct Game* game) {
 bool is_paused(struct Game* game) {
 
 	ASSERT_GAME(game);
-	return game->pause;
+	return paused(game);
 }
 
 bool is_repeat(struct Game* game) {
 
 	ASSERT_GAME(game);
-	return game->repeat;
+	return repeated(game);
 }
 
 void delete_game(struct Game* game) {
