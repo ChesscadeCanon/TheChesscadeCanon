@@ -4,12 +4,12 @@
 #include "view.h"
 #include <stdio.h>
 #include <assert.h>
-#include <stdlib.h>
+#include <sys/timeb.h>
 
-#define MILLISECONDS_DIFFERENCE(__from_time__, __to_time__) ((time_t)(1000.0 * ((__to_time__).time - (__from_time__).time) + ((__to_time__).millitm - (__from_time__).millitm)))
+#define MILLISECONDS_DIFFERENCE(__from_time__, __to_time__) ((Time)(1000.0 * ((__to_time__).time - (__from_time__).time) + ((__to_time__).millitm - (__from_time__).millitm)))
 #define VIEW_FUNCTOR(VAR) void (*VAR)(struct Game*)
-#define MODEL_FUNCTOR(VAR) void (*VAR)(struct Game*, const time_t)
-#define CONTROL_FUNCTOR(VAR) void (*VAR)(struct Game*, const time_t)
+#define MODEL_FUNCTOR(VAR) void (*VAR)(struct Game*, const Time)
+#define CONTROL_FUNCTOR(VAR) void (*VAR)(struct Game*, const Time)
 
 void default_view(struct Game* game) {
 
@@ -21,7 +21,7 @@ void pretty_view(struct Game* game) {
 	print_pretty(game);
 }
 
-void default_control(struct Game* game, const time_t passed) {
+void default_control(struct Game* game, const Time passed) {
 
 	key_control(game, passed);
 }
@@ -33,12 +33,12 @@ void tock(struct Game* game, struct timeb* then, struct timeb* now) {
 	if(!paused(game)) system("cls");
 }
 
-void default_model(struct Game* game, const time_t passed) {
+void default_model(struct Game* game, const Time passed) {
 
 	pump(game, passed);
 }
 
-bool tick(struct Game* game, const time_t passed, CONTROL_FUNCTOR(control), MODEL_FUNCTOR(model), VIEW_FUNCTOR(view)) {
+bool tick(struct Game* game, const Time passed, CONTROL_FUNCTOR(control), MODEL_FUNCTOR(model), VIEW_FUNCTOR(view)) {
 
 	control(game, passed);
 
@@ -57,7 +57,7 @@ void play(struct Game* game, struct timeb* then, CONTROL_FUNCTOR(control), MODEL
 
 		struct timeb now;
 		ftime(&now);
-		const time_t passed = MILLISECONDS_DIFFERENCE(*then, now);
+		const Time passed = MILLISECONDS_DIFFERENCE(*then, now);
 		if (tick(game, passed, control, model, view)) return;
 		tock(game, then, &now);
 	}

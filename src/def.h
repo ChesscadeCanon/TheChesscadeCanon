@@ -1,6 +1,4 @@
 #pragma once
-#include <sys/timeb.h>
-
 /**
 * Internally, ranks range 0 - 7 from the top of the board to the bottom,
 * while files range 0 - 7 from left to right. Interfaces should follow
@@ -36,6 +34,7 @@ typedef unsigned long long Count;
 typedef unsigned long long Set;
 typedef int Settings;
 typedef int Events;
+typedef long long Time;
 
 enum Setting {
 

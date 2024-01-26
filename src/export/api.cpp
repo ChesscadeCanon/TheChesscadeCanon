@@ -47,7 +47,7 @@ Count get_rules_length() {
 	return RULES_LENGTH;
 }
 
-time_t get_ease(struct Game* game) {
+Time get_ease(struct Game* game) {
 
 	ASSERT_GAME(game);
 	return ease(game);
@@ -180,7 +180,7 @@ void begin_game(struct Game* game) {
 	begin(game);
 }
 
-void pump_game(struct Game* game, time_t passed) {
+void pump_game(struct Game* game, Time passed) {
 
 	ASSERT_GAME(game);
 	pump(game, passed);

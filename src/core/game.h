@@ -4,13 +4,13 @@
 
 #define FPS 60
 #define SPF (1.0 / ((long double) FPS))
-#define MPF ((time_t) (1000.0 * SPF))
+#define MPF ((Time) (1000.0 * SPF))
 #define PLAYER_SQUARE(__game__) SQUARE_INDEX(__game__->player_rank, __game__->player_file)
 #define SET(__settings__, __setting__) (__settings__ |= __setting__)
 #define IS_SET(__settings__, __setting__) (__settings__ & __setting__)
 
 void print_rules();
-time_t ease(struct Game*);
+Time ease(struct Game*);
 const char* deck(Index);
 Board board_state(struct Game*);
 Index board_length();
@@ -19,7 +19,7 @@ Set square_bit(Index, Index);
 struct Game* malloc_init_game(Settings);
 void free_game(struct Game*);
 void begin(struct Game*);
-void pump(struct Game* game, const time_t passed);
+void pump(struct Game* game, const Time passed);
 Piece next_piece(struct Game*);
 Index forecast_rank(struct Game*);
 char forecast_piece(struct Game*);
@@ -42,4 +42,4 @@ Index current_cursor_increment(struct Game*);
 Count current_score(struct Game*);
 Count last_scored(struct Game*);
 Count current_combo(struct Game*);
-time_t milliseconds(struct Game*);
+Time milliseconds(struct Game*);

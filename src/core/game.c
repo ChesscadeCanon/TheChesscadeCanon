@@ -25,10 +25,10 @@ struct Game {
 	Count score;
 	Count combo;
 	Count scored;
-	time_t time;
-	time_t last_moved;
-	time_t last_fell;
-	time_t last_spawned;
+	Time time;
+	Time last_moved;
+	Time last_fell;
+	Time last_spawned;
 	Piece player;
 	Index player_rank;
 	Index player_file;
@@ -278,24 +278,24 @@ bool _move_player(struct Game* game, Index to) {
 	return false;
 }
 
-time_t _buy_move(struct Game* game, bool* moved) {
+Time _buy_move(struct Game* game, bool* moved) {
 
 	if (!*moved) return 0;
-	const time_t rate = MOVE_RATE(game);
-	const time_t since = SINCE_MOVED(game);
-	const time_t steps = since / rate;
+	const Time rate = MOVE_RATE(game);
+	const Time since = SINCE_MOVED(game);
+	const Time steps = since / rate;
 	assert(steps >= 0);
 	return steps;
 }
 
-time_t _move(struct Game* game, time_t steps, const short by_rank, const short by_file) {
+Time _move(struct Game* game, Time steps, const short by_rank, const short by_file) {
 
 	if (steps == 0) return 0;
 	const bool orthogonal = !by_rank != !by_file;
 	const short multiplier = max(1, (DOUBLE_BISHOP(game) + orthogonal));
-	time_t ret = 0;
+	Time ret = 0;
 
-	for (time_t s = 0; s < steps; ++s) {
+	for (Time s = 0; s < steps; ++s) {
 
 		const short by_ranks = by_rank * multiplier;
 		if (abs(by_ranks) > game->player_rank && by_ranks < 0) break;
@@ -322,12 +322,12 @@ bool _drop(struct Game* game) {
 	return ret;
 }
 
-time_t _fall(struct Game* game) {
+Time _fall(struct Game* game) {
 
-	const time_t falls = SINCE_FELL(game) / EASE(game);
-	time_t ret = 0;
+	const Time falls = SINCE_FELL(game) / EASE(game);
+	Time ret = 0;
 	
-	for (time_t f = 0; f < falls; ++f) {
+	for (Time f = 0; f < falls; ++f) {
 
 		const Index rank = game->player_rank + (DOUBLE_BISHOP(game) + 1);
 		const Index file = game->player_file;
@@ -344,23 +344,23 @@ time_t _fall(struct Game* game) {
 	return ret;
 }
 
-time_t _do_input(struct Game* game, bool left, bool right, bool down) {
+Time _do_input(struct Game* game, bool left, bool right, bool down) {
 
-	time_t ret = 0;
+	Time ret = 0;
 	const bool diagonals = IS_SET(game->settings, DIAGONALS);
 
 	game->events |= (EVENT_LEFT * (left > 0)) | (EVENT_RIGHT * (right > 0)) | (EVENT_DOWN * (down > 0));
 
 	if (diagonals && left > 0 && down > 0 && right == 0) {
 
-		const time_t steps = min(left, down);
+		const Time steps = min(left, down);
 		ret = _move(game, steps, 1, -1);
 		DRAG(game->dragged_left, ret);
 		DRAG(game->dragged_down, ret);
 	}
 	else if (diagonals && left == 0 && down > 0 && right > 0) {
 
-		const time_t steps = min(right, down);
+		const Time steps = min(right, down);
 		ret = _move(game, steps, 1, 1);
 		DRAG(game->dragged_right, ret);
 		DRAG(game->dragged_down, ret);
@@ -386,10 +386,10 @@ time_t _do_input(struct Game* game, bool left, bool right, bool down) {
 
 void _take_move(struct Game* game) {
 
-	const time_t down = _buy_move(game, &game->moved_down);
-	const time_t left = _buy_move(game, &game->moved_left);
-	const time_t right = _buy_move(game, &game->moved_right);
-	const time_t count = _do_input(game, left, right, down);
+	const Time down = _buy_move(game, &game->moved_down);
+	const Time left = _buy_move(game, &game->moved_left);
+	const Time right = _buy_move(game, &game->moved_right);
+	const Time count = _do_input(game, left, right, down);
 
 	game->last_moved += count * MOVE_RATE(game);
 
@@ -581,7 +581,7 @@ Count current_combo(struct Game* game) {
 	return game->scored;
 }
 
-time_t milliseconds(struct Game* game) {
+Time milliseconds(struct Game* game) {
 
 	return game->time;
 }
@@ -611,7 +611,7 @@ Set square_bit(Index rank, Index file) {
 	return SQUARE_BIT(SQUARE_INDEX(rank, file));
 }
 
-time_t ease(struct Game* game) {
+Time ease(struct Game* game) {
 
 	return EASE(game);
 }
@@ -702,7 +702,7 @@ void _take_drop(struct Game* game) {
 	game->dropped = false;
 }
 
-void pump(struct Game* game, const time_t passed) {
+void pump(struct Game* game, const Time passed) {
 
 	if (game_over(game) || game->pause) return;
 

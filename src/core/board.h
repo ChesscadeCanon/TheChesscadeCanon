@@ -1,7 +1,6 @@
 #pragma once
 #include "def.h"
 #include <stdbool.h>
-#include <stdlib.h>
 
 #define CAPTURE_LENGTH 9
 #define EMPTY_CAPTURES "********"

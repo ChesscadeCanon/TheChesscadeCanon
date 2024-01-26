@@ -34,7 +34,7 @@ void _control_tap(struct Game* game) {
 	}
 }
 
-void key_control(struct Game* game, const time_t passed) {
+void key_control(struct Game* game, const Time passed) {
 
 	const bool left = GetKeyState(LEFT_KEY) < 0;
 	const bool right = GetKeyState(RIGHT_KEY) < 0;
