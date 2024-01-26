@@ -1,4 +1,5 @@
 #pragma once
+#include "def.h"
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -50,8 +51,6 @@
 
 typedef char* Board;
 typedef char* Captures;
-typedef char Piece;
-typedef unsigned short Index;
 
 enum Square {
 	PAWN,

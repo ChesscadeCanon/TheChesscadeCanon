@@ -1,8 +1,8 @@
 #include "histotrie.h"
+#include "def.h"
 #include "game.h"
 #include "config.h"
 #include <string.h>
-#include <time.h>
 #include <assert.h>
 #include <stdio.h>
 

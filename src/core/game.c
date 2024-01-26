@@ -1,11 +1,11 @@
-#include "game.h"
-#include "config.h"
 #include "../../rules.h"
-#include <stdlib.h>
-#include <string.h>
+#include "config.h"
+#include "game.h"
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef __unix__ 
 #define max(A, B) (A > B ? A : B)
