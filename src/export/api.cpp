@@ -1,4 +1,6 @@
+extern "C" {
 #include "api.h"
+#include "game.h"
 #include "../../rules.h"
 #include <stdio.h>
 #include <ctype.h>
@@ -216,3 +218,4 @@ void delete_game(struct Game* game) {
 	ASSERT_GAME(game);
 	free_game(game);
 }
+} // extern "C"

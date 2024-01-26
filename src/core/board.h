@@ -10,22 +10,6 @@
 #include <stddef.h>
 #endif
 
-#define DEAD_PLAYER '!'
-#define EMPTY '_'
-#define WHITE_PAWN 'P'
-#define BLACK_PAWN 'p'
-#define WHITE_KING 'K'
-#define BLACK_KING 'k'
-#define WHITE_QUEEN 'Q'
-#define BLACK_QUEEN 'q'
-#define WHITE_ROOK 'R'
-#define BLACK_ROOK 'r'
-#define WHITE_KNIGHT 'N'
-#define BLACK_KNIGHT 'n'
-#define WHITE_BISHOP 'B'
-#define BLACK_BISHOP 'b'
-#define FILES 8
-#define RANKS 8
 #define CAPTURE_LENGTH 9
 #define EMPTY_CAPTURES "********"
 #define HAS_CAPTURED(__captures__) (strncmp(EMPTY_CAPTURES, __captures__, CAPTURE_LENGTH) != 0)

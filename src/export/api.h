@@ -15,7 +15,7 @@
 #endif
 
 extern "C" {
-#include "game.h"
+#include "def.h"
 
 /**
 * pauses the game if it's unpaused and vice versa

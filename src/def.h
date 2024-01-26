@@ -1,6 +1,33 @@
 #pragma once
 #include <sys/timeb.h>
 
+/**
+* Internally, ranks range 0 - 7 from the top of the board to the bottom,
+* while files range 0 - 7 from left to right. Interfaces should follow
+* traditional chess conventions, numbering ranks 1 - 8 bottom to top,
+* and files A - H from left to right.
+*/
+#define FILES 8
+#define RANKS 8
+
+// when the game ends, the player will be set to this
+#define DEAD_PLAYER '!'
+// an empty square on the board
+#define EMPTY '_'
+// chess piece notation
+#define WHITE_PAWN 'P'
+#define BLACK_PAWN 'p'
+#define WHITE_KING 'K'
+#define BLACK_KING 'k'
+#define WHITE_QUEEN 'Q'
+#define BLACK_QUEEN 'q'
+#define WHITE_ROOK 'R'
+#define BLACK_ROOK 'r'
+#define WHITE_KNIGHT 'N'
+#define BLACK_KNIGHT 'n'
+#define WHITE_BISHOP 'B'
+#define BLACK_BISHOP 'b'
+
 struct Game;
 
 typedef char Piece;
@@ -10,9 +37,13 @@ typedef unsigned int Events;
 
 enum Setting {
 
+	// white pawns attack upward instead of downward
 	WHITE_PAWN_HIT_UP = 1 << 0,
+	// black pawns spawn on rank 7 instead of 8
 	BLACK_PAWN_SPAWN_LOW = 1 << 1,
+	// white pawns land on rank 2 instead of 1
 	WHITE_PAWN_LAND_HIGH = 1 << 2,
+	// white pawns become queens if they land on rank 8, black pawns become queens if they land on rank 1
 	PAWNS_PROMOTE = 1 << 3,
 	NO_CAPTURE_ON_REPEAT = 1 << 4,
 	DOUBLE_BISHOPS = 1 << 5,
