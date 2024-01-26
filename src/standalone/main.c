@@ -30,7 +30,7 @@ void tock(struct Game* game, struct timeb* then, struct timeb* now) {
 
 	memcpy(then, now, sizeof(struct timeb));
 	Sleep(MPF);
-	if(!game->pause) system("cls");
+	if(!paused(game)) system("cls");
 }
 
 void default_model(struct Game* game, const time_t passed) {
@@ -42,7 +42,7 @@ bool tick(struct Game* game, const time_t passed, CONTROL_FUNCTOR(control), MODE
 
 	control(game, passed);
 
-	if (!game->pause) {
+	if (!paused(game)) {
 		model(game, passed);
 		if (game_over(game)) return true;
 		view(game);

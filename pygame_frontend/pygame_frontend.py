@@ -20,7 +20,6 @@ RULES = ''.join([chr(b) for b in engine.get_rules()])
 RANKS = engine.get_ranks()
 FILES = engine.get_files()
 SYMBOL_COUNT = engine.get_symbol_count()
-BOARD_LENGTH = engine.get_board_length()
 SIZE = (FILES + style.SQUARES_OFF_LEFT) * style.SQUARE, (RANKS + style.SQUARES_OFF_TOP) * style.SQUARE
 
 screen = pygame.display.set_mode(SIZE)
@@ -29,7 +28,6 @@ pygame.display.set_caption("Chesscade")
 draw_piece = lambda P, p, x, y: p in P and screen.blit(P[p], (x, y))
 draw_piece_on_square = lambda P, p, r, f: draw_piece(P, p, (f + style.SQUARES_OFF_LEFT) * style.SQUARE, (r + style.SQUARES_OFF_TOP) * style.SQUARE)
 draw_piece_on_deck = lambda P, p, r, f: draw_piece(P, p, (f + style.SQUARES_OFF_LEFT) * style.SQUARE, r * style.SQUARE)
-get_board = lambda g: ''.join([chr(p) for p in engine.get_board(g)])
 
 def draw_board(game):
     white = style.WHITE
@@ -57,12 +55,9 @@ def draw_board(game):
 def draw_pieces(game):
     index = 0
     threats = engine.forecast_captures(game)
-    board = get_board(game)
     for r in range(RANKS):
         for f in range(FILES):
-            while board[index] == '\n':
-                index += 1
-            square = board[index]
+            square = engine.get_square(game, r, f).decode('ascii')
             if square in board_pieces:
                 if threats & engine.get_square_bit(r, f):
                     draw_piece_on_square(threatened_pieces, square, r, f)

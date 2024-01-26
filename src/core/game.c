@@ -541,11 +541,6 @@ Events current_events(struct Game* game) {
 	return game->events;
 }
 
-Board board_state(struct Game* game) {
-
-	return game->board;
-}
-
 Piece player_piece(struct Game* game) {
 
 	return game->player;
@@ -586,9 +581,29 @@ size_t current_combo(struct Game* game) {
 	return game->scored;
 }
 
+time_t milliseconds(struct Game* game) {
+
+	return game->time;
+}
+
 bool cursor_wrapped(struct Game* game) {
 
 	return CURSOR_WRAPPED(game);
+}
+
+Board board_state(struct Game* game) {
+
+	return game->board;
+}
+
+Index board_length() {
+
+	return BOARD_LENGTH;
+}
+
+Piece square_contents(struct Game* game, Index rank, Index file) {
+
+	return GET_SQUARE(game->board, SQUARE_INDEX(rank, file));
 }
 
 size_t square_bit(Index rank, Index file) {

@@ -68,22 +68,17 @@ EXPORT size_t get_ease(struct Game* game);
 /**
 * returns the height of the board
 */
-EXPORT size_t get_ranks();
+EXPORT Index get_ranks();
     
 /**
 * returns the width of the board
 */
-EXPORT size_t get_files();
+EXPORT Index get_files();
 
 /**
 * seturns the current state of the board as a string
 */
-EXPORT char* get_board(struct Game* game);
-
-/**
-* returns the number of squares on the board, plus newlines
-*/
-EXPORT size_t get_board_length();
+EXPORT Piece get_square(struct Game* game, Index, Index);
     
 /**
 * returns the branching factor of the trie structure used to identify repeated board states

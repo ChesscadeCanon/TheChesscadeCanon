@@ -52,27 +52,20 @@ size_t get_ease(struct Game* game) {
 	return ease(game);
 }
 
-size_t get_ranks() {
+Index get_ranks() {
 
 	return RANKS;
 }
 
-size_t get_files() {
+Index get_files() {
 
 	return FILES;
 }
 
-Board get_board(struct Game* game) {
+Piece get_square(struct Game* game, Index rank, Index file) {
 
 	ASSERT_GAME(game);
-	Board ret = board_state(game);
-	assert(ret[BOARD_LENGTH - 1] == '\0');
-	return ret;
-}
-
-size_t get_board_length() {
-
-	return BOARD_LENGTH;
+	return square_contents(game, rank, file);
 }
 
 size_t get_symbol_count() {

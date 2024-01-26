@@ -19,10 +19,9 @@ def Engine():
     engine = ctypes.CDLL(ENGINE_PATH)
     engine.get_rules_length.restype = ctypes.c_ulonglong
     engine.get_rules.restype = ctypes.c_char_p
-    engine.get_ranks.restype = ctypes.c_ulonglong
-    engine.get_files.restype = ctypes.c_ulonglong
+    engine.get_ranks.restype = ctypes.c_ushort
+    engine.get_files.restype = ctypes.c_ushort
     engine.get_symbol_count.restype = ctypes.c_ulonglong
-    engine.get_board_length.restype = ctypes.c_ulonglong
     engine.malloc_init_default_game.restype = ctypes.POINTER(Game)
     engine.input_toggle_pause.argtypes = [ctypes.POINTER(Game)]
     engine.input_drop.argtypes = [ctypes.POINTER(Game)]
@@ -35,8 +34,8 @@ def Engine():
     engine.delete_game.argtypes = [ctypes.POINTER(Game)]
     engine.get_events.argtypes = [ctypes.POINTER(Game)]
     engine.get_events.restype = ctypes.c_ulonglong
-    engine.get_board.argtypes = [ctypes.POINTER(Game)]
-    engine.get_board.restype = ctypes.c_char_p
+    engine.get_square.argtypes = [ctypes.POINTER(Game), ctypes.c_ushort, ctypes.c_ushort]
+    engine.get_square.restype = ctypes.c_char
     engine.get_player.argtypes = [ctypes.POINTER(Game)]
     engine.get_player.restype = ctypes.c_char
     engine.get_player_rank.argtypes = [ctypes.POINTER(Game)]
