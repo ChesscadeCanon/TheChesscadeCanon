@@ -32,8 +32,10 @@ struct Game;
 
 typedef char Piece;
 typedef unsigned short Index;
-typedef unsigned int Settings;
-typedef unsigned int Events;
+typedef unsigned long long Count;
+typedef unsigned long long Set;
+typedef int Settings;
+typedef int Events;
 
 enum Setting {
 

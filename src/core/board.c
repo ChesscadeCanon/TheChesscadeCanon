@@ -17,7 +17,7 @@ const char SYMBOLS[SYMBOL_COUNT] = {
 	EMPTY,
 };
 
-const size_t PIECE_VALUES[SQUARE_COUNT] = {
+const Count PIECE_VALUES[SQUARE_COUNT] = {
 	[PAWN] = 1,
 	[BISHOP] = 3,
 	[KNIGHT] = 3,
@@ -118,9 +118,9 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 
 void _init_squares(Board board) {
 
-	for (size_t i = 0, r = 0; r < RANKS; ++r) {
+	for (Index i = 0, r = 0; r < RANKS; ++r) {
 
-		for (size_t f = 0; f < FILES; ++f) {
+		for (Index f = 0; f < FILES; ++f) {
 
 			board[i] = EMPTY;
 			++i;

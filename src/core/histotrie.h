@@ -3,5 +3,5 @@
 
 struct Histotrie* malloc_init_histotrie();
 void free_histotrie(struct Histotrie*);
-size_t record_state(struct Histotrie*, const char*, size_t);
+Count record_state(struct Histotrie*, const char*, Index);
 void test_histotrie();

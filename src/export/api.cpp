@@ -2,9 +2,8 @@ extern "C" {
 #include "api.h"
 #include "game.h"
 #include "../../rules.h"
-#include <stdio.h>
-#include <ctype.h>
 #include <assert.h>
+#include <string.h>
 
 #define ASSERT_GAME(__game__) assert(static_cast<struct Game*>(__game__))
 
@@ -43,12 +42,12 @@ const char* get_rules() {
 	return RULES;
 }
 
-size_t get_rules_length() {
+Count get_rules_length() {
 
 	return RULES_LENGTH;
 }
 
-size_t get_ease(struct Game* game) {
+time_t get_ease(struct Game* game) {
 
 	ASSERT_GAME(game);
 	return ease(game);
@@ -68,11 +67,6 @@ Piece get_square(struct Game* game, Index rank, Index file) {
 
 	ASSERT_GAME(game);
 	return square_contents(game, rank, file);
-}
-
-size_t get_symbol_count() {
-
-	return SYMBOL_COUNT;
 }
 
 Piece get_next_piece(struct Game* game) {
@@ -111,37 +105,37 @@ Index get_cursor_increment(struct Game* game) {
 	return current_cursor_increment(game);
 }
 
-size_t get_score(struct Game* game) {
+Count get_score(struct Game* game) {
 
 	ASSERT_GAME(game);
 	return current_score(game);
 }
 
-size_t get_scored(struct Game* game) {
+Count get_scored(struct Game* game) {
 
 	ASSERT_GAME(game);
 	return last_scored(game);
 }
 
-size_t get_combo(struct Game* game) {
+Count get_combo(struct Game* game) {
 
 	ASSERT_GAME(game);
 	return current_combo(game);
 }
 
-size_t forecast_captures(struct Game* game) {
+Set forecast_captures(struct Game* game) {
 
 	ASSERT_GAME(game);
 	return attack(game, false, true, false);
 }
 
-size_t attack_pattern(struct Game* game) {
+Set attack_pattern(struct Game* game) {
 
 	ASSERT_GAME(game);
 	return attack(game, false, false, true);
 }
 
-size_t get_forecast_rank(struct Game* game) {
+Index get_forecast_rank(struct Game* game) {
 
 	ASSERT_GAME(game);
 	return forecast_rank(game);
@@ -153,14 +147,17 @@ char get_forecast_piece(struct Game* game) {
 	return forecast_piece(game);
 }
 
-size_t get_square_bit(Index rank, Index file) {
+Set get_square_bit(Index rank, Index file) {
 
 	return square_bit(rank, file);
 }
 
-const char* get_deck(Index d) {
+Piece get_deck_piece(Index grade, Index increment) {
 
-	return deck(d);
+	const char* d = deck(grade);
+	assert(d[FILES] == '\0');
+	assert(strlen(d) == FILES);
+	return d[increment];
 }
 
 struct Game* malloc_init_default_game() {

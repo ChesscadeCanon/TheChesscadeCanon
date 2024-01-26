@@ -59,12 +59,12 @@ void test_histotrie() {
 void test_histotrie() {}
 #endif
 
-size_t _free_children(struct Histotrie* root) {
+Count _free_children(struct Histotrie* root) {
 
 	if (!root) return 0;
-	size_t ret = 1;
+	Count ret = 1;
 
-	for (size_t c = 0; c < SYMBOL_COUNT; ++c) {
+	for (Index c = 0; c < SYMBOL_COUNT; ++c) {
 
 		if (root->children[c]) {
 
@@ -84,18 +84,18 @@ void _init_histotrie(struct Histotrie* histotrie) {
 
 void free_histotrie(struct Histotrie* histotrie) {
 
-	size_t count = _free_children(histotrie);
+	Count count = _free_children(histotrie);
 	MEMLOGF("freed %llu histotrie nodes\n", count);
 }
 
-size_t record_state(struct Histotrie* root, const char* board, const size_t index) {
+Count record_state(struct Histotrie* root, const char* board, const Index index) {
 
 	if (index >= BOARD_LENGTH || !board[index]) return 0;
 	if (board[index] == '\n') return record_state(root, board, index + 1);
 
 	const Piece piece = board[index];
 	const enum Square square = PIECE_MAP[piece];
-	const size_t symbol_index = SYMBOL_INDEX(piece);
+	const Index symbol_index = SYMBOL_INDEX(piece);
 	assert(symbol_index < SYMBOL_COUNT);
 
 	if (root->children[symbol_index]) {

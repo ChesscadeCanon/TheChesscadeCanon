@@ -3,20 +3,13 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#if defined(_MSC_VER)
-//  Microsoft 
-#elif defined(__GNUC__)
-//  GCC
-#include <stddef.h>
-#endif
-
 #define CAPTURE_LENGTH 9
 #define EMPTY_CAPTURES "********"
 #define HAS_CAPTURED(__captures__) (strncmp(EMPTY_CAPTURES, __captures__, CAPTURE_LENGTH) != 0)
 #define LINE_LENGTH (FILES + 1)
 #define SQUARE_RANK(__index__) ((Index)(__index__ / LINE_LENGTH))
 #define SQUARE_FILE(__index__) ((Index)(__index__ % LINE_LENGTH))
-#define SQUARE_BIT(__index__) (1ull << (size_t)(SQUARE_RANK(__index__) * FILES + SQUARE_FILE(__index__)))
+#define SQUARE_BIT(__index__) (1ull << (Set)(SQUARE_RANK(__index__) * FILES + SQUARE_FILE(__index__)))
 #define SET_CAPTURE(__captures__, __piece_index__, __value__) (__captures__[__piece_index__] = __value__)
 #define SET_SQUARE(__board__, __index__, __value__) (__board__[__index__] = __value__)
 #define IS_WHITE(__piece__) (__piece__ <= 'Z')
@@ -80,12 +73,12 @@ extern const char SYMBOLS[SYMBOL_COUNT];
 }
 static const char DECKS[4][9] = STANDARD_DECKS;
 
-extern const size_t PIECE_VALUES[SQUARE_COUNT];
+extern const Count PIECE_VALUES[SQUARE_COUNT];
 #define PIECE_VALUE(P) (PIECE_VALUES[PIECE_MAP[P]])
 
-#define PIECE_BIT(P) (((size_t)1u) << ((size_t) (P - 'B')))
+#define PIECE_BIT(P) (((Set)1u) << ((Set) (P - 'B')))
 
-static const size_t PIECE_SET =
+static const Set PIECE_SET =
 PIECE_BIT(WHITE_PAWN) |
 PIECE_BIT(BLACK_PAWN) |
 PIECE_BIT(WHITE_BISHOP) |

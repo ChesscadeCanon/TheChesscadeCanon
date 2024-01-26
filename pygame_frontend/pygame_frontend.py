@@ -19,7 +19,6 @@ engine = librarian.Engine()
 RULES = ''.join([chr(b) for b in engine.get_rules()])
 RANKS = engine.get_ranks()
 FILES = engine.get_files()
-SYMBOL_COUNT = engine.get_symbol_count()
 SIZE = (FILES + style.SQUARES_OFF_LEFT) * style.SQUARE, (RANKS + style.SQUARES_OFF_TOP) * style.SQUARE
 
 screen = pygame.display.set_mode(SIZE)
@@ -74,15 +73,15 @@ def draw_player(game):
 def draw_next(game):
     cursor_grade = engine.get_cursor_grade(game)
     cursor_increment = engine.get_cursor_increment(game)
-    next_piece = engine.get_next_piece(game)
+    next_piece = engine.get_next_piece(game).decode('ascii')
     for g in range(style.SQUARES_OFF_TOP):
-        deck = [chr(c) for c in engine.get_deck(g)]
-        draw_piece_on_deck(deck_pieces, deck[0], g, 0)
-        [draw_piece_on_deck(deck_pieces, deck[i], g, i) for i in range(FILES)]
+        for i in range(FILES):
+            piece = engine.get_deck_piece(g, i).decode('ascii')
+            draw_piece_on_deck(deck_pieces, piece, g, i)
     draw_piece_on_deck(next_pieces, next_piece, cursor_grade, cursor_increment)
 
 def draw_shadow(game):
-    piece = engine.get_forecast_piece(game)
+    piece = engine.get_forecast_piece(game).decode('ascii')
     rank = engine.get_forecast_rank(game)
     file = engine.get_player_file(game)
     draw_piece_on_square(shadow_pieces, piece, rank, file)

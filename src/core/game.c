@@ -22,26 +22,26 @@ struct Game {
 	long double dragged_left;
 	long double dragged_right;
 	long double dragged_down;
-	size_t score;
-	size_t combo;
-	size_t scored;
+	Count score;
+	Count combo;
+	Count scored;
 	time_t time;
 	time_t last_moved;
 	time_t last_fell;
 	time_t last_spawned;
-	char player;
+	Piece player;
 	Index player_rank;
 	Index player_file;
 	short cursor;
 	Index cursor_grade;
 	Index cursor_increment;
-	char board[BOARD_LENGTH];
-	char captures[CAPTURE_LENGTH];
+	Piece board[BOARD_LENGTH];
+	Piece captures[CAPTURE_LENGTH];
 	bool repeat;
 	Settings settings;
 	Events events;
-	size_t total_pieces;
-	size_t total_value;
+	Count total_pieces;
+	Count total_value;
 	struct Histotrie* histotrie;
 };
 
@@ -119,9 +119,9 @@ Index _update_cursor(struct Game* game) {
 	return game->cursor;
 }
 
-size_t _bit_index(size_t bit) {
+Index _bit_index(Set bit) {
 
-	size_t i = 0, b = 1;
+	Index i = 0, b = 1;
 
 	while (i < 64) {
 
@@ -140,7 +140,7 @@ void _kill(struct Game* game, const Index square, const Index move) {
 	SET_SQUARE(game->board, square, EMPTY);
 }
 
-size_t _capture(struct Game* game, const Index square, const Index move, const bool execute) {
+Set _capture(struct Game* game, const Index square, const Index move, const bool execute) {
 
 	if (execute) {
 
@@ -150,14 +150,14 @@ size_t _capture(struct Game* game, const Index square, const Index move, const b
 	return SQUARE_BIT(square);
 }
 
-size_t _hit(struct Game* game, const enum Square piece_type, const Index rank, const Index file, const Index move, const bool execute, const bool pattern) {
+Set _hit(struct Game* game, const enum Square piece_type, const Index rank, const Index file, const Index move, const bool execute, const bool pattern) {
 
 	struct MoveSet move_set = MOVES[piece_type];
 	const short invert = piece_type == PAWN && IS_WHITE(game->player) && IS_SET(game->settings, WHITE_PAWN_HIT_UP) ? -1 : 1;
 	Index to_rank = rank;
 	Index to_file = file;
 	bool open = true;
-	size_t ret = 0;
+	Set ret = 0;
 
 	while (open) {
 
@@ -176,10 +176,10 @@ size_t _hit(struct Game* game, const enum Square piece_type, const Index rank, c
 	return ret;
 }
 
-size_t _strike(struct Game* game, const enum Square piece_type, const Index rank, const Index file, const bool execute, const bool pattern) {
+Set _strike(struct Game* game, const enum Square piece_type, const Index rank, const Index file, const bool execute, const bool pattern) {
 
 	const struct MoveSet move_set = MOVES[piece_type];
-	size_t ret = 0;
+	Set ret = 0;
 	for (Index move = 0; move < move_set.count; ++move) {
 
 		ret |= _hit(game, piece_type, rank, file, move, execute, pattern);
@@ -204,10 +204,10 @@ Index _drop_to(struct Game* game, const Index from) {
 	return from;
 }
 
-size_t _judge(struct Game* game) {
+Count _judge(struct Game* game) {
 
 	game->scored = 0;
-	size_t count = 0;
+	Count count = 0;
 
 	for (Index i = 0; i < FILES; ++i) {
 
@@ -231,12 +231,12 @@ size_t _judge(struct Game* game) {
 	return game->score;
 }
 
-size_t _chronicle(struct Game* game) {
+Count _chronicle(struct Game* game) {
 
 	if (!game->histotrie) return false;
 	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT | KING_ON_REPEAT)) return false;
 
-	const size_t ret = record_state(game->histotrie, game->board, 0);
+	const Count ret = record_state(game->histotrie, game->board, 0);
 	MEMLOGF("created %llu histotrie nodes\n", ret);
 	game->repeat = !ret;
 	return ret;
@@ -246,7 +246,7 @@ void _resolve(struct Game* game) {
 
 	const Index from_rank = game->player_rank, from_file = game->player_file;
 	game->player = QUEEN_ME(game, from_rank);
-	const size_t captures = attack(game, true, false, false);
+	const Set captures = attack(game, true, false, false);
 	LAND(game);
 	_judge(game);
 	_chronicle(game);
@@ -260,7 +260,7 @@ void _resolve(struct Game* game) {
 	game->last_spawned = game->time;
 }
 
-bool _move_player(struct Game* game, size_t to) {
+bool _move_player(struct Game* game, Index to) {
 
 	const Index to_rank = SQUARE_RANK(to), to_file = SQUARE_FILE(to);
 
@@ -329,9 +329,9 @@ time_t _fall(struct Game* game) {
 	
 	for (time_t f = 0; f < falls; ++f) {
 
-		const size_t rank = game->player_rank + (DOUBLE_BISHOP(game) + 1);
-		const size_t file = game->player_file;
-		const size_t to = SQUARE_INDEX(rank, file);
+		const Index rank = game->player_rank + (DOUBLE_BISHOP(game) + 1);
+		const Index file = game->player_file;
+		const Index to = SQUARE_INDEX(rank, file);
 
 		if (_move_player(game, to)) {
 
@@ -444,16 +444,16 @@ bool game_over(struct Game* game) {
 
 bool _will_checkmate(struct Game* game) {
 
-	size_t hits = attack(game, false, true, false);
-	size_t b = 1;
+	Set hits = attack(game, false, true, false);
+	Set b = 1;
 
 	if (hits) while (b) {
 
 		if (b & hits) {
 
-			size_t i = _bit_index(b);
-			size_t r = i / FILES;
-			size_t f = i % FILES;
+			Index i = _bit_index(b);
+			Index r = i / FILES;
+			Index f = i % FILES;
 
 			if (PIECE_MAP[GET_SQUARE(game->board, SQUARE_INDEX(r, f))] == KING) {
 
@@ -566,17 +566,17 @@ Index current_cursor_increment(struct Game* game) {
 	return game->cursor_increment;
 }
 
-size_t current_score(struct Game* game) {
+Count current_score(struct Game* game) {
 
 	return game->score;
 }
 
-size_t last_scored(struct Game* game) {
+Count last_scored(struct Game* game) {
 
 	return game->scored;
 }
 
-size_t current_combo(struct Game* game) {
+Count current_combo(struct Game* game) {
 
 	return game->scored;
 }
@@ -606,7 +606,7 @@ Piece square_contents(struct Game* game, Index rank, Index file) {
 	return GET_SQUARE(game->board, SQUARE_INDEX(rank, file));
 }
 
-size_t square_bit(Index rank, Index file) {
+Set square_bit(Index rank, Index file) {
 
 	return SQUARE_BIT(SQUARE_INDEX(rank, file));
 }
@@ -636,7 +636,7 @@ void free_game(struct Game* game) {
 	}
 }
 
-size_t attack(struct Game* game, const bool execute, const bool forecast, const bool pattern) {
+Set attack(struct Game* game, const bool execute, const bool forecast, const bool pattern) {
 
 	if (game->repeat && IS_SET(game->settings, NO_CAPTURE_ON_REPEAT)) return 0;
 
