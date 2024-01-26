@@ -45,7 +45,7 @@ const enum Square PIECE_MAP[128] = {
 
 const struct MoveSet MOVES[SQUARE_COUNT] = {
 	[PAWN] = {
-		.repeat = false,
+		.repeat = False,
 		.count = 2,
 		.moves = {
 			{1, 1},
@@ -53,7 +53,7 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 		}
 	},
 	[BISHOP] = {
-		.repeat = true,
+		.repeat = True,
 		.count = 4,
 		.moves = {
 			{1, 1},
@@ -63,7 +63,7 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 		}
 	},
 	[ROOK] = {
-		.repeat = true,
+		.repeat = True,
 		.count = 4,
 		.moves = {
 			{0, 1},
@@ -73,7 +73,7 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 		}
 	},
 	[KNIGHT] = {
-		.repeat = false,
+		.repeat = False,
 		.count = 8,
 		.moves = {
 			{1, 2},
@@ -87,7 +87,7 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 		}
 	},
 	[QUEEN] = {
-		.repeat = true,
+		.repeat = True,
 		.count = 8,
 		.moves = {
 			{1, 1},
@@ -101,7 +101,7 @@ const struct MoveSet MOVES[SQUARE_COUNT] = {
 		}
 	},
 	[KING] = {
-		.repeat = false,
+		.repeat = False,
 		.count = 8,
 		.moves = {
 			{1, 1},

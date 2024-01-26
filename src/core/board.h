@@ -1,6 +1,5 @@
 #pragma once
 #include "def.h"
-#include <stdbool.h>
 
 #define CAPTURE_LENGTH 9
 #define EMPTY_CAPTURES "********"
@@ -41,7 +40,7 @@ enum Square {
 
 struct MoveSet {
 
-	const bool repeat;
+	const Bool repeat;
 	const Index count;
 	const short moves[8][2];
 };

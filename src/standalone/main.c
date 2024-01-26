@@ -44,7 +44,7 @@ bool tick(struct Game* game, const Time passed, CONTROL_FUNCTOR(control), MODEL_
 
 	if (!paused(game)) {
 		model(game, passed);
-		if (game_over(game)) return true;
+		if (game_over(game)) return True;
 		view(game);
 	}
 
@@ -53,7 +53,7 @@ bool tick(struct Game* game, const Time passed, CONTROL_FUNCTOR(control), MODEL_
 
 void play(struct Game* game, struct timeb* then, CONTROL_FUNCTOR(control), MODEL_FUNCTOR(model), VIEW_FUNCTOR(view)) {
 
-	while (true) {
+	while (True) {
 
 		struct timeb now;
 		ftime(&now);

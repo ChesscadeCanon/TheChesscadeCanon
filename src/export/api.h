@@ -151,7 +151,7 @@ extern "C" {
 	* On any given frame, call input_digital_move() with boolean values denoting whether
 	* to try and move the piece left, right and/or down, as indicated by key inputs. For
 	* instance, if the right and down keys were being held, you would call:
-	* input_digital_move(game, false, true, true);
+	* input_digital_move(game, false, True, True);
 	*/
 	EXPORT void input_digital_move(struct Game*, bool, bool, bool);
 

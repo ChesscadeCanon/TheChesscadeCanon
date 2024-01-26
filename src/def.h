@@ -35,6 +35,9 @@ typedef unsigned long long Set;
 typedef int Settings;
 typedef int Events;
 typedef long long Time;
+typedef unsigned short Bool;
+#define True 1u
+#define False 0u
 
 enum Setting {
 

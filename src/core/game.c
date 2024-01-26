@@ -14,11 +14,11 @@
 
 struct Game {
 
-	bool pause;
-	bool dropped;
-	bool moved_left;
-	bool moved_right;
-	bool moved_down;
+	Bool pause;
+	Bool dropped;
+	Bool moved_left;
+	Bool moved_right;
+	Bool moved_down;
 	long double dragged_left;
 	long double dragged_right;
 	long double dragged_down;
@@ -37,7 +37,7 @@ struct Game {
 	Index cursor_increment;
 	Piece board[BOARD_LENGTH];
 	Piece captures[CAPTURE_LENGTH];
-	bool repeat;
+	Bool repeat;
 	Settings settings;
 	Events events;
 	Count total_pieces;
@@ -112,7 +112,7 @@ void print_rules() {
 Index _update_cursor(struct Game* game) {
 
 	const short inc = CURSOR_INCREMENT(game);
-	const bool wrapped = abs(inc) > 1;
+	const Bool wrapped = abs(inc) > 1;
 	game->cursor_increment += inc;
 	game->cursor_grade = CURSOR_GRADE(game, wrapped || CURSOR_WRAPPED(game));
 	game->events |= EVENT_WRAPPED * wrapped;
@@ -140,7 +140,7 @@ void _kill(struct Game* game, const Index square, const Index move) {
 	SET_SQUARE(game->board, square, EMPTY);
 }
 
-Set _capture(struct Game* game, const Index square, const Index move, const bool execute) {
+Set _capture(struct Game* game, const Index square, const Index move, const Bool execute) {
 
 	if (execute) {
 
@@ -150,13 +150,13 @@ Set _capture(struct Game* game, const Index square, const Index move, const bool
 	return SQUARE_BIT(square);
 }
 
-Set _hit(struct Game* game, const enum Square piece_type, const Index rank, const Index file, const Index move, const bool execute, const bool pattern) {
+Set _hit(struct Game* game, const enum Square piece_type, const Index rank, const Index file, const Index move, const Bool execute, const Bool pattern) {
 
 	struct MoveSet move_set = MOVES[piece_type];
 	const short invert = piece_type == PAWN && IS_WHITE(game->player) && IS_SET(game->settings, WHITE_PAWN_HIT_UP) ? -1 : 1;
 	Index to_rank = rank;
 	Index to_file = file;
-	bool open = true;
+	Bool open = True;
 	Set ret = 0;
 
 	while (open) {
@@ -176,7 +176,7 @@ Set _hit(struct Game* game, const enum Square piece_type, const Index rank, cons
 	return ret;
 }
 
-Set _strike(struct Game* game, const enum Square piece_type, const Index rank, const Index file, const bool execute, const bool pattern) {
+Set _strike(struct Game* game, const enum Square piece_type, const Index rank, const Index file, const Bool execute, const Bool pattern) {
 
 	const struct MoveSet move_set = MOVES[piece_type];
 	Set ret = 0;
@@ -233,8 +233,8 @@ Count _judge(struct Game* game) {
 
 Count _chronicle(struct Game* game) {
 
-	if (!game->histotrie) return false;
-	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT | KING_ON_REPEAT)) return false;
+	if (!game->histotrie) return False;
+	if (!IS_SET(game->settings, NO_CAPTURE_ON_REPEAT | KING_ON_REPEAT)) return False;
 
 	const Count ret = record_state(game->histotrie, game->board, 0);
 	MEMLOGF("created %llu histotrie nodes\n", ret);
@@ -246,7 +246,7 @@ void _resolve(struct Game* game) {
 
 	const Index from_rank = game->player_rank, from_file = game->player_file;
 	game->player = QUEEN_ME(game, from_rank);
-	const Set captures = attack(game, true, false, false);
+	const Set captures = attack(game, True, False, False);
 	LAND(game);
 	_judge(game);
 	_chronicle(game);
@@ -260,7 +260,7 @@ void _resolve(struct Game* game) {
 	game->last_spawned = game->time;
 }
 
-bool _move_player(struct Game* game, Index to) {
+Bool _move_player(struct Game* game, Index to) {
 
 	const Index to_rank = SQUARE_RANK(to), to_file = SQUARE_FILE(to);
 
@@ -268,17 +268,17 @@ bool _move_player(struct Game* game, Index to) {
 
 		game->player_rank = to_rank;
 		game->player_file = to_file;
-		return true;
+		return True;
 	}
 	else if (to_rank > game->player_rank) {
 
 		_resolve(game);
 	}
 
-	return false;
+	return False;
 }
 
-Time _buy_move(struct Game* game, bool* moved) {
+Time _buy_move(struct Game* game, Bool* moved) {
 
 	if (!*moved) return 0;
 	const Time rate = MOVE_RATE(game);
@@ -291,7 +291,7 @@ Time _buy_move(struct Game* game, bool* moved) {
 Time _move(struct Game* game, Time steps, const short by_rank, const short by_file) {
 
 	if (steps == 0) return 0;
-	const bool orthogonal = !by_rank != !by_file;
+	const Bool orthogonal = !by_rank != !by_file;
 	const short multiplier = max(1, (DOUBLE_BISHOP(game) + orthogonal));
 	Time ret = 0;
 
@@ -311,11 +311,11 @@ Time _move(struct Game* game, Time steps, const short by_rank, const short by_fi
 	return ret;
 }
 
-bool _drop(struct Game* game) {
+Bool _drop(struct Game* game) {
 
 	const Index from = PLAYER_SQUARE(game);
 	const Index to = _drop_to(game, from);
-	const bool ret = to != from;
+	const Bool ret = to != from;
 	_move_player(game, to);
 	_move(game, 1, 1, 0);
 	game->events |= EVENT_DROPPED * ret;
@@ -344,10 +344,10 @@ Time _fall(struct Game* game) {
 	return ret;
 }
 
-Time _do_input(struct Game* game, bool left, bool right, bool down) {
+Time _do_input(struct Game* game, Bool left, Bool right, Bool down) {
 
 	Time ret = 0;
-	const bool diagonals = IS_SET(game->settings, DIAGONALS);
+	const Bool diagonals = IS_SET(game->settings, DIAGONALS);
 
 	game->events |= (EVENT_LEFT * (left > 0)) | (EVENT_RIGHT * (right > 0)) | (EVENT_DOWN * (down > 0));
 
@@ -389,7 +389,7 @@ void _take_move(struct Game* game) {
 	const Time down = _buy_move(game, &game->moved_down);
 	const Time left = _buy_move(game, &game->moved_left);
 	const Time right = _buy_move(game, &game->moved_right);
-	const Time count = _do_input(game, left, right, down);
+	const Time count = _do_input(game, left > 0, right > 0, down > 0);
 
 	game->last_moved += count * MOVE_RATE(game);
 
@@ -414,15 +414,15 @@ void _init_game(struct Game* game) {
 	game->last_moved = 0;
 	game->last_fell = 0;
 	game->last_spawned = 0;
-	game->repeat = false;
-	game->pause = false;
+	game->repeat = False;
+	game->pause = False;
 	game->player = 'W';
 	game->player_rank = 1;
 	game->player_file = 7;
 	game->cursor = -1;
 	game->cursor_grade = 1;
 	game->cursor_increment = LAST_FILE;
-	game->dropped = false;
+	game->dropped = False;
 	game->moved_left = 0;
 	game->moved_right = 0;
 	game->moved_down = 0;
@@ -437,14 +437,14 @@ void _init_game(struct Game* game) {
 	init_captures(game->captures);
 }
 
-bool game_over(struct Game* game) {
+Bool game_over(struct Game* game) {
 
 	return GAME_OVER(game);
 }
 
-bool _will_checkmate(struct Game* game) {
+Bool _will_checkmate(struct Game* game) {
 
-	Set hits = attack(game, false, true, false);
+	Set hits = attack(game, False, True, False);
 	Set b = 1;
 
 	if (hits) while (b) {
@@ -457,17 +457,17 @@ bool _will_checkmate(struct Game* game) {
 
 			if (PIECE_MAP[GET_SQUARE(game->board, SQUARE_INDEX(r, f))] == KING) {
 
-				return true;
+				return True;
 			}
 		}
 
 		b <<= 1;
 	}
 
-	return false;
+	return False;
 }
 
-bool _will_overflow(struct Game* game) {
+Bool _will_overflow(struct Game* game) {
 
 	const Index rank = SPAWN_RANK(game);
 	const Index file = game->cursor_increment;
@@ -476,7 +476,7 @@ bool _will_overflow(struct Game* game) {
 	return square != EMPTY;
 }
 
-bool on_brink(struct Game* game) {
+Bool on_brink(struct Game* game) {
 
 	return _will_overflow(game) || _will_checkmate(game);
 }
@@ -486,22 +486,22 @@ void toggle_pause(struct Game* game) {
 	game->pause = !game->pause;
 }
 
-bool paused(struct Game* game) {
+Bool paused(struct Game* game) {
 
 	return game->pause;
 }
 
-bool repeated(struct Game* game) {
+Bool repeated(struct Game* game) {
 
 	return game->repeat;
 }
 
 void do_drop(struct Game* game) {
 
-	game->dropped = true;
+	game->dropped = True;
 }
 
-void do_digital_move(struct Game* game, bool left, bool right, bool down) {
+void do_digital_move(struct Game* game, Bool left, Bool right, Bool down) {
 
 	game->moved_left = left;
 	game->moved_right = right;
@@ -586,7 +586,7 @@ Time milliseconds(struct Game* game) {
 	return game->time;
 }
 
-bool cursor_wrapped(struct Game* game) {
+Bool cursor_wrapped(struct Game* game) {
 
 	return CURSOR_WRAPPED(game);
 }
@@ -636,7 +636,7 @@ void free_game(struct Game* game) {
 	}
 }
 
-Set attack(struct Game* game, const bool execute, const bool forecast, const bool pattern) {
+Set attack(struct Game* game, const Bool execute, const Bool forecast, const Bool pattern) {
 
 	if (game->repeat && IS_SET(game->settings, NO_CAPTURE_ON_REPEAT)) return 0;
 
@@ -676,16 +676,16 @@ void _take_drag(struct Game* game) {
 
 	if (game->dragged_right >= 1.0) {
 
-		game->moved_right = true;
+		game->moved_right = True;
 	}
 	else if (game->dragged_left >= 1.0) {
 
-		game->moved_left = true;
+		game->moved_left = True;
 	}
 
 	if (game->dragged_down >= 1.0) {
 
-		game->moved_down = true;
+		game->moved_down = True;
 	}
 }
 
@@ -699,7 +699,7 @@ void _take_drop(struct Game* game) {
 		}
 	}
 
-	game->dropped = false;
+	game->dropped = False;
 }
 
 void pump(struct Game* game, const Time passed) {

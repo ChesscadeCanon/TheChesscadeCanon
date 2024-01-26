@@ -126,13 +126,13 @@ Count get_combo(struct Game* game) {
 Set forecast_captures(struct Game* game) {
 
 	ASSERT_GAME(game);
-	return attack(game, false, true, false);
+	return attack(game, false, True, false);
 }
 
 Set attack_pattern(struct Game* game) {
 
 	ASSERT_GAME(game);
-	return attack(game, false, false, true);
+	return attack(game, false, false, True);
 }
 
 Index get_forecast_rank(struct Game* game) {
