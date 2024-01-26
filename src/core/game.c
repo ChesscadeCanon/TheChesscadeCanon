@@ -1,8 +1,8 @@
 #include "../../rules.h"
 #include "config.h"
 #include "game.h"
+#include "histotrie.h"
 #include <assert.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

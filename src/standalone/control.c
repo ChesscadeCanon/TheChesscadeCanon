@@ -2,10 +2,6 @@
 #include "game.h"
 #include "platform.h"
 #include "config.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdbool.h>
 
 enum Input {
 	NO_INPUT = -1,
@@ -36,9 +32,9 @@ void _control_tap(struct Game* game) {
 
 void key_control(struct Game* game, const Time passed) {
 
-	const bool left = GetKeyState(LEFT_KEY) < 0;
-	const bool right = GetKeyState(RIGHT_KEY) < 0;
-	const bool down = GetKeyState(DOWN_KEY) < 0;
+	const Bool left = GetKeyState(LEFT_KEY) < 0;
+	const Bool right = GetKeyState(RIGHT_KEY) < 0;
+	const Bool down = GetKeyState(DOWN_KEY) < 0;
 	_control_tap(game);
 	if(paused(game)) return;
 	do_digital_move(game, left, right, down);

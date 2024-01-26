@@ -38,7 +38,7 @@ void default_model(struct Game* game, const Time passed) {
 	pump(game, passed);
 }
 
-bool tick(struct Game* game, const Time passed, CONTROL_FUNCTOR(control), MODEL_FUNCTOR(model), VIEW_FUNCTOR(view)) {
+Bool tick(struct Game* game, const Time passed, CONTROL_FUNCTOR(control), MODEL_FUNCTOR(model), VIEW_FUNCTOR(view)) {
 
 	control(game, passed);
 
@@ -48,7 +48,7 @@ bool tick(struct Game* game, const Time passed, CONTROL_FUNCTOR(control), MODEL_
 		view(game);
 	}
 
-	return false;
+	return False;
 }
 
 void play(struct Game* game, struct timeb* then, CONTROL_FUNCTOR(control), MODEL_FUNCTOR(model), VIEW_FUNCTOR(view)) {

@@ -1,6 +1,6 @@
 #pragma once
-#include "histotrie.h"
 #include "def.h"
+#include "board.h"
 
 #define FPS 60
 #define SPF (1.0 / ((long double) FPS))

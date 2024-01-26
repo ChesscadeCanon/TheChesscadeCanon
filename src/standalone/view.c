@@ -27,7 +27,7 @@ void _print_info(struct Game* game) {
 
 void _print_cursor(struct Game* game) {
 
-	const bool wrapped = cursor_wrapped(game);
+	const Bool wrapped = cursor_wrapped(game);
 	const Index rank = current_cursor_grade(game);
 	const Index file = current_cursor_increment(game);
 	const char* d = deck(rank);

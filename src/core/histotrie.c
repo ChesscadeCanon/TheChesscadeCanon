@@ -1,6 +1,5 @@
 #include "histotrie.h"
-#include "def.h"
-#include "game.h"
+#include "board.h"
 #include "config.h"
 #include <string.h>
 #include <assert.h>
@@ -16,7 +15,7 @@ struct Histotrie {
 #if HISTOTRIE_TEST
 void test_histotrie() {
 
-	const size_t n = 1000;
+	const Count n = 1000;
 	struct Histotrie* root = malloc_init_histotrie();
 	srand((unsigned int)time(NULL));
 	char keeper[BOARD_LENGTH];
@@ -27,11 +26,11 @@ void test_histotrie() {
 	printf("%zu nodes added\n", result);
 	assert(result == RANKS * FILES);
 	size_t since = 0, until = 0;
-	for (size_t b = 0; b < n; ++b) {
+	for (Count b = 0; b < n; ++b) {
 		char board[BOARD_LENGTH];
 		init_board(board);
-		for (size_t r = 0; r < RANKS; ++r) {
-			for (size_t f = 0; f < FILES; ++f) {
+		for (Index r = 0; r < RANKS; ++r) {
+			for (Index f = 0; f < FILES; ++f) {
 				board[SQUARE_INDEX(r, f)] = SYMBOLS[rand() % RANKS > r ? SYMBOL_COUNT - 1 : rand() % SYMBOL_COUNT];
 			}
 		}

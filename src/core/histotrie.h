@@ -1,5 +1,5 @@
 #pragma once
-#include "board.h"
+#include "def.h"
 
 struct Histotrie* malloc_init_histotrie();
 void free_histotrie(struct Histotrie*);
