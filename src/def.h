@@ -1,6 +1,8 @@
 #pragma once
 #include <sys/timeb.h>
 
+struct Game;
+
 typedef char Piece;
 typedef unsigned short Index;
 typedef unsigned int Settings;
