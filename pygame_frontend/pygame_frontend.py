@@ -5,6 +5,8 @@ from audio_video import *
 high_score = 0
 def update_high_score(score):
     global high_score
+    with open('high_score.txt', 'w+') as file:
+        pass
     with open('high_score.txt', 'r') as file:
         line = file.readline()
         high_score = int(line) if line else high_score
@@ -111,14 +113,15 @@ def draw_text(game):
         rect.topleft = (0, y)
         screen.blit(text, rect)
         y += text.get_rect().height
-    warnings = ((engine.is_repeat(game), "REPEAT!", style.BLUE, style.WHITE), (engine.is_on_brink(game), "WATCH OUT!", style.RED, style.BLACK))
-    for warning in warnings:
-        if warning[0]:
-            text = FONT_1.render(warning[1], True, warning[2], warning[3])
-            rect = text.get_rect()
-            y += text.get_rect().height
-            rect.center = (style.SQUARE * style.SQUARES_OFF_LEFT * 0.5, y)
-            screen.blit(text, rect)
+    if not engine.is_game_over(game):
+        warnings = ((engine.is_repeat(game), "REPEAT!", style.BLUE, style.WHITE), (engine.is_on_brink(game), "WATCH OUT!", style.RED, style.BLACK))
+        for warning in warnings:
+            if warning[0]:
+                text = FONT_1.render(warning[1], True, warning[2], warning[3])
+                rect = text.get_rect()
+                y += text.get_rect().height
+                rect.center = (style.SQUARE * style.SQUARES_OFF_LEFT * 0.5, y)
+                screen.blit(text, rect)
 
 def play_sounds(game, passed):
     if "REPL_OWNER" not in environ:
@@ -261,6 +264,7 @@ def play_game(game, passed):
         return True
     else:
         engine.pump_game(game, passed)
+        play_sounds(game, passed)
     return False
 
 def play_draw(game, passed):
@@ -269,7 +273,6 @@ def play_draw(game, passed):
         draw_pause(game)
     else:
         draw_game(game)
-    play_sounds(game, passed)
     draw_game_over(game)
     pygame.display.flip()
 
