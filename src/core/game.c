@@ -332,13 +332,14 @@ Time _fall(struct Game* game) {
 		const Index rank = game->player_rank + (DOUBLE_BISHOP(game) + 1);
 		const Index file = game->player_file;
 		const Index to = SQUARE_INDEX(rank, file);
+		ret += EASE(game);
 
 		if (_move_player(game, to)) {
 
 			game->events = EVENT_FELL;
 			_update_cursor(game);
-			ret += EASE(game);
 		}
+		else break;
 	}
 
 	return ret;

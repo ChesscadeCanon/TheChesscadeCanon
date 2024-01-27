@@ -1,6 +1,5 @@
 #include "view.h"
 #include "game.h"
-#include "config.h"
 #include "platform.h"
 #include <stdio.h>
 

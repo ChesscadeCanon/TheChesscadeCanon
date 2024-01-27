@@ -1,7 +1,6 @@
 #include "control.h"
 #include "game.h"
 #include "platform.h"
-#include "config.h"
 
 enum Input {
 	NO_INPUT = -1,

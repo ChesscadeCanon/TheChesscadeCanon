@@ -1,3 +1,4 @@
+from re import L
 import pygame
 from os import environ
 import style
@@ -9,17 +10,18 @@ if "REPL_OWNER" not in environ:
     pygame.midi.init()
     from instrument import MIDINote
 
-    fall_notes = [
-        list(range(32, 48, 2)),
-        list(range(48, 64, 2)),
-        list(range(64, 80, 2)),
-        list(range(80, 96, 2))
-    ]
-    
-    port = pygame.midi.get_default_output_id()
-    midi_out = pygame.midi.Output(port, 0)
-    midi_out.set_instrument(0)
-    fall_notes = [[MIDINote(midi_out, n, 64) for n in s] for s in fall_notes]
+    def prepare_notes(volume, layers, low_note, high_note, step):
+        port = pygame.midi.get_default_output_id()
+        midi_out = pygame.midi.Output(port, 0)
+        notes = []
+        for grade in range(layers):
+            notes.append(list(range(low_note + step * grade, low_note + step * (grade+1), 2)))
+        print(notes)
+        port = pygame.midi.get_default_output_id()
+
+        adjust_volume = lambda v, n: v - (n - low_note) // 2
+        return [[MIDINote(midi_out, n, adjust_volume(volume, n)) for n in s] for s in notes]
+    fall_notes = prepare_notes(75, 4, 16, 96, 16)
     
 FONT_0 = pygame.font.Font('freesansbold.ttf', 11)
 FONT_1 = pygame.font.Font('freesansbold.ttf', 14)
