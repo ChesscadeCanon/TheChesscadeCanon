@@ -123,6 +123,12 @@ Count get_combo(struct Game* game) {
 	return current_combo(game);
 }
 
+Trenary get_cursor_direction(struct Game* game) {
+
+	ASSERT_GAME(game);
+	return cursor_direction(game);
+}
+
 Set forecast_captures(struct Game* game) {
 
 	ASSERT_GAME(game);
@@ -165,6 +171,12 @@ struct Game* malloc_init_default_game() {
 	struct Game* ret = malloc_init_game(DEFAULT_SETTINGS);
 	ASSERT_GAME(ret);
 	return ret;
+}
+
+void print_board(Game* game) {
+
+	ASSERT_GAME(game);
+	print_board_state(game);
 }
 
 struct Game* malloc_init_custom_game(Settings settings) {

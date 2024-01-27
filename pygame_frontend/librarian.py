@@ -29,6 +29,9 @@ def Engine():
     ret.get_combo.argtypes = [ctypes.POINTER(Game)]
     ret.get_combo.restype = ctypes.c_ulonglong
     
+    ret.get_cursor_direction = [ctypes.POINTER(Game)]
+    ret.get_cursor_direction = ctypes.c_short
+
     ret.get_cursor_grade.argtypes = [ctypes.POINTER(Game)]
     ret.get_cursor_grade.restype = ctypes.c_ushort
     
@@ -109,6 +112,8 @@ def Engine():
     ret.malloc_init_custom_game.restype = ctypes.POINTER(Game)
     
     ret.malloc_init_default_game.restype = ctypes.POINTER(Game)
+    
+    ret.print_board.argtypes = [ctypes.POINTER(Game)]
     
     ret.pump_game.argtypes = [ctypes.POINTER(Game), ctypes.c_ulonglong]
 

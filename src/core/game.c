@@ -32,7 +32,7 @@ struct Game {
 	Piece player;
 	Index player_rank;
 	Index player_file;
-	short cursor;
+	Trenary cursor;
 	Index cursor_grade;
 	Index cursor_increment;
 	Piece board[BOARD_LENGTH];
@@ -557,6 +557,11 @@ Index player_piece_file(struct Game* game) {
 	return game->player_file;
 }
 
+Trenary cursor_direction(struct Game* game) {
+
+	return game->cursor;
+}
+
 Index current_cursor_grade(struct Game* game) {
 
 	return game->cursor_grade;
@@ -718,6 +723,11 @@ void pump(struct Game* game, const Time passed) {
 void begin(struct Game* game) {
 
 	SPAWN(game);
+}
+
+void print_board_state(struct Game* game) {
+
+	printf("%s", game->board);
 }
 
 struct Game* malloc_init_game(Settings settings) {

@@ -125,7 +125,6 @@ def play_sounds(game, passed):
         if engine.get_events(game) & librarian.EVENT_FELL:
             ease = maxtime=engine.get_ease(game)
             note = fall_notes[engine.get_cursor_grade(game)][engine.get_cursor_increment(game)]
-            note.midi_out.set_instrument(52)
             note.play(ease)
         [[n.pump(passed) for n in s] for s in fall_notes]
 

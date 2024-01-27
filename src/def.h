@@ -29,6 +29,7 @@
 struct Game;
 
 typedef char Piece;
+typedef short Trenary;
 typedef unsigned short Index;
 typedef unsigned long long Count;
 typedef unsigned long long Set;

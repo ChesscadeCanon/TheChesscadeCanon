@@ -38,6 +38,11 @@ extern "C" {
 	EXPORT unsigned long long get_combo(struct Game*);
 
 	/**
+	* returns -1 if the cursor is going left or 1 if it's going right
+	*/
+	EXPORT short get_cursor_direction(struct Game*);
+
+	/**
 	* returns an unsigned short denoting the rank of the board where the falling piece currently is
 	*/
 	EXPORT unsigned short get_cursor_grade(struct Game*);
@@ -194,6 +199,8 @@ extern "C" {
 	* returns a pointer to a newly allocated and initialized Game struct
 	*/
 	EXPORT struct Game* malloc_init_default_game();
+
+	EXPORT void print_board(struct Game*);
 
 	/**
 	* progresses the game by the given number of milliseconds
