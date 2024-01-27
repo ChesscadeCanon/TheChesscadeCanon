@@ -25,7 +25,7 @@ void input_digital_move(struct Game* game, bool left, bool right, bool down) {
 	do_digital_move(game, left, right, down);
 }
 
-void input_analog_move(struct Game* game, long double x, long double y) {
+void input_analog_move(struct Game* game, Fraction x, Fraction y) {
 
 	ASSERT_GAME(game);
 	do_analog_move(game, x, y);

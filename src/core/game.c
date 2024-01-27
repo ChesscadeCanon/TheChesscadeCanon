@@ -19,9 +19,9 @@ struct Game {
 	Bool moved_left;
 	Bool moved_right;
 	Bool moved_down;
-	long double dragged_left;
-	long double dragged_right;
-	long double dragged_down;
+	Fraction dragged_left;
+	Fraction dragged_right;
+	Fraction dragged_down;
 	Count score;
 	Count combo;
 	Count scored;
@@ -47,11 +47,14 @@ struct Game {
 	struct Histotrie* histotrie;
 };
 
+#define PLAYER_SQUARE(__game__) SQUARE_INDEX(__game__->player_rank, __game__->player_file)
+#define SET(__settings__, __setting__) (__settings__ |= __setting__)
+#define IS_SET(__settings__, __setting__) (__settings__ & __setting__)
 #define MOVE_RATE(__game__) (64)
 #define SINCE_MOVED(__game__) ((__game__->time) - __game__->last_moved)
 #define SINCE_FELL(__game__) ((__game__->time) - __game__->last_fell)
 #define SINCE_SPAWNED(__game__) ((__game__->time) - __game__->last_spawned)
-#define DRAG(__drag__, __steps__) __drag__ = max(0, __drag__ - (long double)__steps__);
+#define DRAG(__drag__, __steps__) __drag__ = max(0, __drag__ - (Fraction)__steps__);
 #define PLACE_PLAYER(__game__) SET_SQUARE(__game__->board, PLAYER_SQUARE(__game__), __game__->player)
 #define REVERSE_CURSOR(__game__) (__game__->cursor *= -1)
 #define DOUBLE_BISHOP(__game__) (PIECE_MAP[__game__->player] == BISHOP && IS_SET(__game__->settings, DOUBLE_BISHOPS))
@@ -533,7 +536,7 @@ void do_digital_move(struct Game* game, Bool left, Bool right, Bool down) {
 	game->moved_down = down;
 }
 
-void do_analog_move(struct Game* game, long double x, long double y) {
+void do_analog_move(struct Game* game, Fraction x, Fraction y) {
 
 	if (x > 0) {
 

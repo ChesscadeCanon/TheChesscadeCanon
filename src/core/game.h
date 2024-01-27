@@ -2,13 +2,6 @@
 #include "def.h"
 #include "board.h"
 
-#define FPS 60
-#define SPF (1.0 / ((long double) FPS))
-#define MPF ((Time) (1000.0 * SPF))
-#define PLAYER_SQUARE(__game__) SQUARE_INDEX(__game__->player_rank, __game__->player_file)
-#define SET(__settings__, __setting__) (__settings__ |= __setting__)
-#define IS_SET(__settings__, __setting__) (__settings__ & __setting__)
-
 void print_rules();
 Time ease(struct Game*);
 const char* deck(Index);
@@ -33,7 +26,7 @@ Bool paused(struct Game*);
 Bool repeated(struct Game*);
 void do_drop(struct Game*);
 void do_digital_move(struct Game*, Bool, Bool, Bool);
-void do_analog_move(struct Game*, long double, long double);
+void do_analog_move(struct Game*, Fraction, Fraction);
 Events current_events(struct Game*);
 Piece player_piece(struct Game*);
 Index player_piece_rank(struct Game*);

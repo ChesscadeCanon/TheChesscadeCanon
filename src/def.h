@@ -1,4 +1,8 @@
 #pragma once
+
+// The master game object, exposed in src/core/game.h.
+struct Game;
+
 /**
 * Internally, ranks range 0 - 7 from the top of the board to the bottom,
 * while files range 0 - 7 from left to right. Interfaces should follow
@@ -25,8 +29,9 @@
 #define BLACK_KNIGHT 'n'
 #define WHITE_BISHOP 'B'
 #define BLACK_BISHOP 'b'
-
-struct Game;
+#define FPS 60
+#define SPF (1.0 / ((long double) FPS))
+#define MPF ((Time) (1000.0 * SPF))
 
 typedef char Piece;
 typedef short Trenary;
@@ -37,6 +42,7 @@ typedef int Settings;
 typedef int Events;
 typedef long long Time;
 typedef unsigned short Bool;
+typedef long double Fraction;
 #define True 1u
 #define False 0u
 
