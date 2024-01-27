@@ -40,6 +40,8 @@ struct Game {
 	Bool repeat;
 	Settings settings;
 	Events events;
+	Count white_pieces;
+	Count black_pieces;
 	Count total_pieces;
 	Count total_value;
 	struct Histotrie* histotrie;
@@ -55,8 +57,8 @@ struct Game {
 #define DOUBLE_BISHOP(__game__) (PIECE_MAP[__game__->player] == BISHOP && IS_SET(__game__->settings, DOUBLE_BISHOPS))
 #define BISHOP_SPEED(__game__, __moved__) ((__moved__) / (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_DOWN(__game__) SQUARE_INDEX(__game__->player_rank + (DOUBLE_BISHOP(__game__) + 1), __game__->player_file)
-#define EASE(__game__) (max(1, 1024) * (1 + DOUBLE_BISHOP(__game__)))
-#define DROP_RATE(__game__) (EASE(__game__) >> 1) 
+#define EASE(__game__) (MOVE_RATE(__game__) * 36)
+#define DROP_RATE(__game__) 0 
 #define QUEEN_ME(__game__, __rank__) (\
 	IS_SET(__game__->settings, PAWNS_PROMOTE) ?\
 		__game__->player == WHITE_PAWN && (__rank__) == 0 ? WHITE_QUEEN \
@@ -80,8 +82,13 @@ struct Game {
 	IS_PIECE(GET_SQUARE(__game__->board, __index__)) &&\
 	IS_WHITE(GET_SQUARE(__game__->board, __index__)) != IS_WHITE(__game__->player) \
 )
+#define TALLY_COLORS(__game__, __piece__, __count__) (\
+	(__game__->white_pieces += IS_WHITE(__piece__) * __count__) &\
+	(__game__->black_pieces += !IS_WHITE(__piece__) * __count__) \
+)
 #define NEXT_PLAYER(__game__) (__game__->player = NEXT_PIECE(__game__)) 
 #define SPAWN(__game__) (\
+	TALLY_COLORS(__game__, __game__->player, 1) &\
 	NEXT_PLAYER(__game__) &\
 	(__game__->player_rank = SPAWN_RANK(__game__)) &\
 	(__game__->player_file = __game__->cursor_increment) &\
@@ -121,7 +128,8 @@ Index _update_cursor(struct Game* game) {
 
 Index _bit_index(Set bit) {
 
-	Index i = 0, b = 1;
+	Index i = 0;
+	Set b = 1;
 
 	while (i < 64) {
 
@@ -136,6 +144,7 @@ Index _bit_index(Set bit) {
 void _kill(struct Game* game, const Index square, const Index move) {
 
 	Piece piece = GET_SQUARE(game->board, square);
+	TALLY_COLORS(game, piece, -1);
 	SET_CAPTURE(game->captures, move, piece);
 	SET_SQUARE(game->board, square, EMPTY);
 }
@@ -204,19 +213,29 @@ Index _drop_to(struct Game* game, const Index from) {
 	return from;
 }
 
-Count _judge(struct Game* game) {
+void _checkmate(struct Game* game) {
 
-	game->scored = 0;
-	Count count = 0;
+	if (!IS_SET(game->settings, CHECKMATE)) return;
 
 	for (Index i = 0; i < FILES; ++i) {
 
 		Piece piece = GET_CAPTURE(game->captures, i);
 
-		if (IS_SET(game->settings, CHECKMATE) && PIECE_MAP[piece] == KING) {
+		if (PIECE_MAP[piece] == KING) {
 
 			game->player = DEAD_PLAYER;
 		}
+	}
+}
+
+void _judge(struct Game* game) {
+
+	game->scored = IS_WHITE(game->player) ? game->white_pieces : game->black_pieces;
+	Count count = 0;
+
+	for (Index i = 0; i < FILES; ++i) {
+
+		Piece piece = GET_CAPTURE(game->captures, i);
 
 		if (piece != *EMPTY_CAPTURES) {
 
@@ -226,9 +245,8 @@ Count _judge(struct Game* game) {
 	}
 
 	count ? ++game->combo : (game->combo = 0);
-	game->scored *= game->combo * count;
+	game->scored *= (RANKS - game->player_rank) * count;
 	game->score += game->scored;
-	return game->score;
 }
 
 Count _chronicle(struct Game* game) {
@@ -244,16 +262,19 @@ Count _chronicle(struct Game* game) {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                const char* LICENSE = "Chesscade is a falling block puzzle game with chess pieces.\nCopyright(C) 2024  George Cesana ne Guy\n\nThis program is free software : you can redistribute it and /or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.If not, see < https://www.gnu.org/licenses/>.";
 void _resolve(struct Game* game) {
 
+	game->events |= EVENT_LANDED;
 	const Index from_rank = game->player_rank, from_file = game->player_file;
 	game->player = QUEEN_ME(game, from_rank);
 	const Set captures = attack(game, True, False, False);
-	LAND(game);
 	_judge(game);
+	LAND(game);
+	_checkmate(game);
 	_chronicle(game);
-	game->cursor_grade = CURSOR_GRADE(game, 0);
+	game->cursor_grade = CURSOR_GRADE(game, game->repeat && IS_SET(game->settings, KING_ON_REPEAT));
 
 	if (captures) {
-
+		
+		game->events |= EVENT_CAPTURE;
 		REVERSE_CURSOR(game);
 	}
 
@@ -336,7 +357,7 @@ Time _fall(struct Game* game) {
 
 		if (_move_player(game, to)) {
 
-			game->events = EVENT_FELL;
+			game->events |= EVENT_FELL;
 			_update_cursor(game);
 		}
 		else break;
@@ -432,6 +453,8 @@ void _init_game(struct Game* game) {
 	game->dragged_down = 0;
 	game->settings = 0;
 	game->events = 0;
+	game->white_pieces = 0;
+	game->black_pieces = 0;
 	game->total_pieces = 0;
 	game->total_value = 0;
 	init_board(game->board);
@@ -445,24 +468,25 @@ Bool game_over(struct Game* game) {
 
 Bool _will_checkmate(struct Game* game) {
 
-	Set hits = attack(game, False, True, False);
-	Set b = 1;
+	const Set hits = attack(game, False, True, False);
+	Set bit = 1;
+	Index index = 0;
 
-	if (hits) while (b) {
+	if (hits) while (bit) {
 
-		if (b & hits) {
+		if (bit & hits) {
 
-			Index i = _bit_index(b);
-			Index r = i / FILES;
-			Index f = i % FILES;
+			const Index rank = index / FILES;
+			const Index file = index % FILES;
 
-			if (PIECE_MAP[GET_SQUARE(game->board, SQUARE_INDEX(r, f))] == KING) {
+			if (PIECE_MAP[GET_SQUARE(game->board, SQUARE_INDEX(rank, file))] == KING) {
 
 				return True;
 			}
 		}
 
-		b <<= 1;
+		bit <<= 1;
+		++index;
 	}
 
 	return False;

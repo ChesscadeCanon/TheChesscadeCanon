@@ -87,7 +87,7 @@ def draw_shadow(game):
     draw_piece_on_square(shadow_pieces, piece, rank, file)
 
 def draw_text(game):
-    readouts = ("Score", f"{engine.get_score(game)}"), ("Scored", f"{engine.get_scored(game)}"), ("Combo", f"{engine.get_combo(game)}"), ("Delay", f"{engine.get_ease(game)}")
+    readouts = ("Score", f"{engine.get_score(game)}"), ("Scored", f"{engine.get_scored(game)}"), ("Delay", f"{engine.get_ease(game)}")
     y = 0
     for readout in readouts:
         for part in readout:    
@@ -122,11 +122,26 @@ def draw_text(game):
 
 def play_sounds(game, passed):
     if "REPL_OWNER" not in environ:
-        if engine.get_events(game) & librarian.EVENT_FELL:
-            ease = maxtime=engine.get_ease(game)
+        if engine.get_events(game) & librarian.EVENT_WRAPPED:
+            wrap_note.play()
+        elif engine.get_events(game) & librarian.EVENT_FELL:
             note = fall_notes[engine.get_cursor_grade(game)][engine.get_cursor_increment(game)]
-            note.play(ease)
+            note.play()
+        if engine.get_events(game) & (librarian.EVENT_LEFT | librarian.EVENT_RIGHT | librarian.EVENT_DOWN):
+            move_note.play()
+        if engine.get_events(game) & librarian.EVENT_CAPTURED:
+            capture_note.play()
+        elif engine.get_events(game) & librarian.EVENT_DROPPED:
+            drop_note.play()
+        elif engine.get_events(game) & librarian.EVENT_LANDED:
+            land_note.play()
         [[n.pump(passed) for n in s] for s in fall_notes]
+        move_note.pump(passed)
+        drop_note.pump(passed)
+        land_note.pump(passed)
+        capture_note.pump(passed)
+        wrap_note.pump(passed)
+        
 
 def take_input(game, passed):
     keys=pygame.key.get_pressed()

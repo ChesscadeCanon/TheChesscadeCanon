@@ -7,6 +7,8 @@ EVENT_RIGHT = 1 << 3
 EVENT_DOWN = 1 << 4
 EVENT_DROPPED = 1 << 5
 EVENT_WRAPPED = 1 << 6
+EVENT_LANDED = 1 << 7
+EVENT_CAPTURED = 1 << 8
 
 SYSTEM = platform.system().lower()
 ENGINE_PATH = 'bin/ChesscadeLib.dll' if "windows" in SYSTEM else 'bin/libChesscadeLib.so' if "linux" in SYSTEM else 'bin/cygChesscadeLib.dll' if 'cygwin' in SYSTEM else ''

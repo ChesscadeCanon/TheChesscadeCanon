@@ -1,6 +1,8 @@
 from re import L
 import pygame
 from os import environ
+
+from pygame import midi
 import style
 
 pygame.init()
@@ -9,16 +11,20 @@ if "REPL_OWNER" not in environ:
     import pygame.midi
     pygame.midi.init()
     from instrument import MIDINote
-    def prepare_notes(instrument, volume, layers, low_note, high_note, outer_step, inner_step):
-        port = pygame.midi.get_default_output_id()
-        midi_out = pygame.midi.Output(port, 0)
+    port = pygame.midi.get_default_output_id()
+    midi_out = pygame.midi.Output(port, 0)
+    def prepare_notes(instrument, volume, layers, low_note, outer_step, inner_step):
         notes = []
         for layer in range(layers):
             notes.append(list(range(low_note + outer_step * layer, low_note + outer_step * (layer+1), inner_step)))
-        print(notes)
         adjust_volume = lambda v, n: v - (n - low_note) // 2
-        return [[MIDINote(midi_out, instrument, n, adjust_volume(volume, n)) for n in s] for s in notes]
-    fall_notes = prepare_notes(112, 64, 4, 64, 64, 8, 1)
+        return [[MIDINote(midi_out, instrument, n, volume, 64 * 36) for n in s] for s in notes]
+    fall_notes = prepare_notes(114, 64, 4, 48, 16, 2)
+    move_note = MIDINote(midi_out, 116, 96, 32, 64)
+    drop_note = MIDINote(midi_out, 118, 32, 96, 128)
+    land_note = MIDINote(midi_out, 113, 48, 64, 128)
+    capture_note = MIDINote(midi_out, 28, 72, 72, 128)
+    wrap_note = MIDINote(midi_out, 57, 64, 64, 256)
     
 FONT_0 = pygame.font.Font('freesansbold.ttf', 11)
 FONT_1 = pygame.font.Font('freesansbold.ttf', 14)
