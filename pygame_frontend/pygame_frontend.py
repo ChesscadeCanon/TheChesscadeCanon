@@ -122,25 +122,25 @@ def draw_text(game):
 
 def play_sounds(game, passed):
     if "REPL_OWNER" not in environ:
-        if engine.get_events(game) & librarian.EVENT_WRAPPED:
-            wrap_note.play()
-        elif engine.get_events(game) & librarian.EVENT_FELL:
-            note = fall_notes[engine.get_cursor_grade(game)][engine.get_cursor_increment(game)]
-            note.play()
-        if engine.get_events(game) & (librarian.EVENT_LEFT | librarian.EVENT_RIGHT | librarian.EVENT_DOWN):
-            move_note.play()
-        if engine.get_events(game) & librarian.EVENT_CAPTURED:
-            capture_note.play()
-        elif engine.get_events(game) & librarian.EVENT_DROPPED:
-            drop_note.play()
-        elif engine.get_events(game) & librarian.EVENT_LANDED:
-            land_note.play()
         [[n.pump(passed) for n in s] for s in fall_notes]
         move_note.pump(passed)
         drop_note.pump(passed)
         land_note.pump(passed)
         capture_note.pump(passed)
         wrap_note.pump(passed)
+        if engine.get_events(game) & (librarian.EVENT_LEFT | librarian.EVENT_RIGHT | librarian.EVENT_DOWN):
+            move_note.play()
+        if engine.get_events(game) & librarian.EVENT_WRAPPED:
+            wrap_note.play()
+        elif engine.get_events(game) & librarian.EVENT_FELL:
+            note = fall_notes[engine.get_cursor_grade(game)][engine.get_cursor_increment(game)]
+            note.play()
+        if engine.get_events(game) & librarian.EVENT_CAPTURED:
+            capture_note.play()
+        elif engine.get_events(game) & librarian.EVENT_DROPPED:
+            drop_note.play()
+        elif engine.get_events(game) & librarian.EVENT_LANDED:
+            land_note.play()
         
 
 def take_input(game, passed):
@@ -282,7 +282,7 @@ def play():
     back = False
     clock = pygame.time.Clock()
     while go == GO:
-        passed = clock.tick(30)
+        passed = clock.tick(60)
         go = play_events(game)
         over = play_game(game, passed)
         play_draw(game, passed)

@@ -13,18 +13,18 @@ if "REPL_OWNER" not in environ:
     from instrument import MIDINote
     port = pygame.midi.get_default_output_id()
     midi_out = pygame.midi.Output(port, 0)
-    def prepare_notes(instrument, volume, layers, low_note, outer_step, inner_step):
+    def prepare_notes(instrument, volume=0, layers=0, low_note=0, outer_step=0, inner_step=0):
         notes = []
         for layer in range(layers):
             notes.append(list(range(low_note + outer_step * layer, low_note + outer_step * (layer+1), inner_step)))
         adjust_volume = lambda v, n: v - (n - low_note) // 2
-        return [[MIDINote(midi_out, instrument, n, volume, 64 * 36) for n in s] for s in notes]
-    fall_notes = prepare_notes(114, 64, 4, 48, 16, 2)
-    move_note = MIDINote(midi_out, 116, 96, 32, 64)
-    drop_note = MIDINote(midi_out, 118, 32, 96, 128)
-    land_note = MIDINote(midi_out, 113, 48, 64, 128)
-    capture_note = MIDINote(midi_out, 28, 72, 72, 128)
-    wrap_note = MIDINote(midi_out, 57, 64, 64, 256)
+        return [[MIDINote(midi_out, instrument=instrument, note=n, volume=volume, length=64 * 36) for n in s] for s in notes]
+    fall_notes = prepare_notes(instrument=114, volume=64, layers=4, low_note=48, outer_step=16, inner_step=2)
+    move_note = MIDINote(midi_out, instrument=116, note=96, volume=32, length=64)
+    drop_note = MIDINote(midi_out, instrument=118, note=32, volume=96, length=128)
+    land_note = MIDINote(midi_out, instrument=113, note=48, volume=64, length=128)
+    capture_note = MIDINote(midi_out, instrument=108, note=64, volume=72, length=512)
+    wrap_note = MIDINote(midi_out, instrument=57, note=64, volume=64, length=256)
     
 FONT_0 = pygame.font.Font('freesansbold.ttf', 11)
 FONT_1 = pygame.font.Font('freesansbold.ttf', 14)

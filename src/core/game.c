@@ -245,7 +245,7 @@ void _judge(struct Game* game) {
 	}
 
 	count ? ++game->combo : (game->combo = 0);
-	game->scored *= (RANKS - game->player_rank) * count;
+	game->scored *= (RANKS - game->player_rank) + count;
 	game->score += game->scored;
 }
 
