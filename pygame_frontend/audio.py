@@ -10,7 +10,7 @@ if "REPL_OWNER" in environ:
         pass
     def stop_notes():
         pass
-    def pump_notes():
+    def pump_notes(p):
         pass
 else:
     import pygame.midi
