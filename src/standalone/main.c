@@ -21,7 +21,7 @@ void print_help() {
 
 Bool argmatch(int argc, const char** argv, int index, const char* arg) {
 
-	return argc > index && strncmp(arg, argv[index], 2);
+	return argc > index && strncmp(arg, argv[index], 2) == 0;
 }
 
 int main(int argc, const char** argv) {
