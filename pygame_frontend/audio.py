@@ -2,6 +2,8 @@ from os import environ
 from pygame import midi
 
 if "REPL_OWNER" in environ:
+    def init_notes():
+        pass
     def get_notes():
         return None
     def quit_audio():
