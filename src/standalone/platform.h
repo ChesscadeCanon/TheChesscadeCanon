@@ -1,8 +1,8 @@
 #pragma once
 #ifdef _WIN32
 #include <windows.h>
-#endif
 #include <conio.h>
+#endif
 
 #define DROP_KEY ' '
 #define QUIT_KEY 'q'
