@@ -23,7 +23,7 @@ Bool argmatch(int argc, const char** argv, int index, const char* arg) {
 	return argc > index && strncmp(arg, argv[index], 2);
 }
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
 	if (argc == 1) {
 #ifdef _WIN32
 		run_pretty_text_game(DEFAULT_SETTINGS);
