@@ -20,7 +20,7 @@ void print_help() {
 }
 
 Bool argmatch(int argc, const char** argv, int index, const char* arg) {
-	printf("%s\n", arg);
+	printf("%s %s\n", arg, argv[index]);
 	return argc > index && strncmp(arg, argv[index], 2) == 0;
 }
 
