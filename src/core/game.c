@@ -764,7 +764,7 @@ void begin(struct Game* game) {
 
 void print_board_state(const struct Game* game) {
 
-	printf("%s", game->board);
+	printf("%s\n", game->board);
 }
 
 struct Game* malloc_init_game(Settings settings) {
