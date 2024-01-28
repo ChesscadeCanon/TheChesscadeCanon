@@ -9,6 +9,6 @@ void _test_0(int select)
 }
 
 void run_tests(int select) {
-
+	printf("Running tests.\n");
 	_test_0(select);
 }
