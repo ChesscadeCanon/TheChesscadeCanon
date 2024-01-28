@@ -6,6 +6,7 @@ void churn(const Count games, const Count fps) {
 
 		struct Game* game = malloc_init_game(DEFAULT_SETTINGS);
 
+		begin(game);
 		while (!game_over(game)) {
 
 			pump(game, fps);
