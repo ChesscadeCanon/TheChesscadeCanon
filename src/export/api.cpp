@@ -117,6 +117,12 @@ Count get_scored(const struct Game* game) {
 	return last_scored(game);
 }
 
+Index get_spawn_rank(const struct Game* game)
+{
+	ASSERT_GAME(game);
+	return spawn_rank(game);
+}
+
 Count get_combo(const struct Game* game) {
 
 	ASSERT_GAME(game);
@@ -145,6 +151,12 @@ Index get_forecast_rank(const struct Game* game) {
 
 	ASSERT_GAME(game);
 	return forecast_rank(game);
+}
+
+Time get_move_rate(const struct Game* game)
+{
+	ASSERT_GAME(game);
+	return move_rate(game);
 }
 
 char get_forecast_piece(const struct Game* game) {

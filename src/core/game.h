@@ -38,3 +38,5 @@ Count current_score(const struct Game*);
 Count last_scored(const struct Game*);
 Count current_combo(const struct Game*);
 Time milliseconds(const struct Game*);
+Time move_rate(const struct Game*);
+Index spawn_rank(const struct Game*);

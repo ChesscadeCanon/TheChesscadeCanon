@@ -88,6 +88,11 @@ extern "C" {
 	EXPORT unsigned short get_forecast_rank(const struct Game*);
 
 	/**
+	* returns the minimum amount of time between player moves
+	*/
+	EXPORT long long get_move_rate(const struct Game*);
+
+	/**
 	* returns the next piece that will spawn if the current piece lands right now
 	*/
 	EXPORT char get_next_piece(const struct Game*);
@@ -131,6 +136,11 @@ extern "C" {
 	* returns the number of points scored on the last landing
 	*/
 	EXPORT unsigned long long get_scored(const struct Game*);
+
+	/**
+	* gets the rank where the next piece will spawn
+	*/
+	EXPORT unsigned short get_spawn_rank(const struct Game*);
 
 	/**
 	* seturns the current state of the board as a string
@@ -200,6 +210,9 @@ extern "C" {
 	*/
 	EXPORT struct Game* malloc_init_default_game();
 
+	/**
+	* prints the current state of the board in ascii form to stdout
+	*/
 	EXPORT void print_board(const struct Game*);
 
 	/**

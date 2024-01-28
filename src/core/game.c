@@ -619,6 +619,16 @@ Time milliseconds(const struct Game* game) {
 	return game->time;
 }
 
+Time move_rate(const struct Game* game)
+{
+	return MOVE_RATE(game);
+}
+
+Index spawn_rank(const struct Game* game) {
+
+	return SPAWN_RANK(game);
+}
+
 Bool cursor_wrapped(const struct Game* game) {
 
 	return CURSOR_WRAPPED(game);

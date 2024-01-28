@@ -31,8 +31,8 @@ def Engine():
     ret.get_combo.argtypes = [ctypes.POINTER(Game)]
     ret.get_combo.restype = ctypes.c_ulonglong
     
-    ret.get_cursor_direction = [ctypes.POINTER(Game)]
-    ret.get_cursor_direction = ctypes.c_short
+    ret.get_cursor_direction.argtypes = [ctypes.POINTER(Game)]
+    ret.get_cursor_direction.restype = ctypes.c_short
 
     ret.get_cursor_grade.argtypes = [ctypes.POINTER(Game)]
     ret.get_cursor_grade.restype = ctypes.c_ushort
@@ -59,10 +59,13 @@ def Engine():
     
     ret.get_forecast_rank.argtypes = [ctypes.POINTER(Game)]
     ret.get_forecast_rank.restype = ctypes.c_ushort
-    
+   
+    ret.get_move_rate.argtypes = [ctypes.POINTER(Game)]
+    ret.get_move_rate.restype = ctypes.c_longlong
+
     ret.get_next_piece.argtypes = [ctypes.POINTER(Game)]
     ret.get_next_piece.restype = ctypes.c_char
-    
+   
     ret.get_player.argtypes = [ctypes.POINTER(Game)]
     ret.get_player.restype = ctypes.c_char
     
@@ -84,6 +87,9 @@ def Engine():
     ret.get_scored.argtypes = [ctypes.POINTER(Game)]
     ret.get_scored.restype = ctypes.c_ulonglong
     
+    ret.get_spawn_rank.argtypes = [ctypes.POINTER(Game)]
+    ret.get_spawn_rank.restype = ctypes.c_ushort
+
     ret.get_square.argtypes = [ctypes.POINTER(Game), ctypes.c_ushort, ctypes.c_ushort]
     ret.get_square.restype = ctypes.c_char
 

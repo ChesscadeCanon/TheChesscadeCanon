@@ -31,9 +31,18 @@ SIZE = (FILES + style.SQUARES_OFF_LEFT) * style.SQUARE, (RANKS + style.SQUARES_O
 screen = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Chesscade")
 
+square_to_point = lambda rank, file: ((file + style.SQUARES_OFF_TOP) * style.SQUARE, (rank + style.SQUARES_OFF_LEFT) * style.SQUARE)
+draw_on_square = lambda image, rank, file: screen.blit(image, square_to_point(rank, file))
 draw_piece = lambda pieces, piece, x, y: piece in pieces and screen.blit(pieces[piece], (x, y))
 draw_piece_on_square = lambda pieces, piece, r, f: draw_piece(pieces, piece, (f + style.SQUARES_OFF_LEFT) * style.SQUARE, (r + style.SQUARES_OFF_TOP) * style.SQUARE)
 draw_piece_on_deck = lambda pieces, piece, r, f: draw_piece(pieces, piece, (f + style.SQUARES_OFF_LEFT) * style.SQUARE, r * style.SQUARE)
+
+def draw_cursor(game):
+    direction = engine.get_cursor_direction(game)
+    arrow = right_arrow if direction > 0 else left_arrow
+    spawn_rank = engine.get_spawn_rank(game)
+    spawn_file = engine.get_cursor_increment(game)
+    draw_on_square(arrow, spawn_rank, spawn_file)
 
 def draw_board(game):
     white = style.WHITE
@@ -217,6 +226,7 @@ def title():
 def draw_game(game):
     draw_board(game)
     draw_next(game)
+    draw_cursor(game)
     draw_pieces(game)
     draw_shadow(game)
     draw_player(game)
