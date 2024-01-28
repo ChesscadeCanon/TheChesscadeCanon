@@ -6,10 +6,11 @@ void churn(const Count games) {
 
 		struct Game* game = malloc_init_game(DEFAULT_SETTINGS);
 
+		print_board_state(game);
 		while (!game_over(game)) {
 
-			print_board_state(game);
 			pump(game, ease(game));
+			print_board_state(game);
 		}
 
 		free_game(game);
