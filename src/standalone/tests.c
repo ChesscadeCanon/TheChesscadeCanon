@@ -1,6 +1,6 @@
 #include "tests.h"
 #include <stdio.h>
-#define SELECT(__test_number__, __select__) {if(__test_number__ >= 0 && __test_number__ != __select__) return;}
+#define SELECT(__test_number__, __select__) {if(__select__ >= 0 && __test_number__ != __select__) return;}
 
 void _test_0(int select)
 {
