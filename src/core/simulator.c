@@ -1,6 +1,6 @@
 #include "simulator.h"
 #include "game.h"
-void churn(const Count games) {
+void churn(const Count games, const Count fps) {
 
 	for (Count g = 0; g < games; ++g) {
 
@@ -8,7 +8,7 @@ void churn(const Count games) {
 
 		while (!game_over(game)) {
 
-			pump(game, ease(game));
+			pump(game, fps);
 		}
 
 		print_board_state(game);
