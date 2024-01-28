@@ -23,11 +23,12 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="audio_video.py" />
+    <Compile Include="audio.py" />
     <Compile Include="style.py" />
     <Compile Include="librarian.py" />
     <Compile Include="instrument.py" />
     <Compile Include="pygame_frontend.py" />
+    <Compile Include="video.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|PythonCore|3.9" />

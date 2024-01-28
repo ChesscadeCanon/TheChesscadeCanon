@@ -199,7 +199,7 @@ Set _strike(struct Game* game, const enum Square piece_type, const Index rank, c
 	return ret;
 }
 
-Index _drop_to(struct Game* game, const Index from) {
+Index _drop_to(const struct Game* game, const Index from) {
 
 	Index to = SQUARE_DOWN(from);
 
@@ -294,7 +294,7 @@ Bool _move_player(struct Game* game, Index to) {
 		game->player_file = to_file;
 		return True;
 	}
-	else if (to_rank > game->player_rank) {
+	else if (to_rank > game->player_rank && to_rank <= RANKS + 1) {
 
 		_resolve(game);
 	}
@@ -369,7 +369,7 @@ Time _fall(struct Game* game) {
 	return ret;
 }
 
-Time _do_input(struct Game* game, Bool left, Bool right, Bool down) {
+Time _do_move(struct Game* game, Bool left, Bool right, Bool down) {
 
 	Time ret = 0;
 	const Bool diagonals = IS_SET(game->settings, DIAGONALS);
@@ -414,7 +414,7 @@ void _take_move(struct Game* game) {
 	const Time down = _buy_move(game, &game->moved_down);
 	const Time left = _buy_move(game, &game->moved_left);
 	const Time right = _buy_move(game, &game->moved_right);
-	const Time count = _do_input(game, left > 0, right > 0, down > 0);
+	const Time count = _do_move(game, left > 0, right > 0, down > 0);
 
 	game->last_moved += count * MOVE_RATE(game);
 
@@ -464,7 +464,7 @@ void _init_game(struct Game* game) {
 	init_captures(game->captures);
 }
 
-Bool game_over(struct Game* game) {
+Bool game_over(const struct Game* game) {
 
 	return GAME_OVER(game);
 }
@@ -495,7 +495,7 @@ Bool _will_checkmate(struct Game* game) {
 	return False;
 }
 
-Bool _will_overflow(struct Game* game) {
+Bool _will_overflow(const struct Game* game) {
 
 	const Index rank = SPAWN_RANK(game);
 	const Index file = game->cursor_increment;
@@ -514,12 +514,12 @@ void toggle_pause(struct Game* game) {
 	game->pause = !game->pause;
 }
 
-Bool paused(struct Game* game) {
+Bool paused(const struct Game* game) {
 
 	return game->pause;
 }
 
-Bool repeated(struct Game* game) {
+Bool repeated(const struct Game* game) {
 
 	return game->repeat;
 }
@@ -564,69 +564,69 @@ void do_analog_move(struct Game* game, Fraction x, Fraction y) {
 	}
 }
 
-Events current_events(struct Game* game) {
+Events current_events(const struct Game* game) {
 
 	return game->events;
 }
 
-Piece player_piece(struct Game* game) {
+Piece player_piece(const struct Game* game) {
 
 	return game->player;
 }
 
-Index player_piece_rank(struct Game* game) {
+Index player_piece_rank(const struct Game* game) {
 
 	return game->player_rank;
 }
 
-Index player_piece_file(struct Game* game) {
+Index player_piece_file(const struct Game* game) {
 
 	return game->player_file;
 }
 
-Trenary cursor_direction(struct Game* game) {
+Trenary cursor_direction(const struct Game* game) {
 
 	return game->cursor;
 }
 
-Index current_cursor_grade(struct Game* game) {
+Index current_cursor_grade(const struct Game* game) {
 
 	return game->cursor_grade;
 }
 
-Index current_cursor_increment(struct Game* game) {
+Index current_cursor_increment(const struct Game* game) {
 
 	return game->cursor_increment;
 }
 
-Count current_score(struct Game* game) {
+Count current_score(const struct Game* game) {
 
 	return game->score;
 }
 
-Count last_scored(struct Game* game) {
+Count last_scored(const struct Game* game) {
 
 	return game->scored;
 }
 
-Count current_combo(struct Game* game) {
+Count current_combo(const struct Game* game) {
 
 	return game->scored;
 }
 
-Time milliseconds(struct Game* game) {
+Time milliseconds(const struct Game* game) {
 
 	return game->time;
 }
 
-Bool cursor_wrapped(struct Game* game) {
+Bool cursor_wrapped(const struct Game* game) {
 
 	return CURSOR_WRAPPED(game);
 }
 
-Board board_state(struct Game* game) {
+const Board board_state(const struct Game* game) {
 
-	return game->board;
+	return (const Board)game->board;
 }
 
 Index board_length() {
@@ -634,7 +634,7 @@ Index board_length() {
 	return BOARD_LENGTH;
 }
 
-Piece square_contents(struct Game* game, Index rank, Index file) {
+Piece square_contents(const struct Game* game, const Index rank, const Index file) {
 
 	return GET_SQUARE(game->board, SQUARE_INDEX(rank, file));
 }
@@ -644,17 +644,17 @@ Set square_bit(Index rank, Index file) {
 	return SQUARE_BIT(SQUARE_INDEX(rank, file));
 }
 
-Time ease(struct Game* game) {
+Time ease(const struct Game* game) {
 
 	return EASE(game);
 }
 
-const char* deck(Index d) {
+const char* deck(const Index d) {
 
 	return DECKS[d];
 }
 
-Piece next_piece(struct Game* game) {
+Piece next_piece(const struct Game* game) {
 
 	return NEXT_PIECE(game);
 }
@@ -692,14 +692,14 @@ Set attack(struct Game* game, const Bool execute, const Bool forecast, const Boo
 	return _strike(game, piece_type, rank, file, execute, pattern);
 }
 
-Index forecast_rank(struct Game* game) {
+Index forecast_rank(const struct Game* game) {
 
 	const Index rank = game->player_rank;
 	const Index file = game->player_file;
 	return SQUARE_RANK(_drop_to(game, SQUARE_INDEX(rank, file)));
 }
 
-char forecast_piece(struct Game* game) {
+char forecast_piece(const struct Game* game) {
 
 	const Index rank = forecast_rank(game);
 	return QUEEN_ME(game, rank);
@@ -752,7 +752,7 @@ void begin(struct Game* game) {
 	SPAWN(game);
 }
 
-void print_board_state(struct Game* game) {
+void print_board_state(const struct Game* game) {
 
 	printf("%s", game->board);
 }

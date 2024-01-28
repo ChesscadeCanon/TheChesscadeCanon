@@ -1,6 +1,10 @@
 import librarian
 import style
-from audio_video import *
+import audio
+from audio import init_notes, get_notes, quit_audio, stop_notes, pump_notes
+import pygame
+pygame.init()
+from video import *
 
 high_score = 0
 def update_high_score(score):
@@ -17,6 +21,7 @@ def update_high_score(score):
     return high_score
 
 engine = librarian.Engine()
+init_notes()
 
 RULES = ''.join([chr(b) for b in engine.get_rules()])
 RANKS = engine.get_ranks()
@@ -26,9 +31,9 @@ SIZE = (FILES + style.SQUARES_OFF_LEFT) * style.SQUARE, (RANKS + style.SQUARES_O
 screen = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Chesscade")
 
-draw_piece = lambda P, p, x, y: p in P and screen.blit(P[p], (x, y))
-draw_piece_on_square = lambda P, p, r, f: draw_piece(P, p, (f + style.SQUARES_OFF_LEFT) * style.SQUARE, (r + style.SQUARES_OFF_TOP) * style.SQUARE)
-draw_piece_on_deck = lambda P, p, r, f: draw_piece(P, p, (f + style.SQUARES_OFF_LEFT) * style.SQUARE, r * style.SQUARE)
+draw_piece = lambda pieces, piece, x, y: piece in pieces and screen.blit(pieces[piece], (x, y))
+draw_piece_on_square = lambda pieces, piece, r, f: draw_piece(pieces, piece, (f + style.SQUARES_OFF_LEFT) * style.SQUARE, (r + style.SQUARES_OFF_TOP) * style.SQUARE)
+draw_piece_on_deck = lambda pieces, piece, r, f: draw_piece(pieces, piece, (f + style.SQUARES_OFF_LEFT) * style.SQUARE, r * style.SQUARE)
 
 def draw_board(game):
     white = style.WHITE
@@ -123,28 +128,25 @@ def draw_text(game):
                 rect.center = (style.SQUARE * style.SQUARES_OFF_LEFT * 0.5, y)
                 screen.blit(text, rect)
 
-def play_sounds(game, passed):
-    if "REPL_OWNER" not in environ:
-        [[n.pump(passed) for n in s] for s in fall_notes]
-        move_note.pump(passed)
-        drop_note.pump(passed)
-        land_note.pump(passed)
-        capture_note.pump(passed)
-        wrap_note.pump(passed)
+def play_sounds(game):
+    notes = get_notes()
+    if engine.is_game_over(game):
+        stop_notes()
+        return;
+    if notes:
         if engine.get_events(game) & (librarian.EVENT_LEFT | librarian.EVENT_RIGHT | librarian.EVENT_DOWN):
-            move_note.play()
+            notes.move_note.play()
         if engine.get_events(game) & librarian.EVENT_WRAPPED:
-            wrap_note.play()
+            notes.wrap_note.play()
         elif engine.get_events(game) & librarian.EVENT_FELL:
-            note = fall_notes[engine.get_cursor_grade(game)][engine.get_cursor_increment(game)]
+            note = notes.fall_notes[engine.get_cursor_grade(game)][engine.get_cursor_increment(game)]
             note.play()
         if engine.get_events(game) & librarian.EVENT_CAPTURED:
-            capture_note.play()
+            notes.capture_note.play()
         elif engine.get_events(game) & librarian.EVENT_DROPPED:
-            drop_note.play()
+            notes.drop_note.play()
         elif engine.get_events(game) & librarian.EVENT_LANDED:
-            land_note.play()
-        
+            notes.land_note.play()
 
 def take_input(game, passed):
     keys=pygame.key.get_pressed()
@@ -261,16 +263,18 @@ def play_events(game):
 def play_game(game, passed):
     take_input(game, passed)
     if engine.is_game_over(game):
+        stop_notes()
         return True
     else:
         engine.pump_game(game, passed)
-        play_sounds(game, passed)
+        pump_notes(passed)
     return False
 
-def play_draw(game, passed):
+def play_draw(game,):
     screen.fill(style.GREY)
     if engine.is_paused(game):
         draw_pause(game)
+        stop_notes()
     else:
         draw_game(game)
     draw_game_over(game)
@@ -288,7 +292,8 @@ def play():
         passed = clock.tick(60)
         go = play_events(game)
         over = play_game(game, passed)
-        play_draw(game, passed)
+        play_draw(game)
+        play_sounds(game)
     update_high_score(engine.get_score(game))
     over = engine.is_game_over(game)
     engine.delete_game(game)
@@ -299,13 +304,13 @@ while True:
     do = title()
     if do > 0:
         do = play()
+        stop_notes()
         if do == QUIT:
             break
     else:
         break
 
-if "REPL_OWNER" not in environ:
-    pygame.midi.quit()
+quit_audio()
 pygame.quit()
 
     
