@@ -7,7 +7,7 @@ void _test_0(int select)
 {
 	SELECT(0, select);
 	printf("executing test 0\n");
-	churn(1, 60);
+	churn(1, 30);
 	printf("test 0 complete\n");
 }
 
