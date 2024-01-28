@@ -1,4 +1,6 @@
+#ifdef _WIN32
 #include "application.h"
+#endif
 #include <stdio.h>
 
 int main(int argc, char** argv) {
