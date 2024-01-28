@@ -2,6 +2,7 @@
 #include "application.h"
 #endif
 #include "tests.h"
+#include "def.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
