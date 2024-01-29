@@ -3,11 +3,11 @@
 #include "game.h"
 #include "control.h"
 #include "view.h"
+#include "main.h"
 #include <stdio.h>
 #include <assert.h>
 #include <sys/timeb.h>
 
-#define MILLISECONDS_DIFFERENCE(__from_time__, __to_time__) ((Time)(1000.0 * ((__to_time__).time - (__from_time__).time) + ((__to_time__).millitm - (__from_time__).millitm)))
 #define VIEW_FUNCTOR(VAR) void (*VAR)(struct Game*)
 #define MODEL_FUNCTOR(VAR) void (*VAR)(struct Game*, const Time)
 #define CONTROL_FUNCTOR(VAR) void (*VAR)(struct Game*, const Time)

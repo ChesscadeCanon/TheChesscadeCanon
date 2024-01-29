@@ -88,6 +88,11 @@ extern "C" {
 	EXPORT unsigned short get_forecast_rank(const struct Game*);
 
 	/**
+	* returns the number of milliseconds of gameplay
+	*/
+	EXPORT long long get_milliseconds(const struct Game*);
+
+	/**
 	* returns the minimum amount of time between player moves
 	*/
 	EXPORT long long get_move_rate(const struct Game*);

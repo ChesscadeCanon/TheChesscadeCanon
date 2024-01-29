@@ -1,2 +1,3 @@
 #pragma once
-void run_tests(int);
+#include "def.h"
+void run_tests(int, Bool);

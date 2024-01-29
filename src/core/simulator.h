@@ -1,4 +1,6 @@
 #pragma once
 #include "def.h"
 
-void churn(const Count, const Count);
+#define TACTIC_FUNCTOR(VAR) void (*VAR)(struct Game*)
+
+Count churn(struct Game* game, const Time, TACTIC_FUNCTOR(pre_tactic));

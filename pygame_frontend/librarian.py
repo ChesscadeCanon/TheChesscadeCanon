@@ -60,6 +60,9 @@ def Engine():
     ret.get_forecast_rank.argtypes = [ctypes.POINTER(Game)]
     ret.get_forecast_rank.restype = ctypes.c_ushort
    
+    ret.get_milliseconds.argtypes = [ctypes.POINTER(Game)]
+    ret.get_milliseconds.restype = ctypes.c_longlong
+
     ret.get_move_rate.argtypes = [ctypes.POINTER(Game)]
     ret.get_move_rate.restype = ctypes.c_longlong
 

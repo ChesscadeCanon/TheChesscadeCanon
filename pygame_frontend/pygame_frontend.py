@@ -103,7 +103,7 @@ def draw_shadow(game):
     draw_piece_on_square(shadow_pieces, piece, rank, file)
 
 def draw_text(game):
-    readouts = ("Score", f"{engine.get_score(game)}"), ("Scored", f"{engine.get_scored(game)}"), ("Delay", f"{engine.get_ease(game)}")
+    readouts = ("Score", f"{engine.get_score(game)}"), ("Scored", f"{engine.get_scored(game)}"), ("Time", f"{engine.get_milliseconds(game)}")
     y = 0
     for readout in readouts:
         for part in readout:    

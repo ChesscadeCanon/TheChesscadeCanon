@@ -153,6 +153,12 @@ Index get_forecast_rank(const struct Game* game) {
 	return forecast_rank(game);
 }
 
+long long get_milliseconds(const Game* game)
+{
+	ASSERT_GAME(game);
+	return milliseconds(game);
+}
+
 Time get_move_rate(const struct Game* game)
 {
 	ASSERT_GAME(game);
@@ -180,7 +186,7 @@ Piece get_deck_piece(const Index grade, const Index increment) {
 
 struct Game* malloc_init_default_game() {
 
-	struct Game* ret = malloc_init_game(DEFAULT_SETTINGS);
+	struct Game* ret = malloc_init_game(STANDARD_SETTINGS);
 	ASSERT_GAME(ret);
 	return ret;
 }

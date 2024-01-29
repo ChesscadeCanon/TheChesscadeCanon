@@ -1,18 +1,18 @@
 #include "simulator.h"
 #include "game.h"
-void churn(const Count games, const Count fps) {
 
-	for (Count g = 0; g < games; ++g) {
+Count churn(struct Game* game, const Time mpf, TACTIC_FUNCTOR(tactic)) {
 
-		struct Game* game = malloc_init_game(DEFAULT_SETTINGS);
+	begin(game);
+	Count pumps = 0;
+	while (!game_over(game)) {
 
-		begin(game);
-		while (!game_over(game)) {
+		++pumps;
+		if (tactic) {
 
-			pump(game, fps);
+			tactic(game);
 		}
-
-		print_board_state(game);
-		free_game(game);
+		pump(game, mpf);
 	}
+	return pumps;
 }

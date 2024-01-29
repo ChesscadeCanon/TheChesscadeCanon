@@ -51,9 +51,9 @@ struct Game {
 #define SET(__settings__, __setting__) (__settings__ |= __setting__)
 #define IS_SET(__settings__, __setting__) (__settings__ & __setting__)
 #define MOVE_RATE(__game__) (64)
-#define SINCE_MOVED(__game__) ((__game__->time) - __game__->last_moved)
-#define SINCE_FELL(__game__) ((__game__->time) - __game__->last_fell)
-#define SINCE_SPAWNED(__game__) ((__game__->time) - __game__->last_spawned)
+#define SINCE_MOVED(__game__, __passed__) ((__game__->time + __passed__) - (__game__->last_moved))
+#define SINCE_FELL(__game__, __passed__) ((__game__->time + __passed__) - (__game__->last_fell))
+#define SINCE_SPAWNED(__game__, __passed__) ((__game__->time + __passed__) - (__game__->last_spawned))
 #define DRAG(__drag__, __steps__) __drag__ = max(0, __drag__ - (Fraction)__steps__);
 #define PLACE_PLAYER(__game__) SET_SQUARE(__game__->board, PLAYER_SQUARE(__game__), __game__->player)
 #define REVERSE_CURSOR(__game__) (__game__->cursor *= -1)
@@ -263,7 +263,7 @@ Count _chronicle(struct Game* game) {
 	return ret;
 }
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                const char* LICENSE = "Chesscade is a falling block puzzle game with chess pieces.\nCopyright(C) 2024  George Cesana ne Guy\n\nThis program is free software : you can redistribute it and /or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.If not, see < https://www.gnu.org/licenses/>.";
-void _resolve(struct Game* game) {
+void _resolve(struct Game* game, Time time_spent) {
 
 	game->events |= EVENT_LANDED;
 	const Index from_rank = game->player_rank, from_file = game->player_file;
@@ -281,10 +281,10 @@ void _resolve(struct Game* game) {
 		REVERSE_CURSOR(game);
 	}
 
-	game->last_spawned = game->time;
+	game->last_fell = game->last_spawned = game->time + time_spent;
 }
 
-Bool _move_player(struct Game* game, Index to) {
+Bool _move_player(struct Game* game, Index to, Time time_spent) {
 
 	const Index to_rank = SQUARE_RANK(to), to_file = SQUARE_FILE(to);
 
@@ -296,17 +296,17 @@ Bool _move_player(struct Game* game, Index to) {
 	}
 	else if (to_rank > game->player_rank && to_rank <= RANKS + 1) {
 
-		_resolve(game);
+		_resolve(game, time_spent);
 	}
 
 	return False;
 }
 
-Time _buy_move(struct Game* game, Bool* moved) {
+Time _buy_move(struct Game* game, const Bool moved, const Time passed) {
 
-	if (!*moved) return 0;
+	if (!moved) return 0;
 	const Time rate = MOVE_RATE(game);
-	const Time since = SINCE_MOVED(game);
+	const Time since = SINCE_MOVED(game, passed);
 	const Time steps = since / rate;
 	assert(steps >= 0);
 	return steps;
@@ -328,7 +328,8 @@ Time _move(struct Game* game, Time steps, const short by_rank, const short by_fi
 		const Index to_rank = game->player_rank + by_ranks;
 		const Index to_file = game->player_file + by_files;
 		const Index to = SQUARE_INDEX(to_rank, to_file);
-		if (!_move_player(game, to)) break;
+		const Time time_spent = (ret + 1) * MOVE_RATE(game);
+		if (!_move_player(game, to, time_spent)) break;
 		++ret;
 	};
 
@@ -340,15 +341,15 @@ Bool _drop(struct Game* game) {
 	const Index from = PLAYER_SQUARE(game);
 	const Index to = _drop_to(game, from);
 	const Bool ret = to != from;
-	_move_player(game, to);
+	_move_player(game, to, 0);
 	_move(game, 1, 1, 0);
 	game->events |= EVENT_DROPPED * ret;
 	return ret;
 }
 
-Time _fall(struct Game* game) {
+Time _fall(struct Game* game, Time passed) {
 
-	const Time falls = SINCE_FELL(game) / EASE(game);
+	const Time falls = SINCE_FELL(game, passed) / EASE(game);
 	Time ret = 0;
 	
 	for (Time f = 0; f < falls; ++f) {
@@ -358,7 +359,7 @@ Time _fall(struct Game* game) {
 		const Index to = SQUARE_INDEX(rank, file);
 		ret += EASE(game);
 
-		if (_move_player(game, to)) {
+		if (_move_player(game, to, ret)) {
 
 			game->events |= EVENT_FELL;
 			_update_cursor(game);
@@ -409,11 +410,11 @@ Time _do_move(struct Game* game, Bool left, Bool right, Bool down) {
 	return ret;
 }
 
-void _take_move(struct Game* game) {
+void _take_move(struct Game* game, Time passed) {
 
-	const Time down = _buy_move(game, &game->moved_down);
-	const Time left = _buy_move(game, &game->moved_left);
-	const Time right = _buy_move(game, &game->moved_right);
+	const Time down = _buy_move(game, game->moved_down, passed);
+	const Time left = _buy_move(game, game->moved_left, passed);
+	const Time right = _buy_move(game, game->moved_right, passed);
 	const Time count = _do_move(game, left > 0, right > 0, down > 0);
 
 	game->last_moved += count * MOVE_RATE(game);
@@ -427,7 +428,7 @@ void _take_move(struct Game* game) {
 		game->last_fell = game->last_moved;
 	}
 
-	game->last_fell += _fall(game);
+	game->last_fell += _fall(game, passed);
 }
 
 void _init_game(struct Game* game) {
@@ -732,9 +733,9 @@ void _take_drag(struct Game* game) {
 	}
 }
 
-void _take_drop(struct Game* game) {
+void _take_drop(struct Game* game, Time passed) {
 
-	if (game->dropped && SINCE_SPAWNED(game) >= DROP_RATE(game)) {
+	if (game->dropped && SINCE_SPAWNED(game, passed) >= DROP_RATE(game)) {
 
 		if (_drop(game)) {
 
@@ -745,16 +746,27 @@ void _take_drop(struct Game* game) {
 	game->dropped = False;
 }
 
+void _recursive_pump(struct Game* game, Time passed) {
+
+	if (game_over(game)) return;
+
+	_take_drop(game, passed);
+	_take_drag(game);
+	_take_move(game, passed);
+
+	if (SINCE_FELL(game, passed) >= ease(game)) {
+
+		_recursive_pump(game, passed);
+	}
+}
+
 void pump(struct Game* game, const Time passed) {
 
 	if (game_over(game) || game->pause) return;
 
 	game->events = 0;
+	_recursive_pump(game, passed);
 	game->time += passed;
-
-	_take_drop(game);
-	_take_drag(game);
-	_take_move(game);
 }
 
 void begin(struct Game* game) {
