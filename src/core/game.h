@@ -4,6 +4,7 @@
 
 void print_rules();
 Time ease(const struct Game*);
+Time ended(const struct Game*);
 const char* deck(Index);
 const Board board_state(const struct Game*);
 Index board_length();

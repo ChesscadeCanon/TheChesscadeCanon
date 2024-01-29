@@ -26,6 +26,7 @@ struct Game {
 	Count combo;
 	Count scored;
 	Time time;
+	Time end_time;
 	Time last_moved;
 	Time last_fell;
 	Time last_spawned;
@@ -265,6 +266,7 @@ Count _chronicle(struct Game* game) {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                const char* LICENSE = "Chesscade is a falling block puzzle game with chess pieces.\nCopyright(C) 2024  George Cesana ne Guy\n\nThis program is free software : you can redistribute it and /or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.If not, see < https://www.gnu.org/licenses/>.";
 void _resolve(struct Game* game, Time time_spent) {
 
+	const Time time = game->time + time_spent;
 	game->events |= EVENT_LANDED;
 	const Index from_rank = game->player_rank, from_file = game->player_file;
 	game->player = QUEEN_ME(game, from_rank);
@@ -281,7 +283,12 @@ void _resolve(struct Game* game, Time time_spent) {
 		REVERSE_CURSOR(game);
 	}
 
-	game->last_fell = game->last_spawned = game->time + time_spent;
+	game->last_fell = game->last_spawned = time;
+
+	if (game->end_time < 0 && game_over(game)) {
+
+		game->end_time = time;
+	}
 }
 
 Bool _move_player(struct Game* game, Index to, Time time_spent) {
@@ -440,6 +447,7 @@ void _init_game(struct Game* game) {
 	game->last_moved = 0;
 	game->last_fell = 0;
 	game->last_spawned = 0;
+	game->end_time = -1;
 	game->repeat = False;
 	game->pause = False;
 	game->player = 'W';
@@ -658,6 +666,11 @@ Set square_bit(Index rank, Index file) {
 Time ease(const struct Game* game) {
 
 	return EASE(game);
+}
+
+Time ended(const struct Game* game) {
+
+	return game->end_time;
 }
 
 const char* deck(const Index d) {

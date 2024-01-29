@@ -60,7 +60,12 @@ extern "C" {
 	/**
 	* returns the number of milliseconds it currently takes for the piece to fall
 	*/
-	EXPORT long long get_ease(const struct Game* game);
+	EXPORT long long get_ease(const struct Game*);
+
+	/**
+	* returns the time when a finished game ended, or -1 if the game is still going
+	*/
+	EXPORT long long get_end_time(const struct Game*);
 
 	/**
 	* returns a bitset denoting what events took place in the last frame

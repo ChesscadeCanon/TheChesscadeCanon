@@ -45,7 +45,8 @@ void _test_0(int select, Bool verbose) {
 
 		struct Game* game = malloc_init_game(WITH_THESE_SETTINGS);
 		const Count pumps = churn(game, mpf, NULL);
-		game_time += milliseconds(game);
+		assert(ended(game) >= 0);
+		game_time += ended(game);
 
 		if (verbose) {
 

@@ -53,6 +53,12 @@ Time get_ease(const struct Game* game) {
 	return ease(game);
 }
 
+Time get_end_time(const struct Game* game) {
+
+	ASSERT_GAME(game);
+	return ended(game);
+}
+
 Index get_ranks() {
 
 	return RANKS;

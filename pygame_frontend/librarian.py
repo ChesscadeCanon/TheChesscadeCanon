@@ -46,6 +46,9 @@ def Engine():
     ret.get_ease.argtypes = [ctypes.POINTER(Game)]
     ret.get_ease.restype = ctypes.c_longlong
     
+    ret.get_end_time.argtypes = [ctypes.POINTER(Game)]
+    ret.get_end_time.restype = ctypes.c_longlong
+    
     ret.get_events.argtypes = [ctypes.POINTER(Game)]
     ret.get_events.restype = ctypes.c_int
     
