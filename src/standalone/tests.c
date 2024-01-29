@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
-#include <sys/timeb.h>
+#include <time.h>
 
 #define SELECT(__test_number__, __select__) {if(__select__ >= 0 && __test_number__ != __select__) return;}
 #define WITH_THESE_SETTINGS (WHITE_PAWN_HIT_UP | BLACK_PAWN_SPAWN_LOW | WHITE_PAWN_LAND_HIGH | PAWNS_PROMOTE | KING_ON_REPEAT | DOUBLE_BISHOPS | CHECKMATE | DIAGONALS)
@@ -31,8 +31,8 @@ void _test_0(int select, Bool verbose) {
 	printf("After the game, the state of the board will be compared to the known final state of the Dead Man's Game.\n");
 	printf("If all games end in the correct state, the test will pass.\n");
 	printf("This test will help demonstrate that frame rate has no meaningful impact on the course of the game.\n");
-	struct timeb then;
-	ftime(&then);
+	struct timespec then;
+	assert(timespec_get(&then, TIME_UTC) == TIME_UTC);
 	Count round = 0;
 	Time game_time = 0;
 	for (Time mpf = 1; mpf <= 135936; ++mpf) {
@@ -58,8 +58,8 @@ void _test_0(int select, Bool verbose) {
 	}
 
 	printf("test 0 complete\n");
-	struct timeb now;
-	ftime(&now);
+	struct timespec now;
+	assert(timespec_get(&now, TIME_UTC) == TIME_UTC);
 	Time difference = MILLISECONDS_DIFFERENCE(then, now);
 	printf("Completed %lld milliseconds of game time in %lld milliseconds.\n", game_time, difference);
 }

@@ -6,7 +6,7 @@
 #include "main.h"
 #include <stdio.h>
 #include <assert.h>
-#include <sys/timeb.h>
+#include <time.h>
 
 #define VIEW_FUNCTOR(VAR) void (*VAR)(struct Game*)
 #define MODEL_FUNCTOR(VAR) void (*VAR)(struct Game*, const Time)
@@ -27,9 +27,9 @@ void default_control(struct Game* game, const Time passed) {
 	key_control(game, passed);
 }
 
-void tock(struct Game* game, struct timeb* then, struct timeb* now) {
+void tock(struct Game* game, struct timespec* then, struct timespec* now) {
 
-	memcpy(then, now, sizeof(struct timeb));
+	memcpy(then, now, sizeof(struct timespec));
 	Sleep(MPF);
 	if(!paused(game)) system("cls");
 }
@@ -52,12 +52,12 @@ Bool tick(struct Game* game, const Time passed, CONTROL_FUNCTOR(control), MODEL_
 	return False;
 }
 
-void play(struct Game* game, struct timeb* then, CONTROL_FUNCTOR(control), MODEL_FUNCTOR(model), VIEW_FUNCTOR(view)) {
+void play(struct Game* game, struct timespec* then, CONTROL_FUNCTOR(control), MODEL_FUNCTOR(model), VIEW_FUNCTOR(view)) {
 
 	while (True) {
 
-		struct timeb now;
-		ftime(&now);
+		struct timespec now;
+		assert(timespec_get(&now, TIME_UTC) == TIME_UTC);
 		const Time passed = MILLISECONDS_DIFFERENCE(*then, now);
 		if (tick(game, passed, control, model, view)) return;
 		tock(game, then, &now);
@@ -66,16 +66,16 @@ void play(struct Game* game, struct timeb* then, CONTROL_FUNCTOR(control), MODEL
 
 void play_default(struct Game* game) {
 
-	struct timeb start;
-	ftime(&start);
+	struct timespec start;
+	assert(timespec_get(&start, TIME_UTC) == TIME_UTC);
 	begin(game);
 	play(game, &start, default_control, default_model, default_view);
 }
 
 void play_pretty(struct Game* game) {
 
-	struct timeb start;
-	ftime(&start);
+	struct timespec start;
+	assert(timespec_get(&start, TIME_UTC) == TIME_UTC);
 	begin(game);
 	play(game, &start, default_control, default_model, pretty_view);
 }
