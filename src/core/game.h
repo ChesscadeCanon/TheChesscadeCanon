@@ -41,3 +41,4 @@ Count current_combo(const struct Game*);
 Time milliseconds(const struct Game*);
 Time move_rate(const struct Game*);
 Index spawn_rank(const struct Game*);
+Count falls(const struct Game*);

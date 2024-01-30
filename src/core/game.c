@@ -45,6 +45,7 @@ struct Game {
 	Count black_pieces;
 	Count total_pieces;
 	Count total_value;
+	Count fall_count;
 	struct Histotrie* histotrie;
 };
 
@@ -61,7 +62,8 @@ struct Game {
 #define DOUBLE_BISHOP(__game__) (PIECE_MAP[__game__->player] == BISHOP && IS_SET(__game__->settings, DOUBLE_BISHOPS))
 #define BISHOP_SPEED(__game__, __moved__) ((__moved__) / (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_DOWN(__game__) SQUARE_INDEX(__game__->player_rank + (DOUBLE_BISHOP(__game__) + 1), __game__->player_file)
-#define EASE(__game__) (MOVE_RATE(__game__) * 36)
+#define BASE_FALL_RATE 1
+#define EASE(__game__) (__game__ ? 1 : BASE_FALL_RATE)//(MOVE_RATE(__game__) * 36)
 #define DROP_RATE(__game__) 0 
 #define QUEEN_ME(__game__, __rank__) (\
 	IS_SET(__game__->settings, PAWNS_PROMOTE) ?\
@@ -266,7 +268,7 @@ Count _chronicle(struct Game* game) {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                const char* LICENSE = "Chesscade is a falling block puzzle game with chess pieces.\nCopyright(C) 2024  George Cesana ne Guy\n\nThis program is free software : you can redistribute it and /or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.If not, see < https://www.gnu.org/licenses/>.";
 void _resolve(struct Game* game, Time time_spent) {
 
-	const Time time = game->time + time_spent;
+	const Time time = max(game->last_spawned, (max(game->last_moved, max(game->time, game->last_fell)))) + time_spent;
 	game->events |= EVENT_LANDED;
 	const Index from_rank = game->player_rank, from_file = game->player_file;
 	game->player = QUEEN_ME(game, from_rank);
@@ -283,7 +285,7 @@ void _resolve(struct Game* game, Time time_spent) {
 		REVERSE_CURSOR(game);
 	}
 
-	game->last_fell = game->last_spawned = time;
+	game->last_spawned = time;
 
 	if (game->end_time < 0 && game_over(game)) {
 
@@ -356,6 +358,7 @@ Bool _drop(struct Game* game) {
 
 Time _fall(struct Game* game, Time passed) {
 
+	assert(game);
 	const Time falls = SINCE_FELL(game, passed) / EASE(game);
 	Time ret = 0;
 	
@@ -365,6 +368,7 @@ Time _fall(struct Game* game, Time passed) {
 		const Index file = game->player_file;
 		const Index to = SQUARE_INDEX(rank, file);
 		ret += EASE(game);
+		++game->fall_count;
 
 		if (_move_player(game, to, ret)) {
 
@@ -469,6 +473,7 @@ void _init_game(struct Game* game) {
 	game->black_pieces = 0;
 	game->total_pieces = 0;
 	game->total_value = 0;
+	game->fall_count = 0;
 	init_board(game->board);
 	init_captures(game->captures);
 }
@@ -638,6 +643,11 @@ Index spawn_rank(const struct Game* game) {
 	return SPAWN_RANK(game);
 }
 
+Count falls(const struct Game* game)
+{
+	return game->fall_count;
+}
+
 Bool cursor_wrapped(const struct Game* game) {
 
 	return CURSOR_WRAPPED(game);
@@ -767,7 +777,12 @@ void _recursive_pump(struct Game* game, Time passed) {
 	_take_drag(game);
 	_take_move(game, passed);
 
-	if (SINCE_FELL(game, passed) >= ease(game)) {
+	if (game_over(game)) return;
+
+	const Bool moved = game->moved_left || game->moved_right || game->moved_down;
+	const Bool time_to_move = SINCE_MOVED(game, passed) >= move_rate(game) && moved;
+	const Bool time_to_fall = SINCE_FELL(game, passed) >= ease(game);
+	if (time_to_fall || time_to_move) {
 
 		_recursive_pump(game, passed);
 	}
