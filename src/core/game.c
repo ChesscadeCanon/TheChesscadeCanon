@@ -62,8 +62,8 @@ struct Game {
 #define DOUBLE_BISHOP(__game__) (PIECE_MAP[__game__->player] == BISHOP && IS_SET(__game__->settings, DOUBLE_BISHOPS))
 #define BISHOP_SPEED(__game__, __moved__) ((__moved__) / (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_DOWN(__game__) SQUARE_INDEX(__game__->player_rank + (DOUBLE_BISHOP(__game__) + 1), __game__->player_file)
-#define BASE_FALL_RATE 1
-#define EASE(__game__) (__game__ ? 1 : BASE_FALL_RATE)//(MOVE_RATE(__game__) * 36)
+#define BASE_FALL_RATE(__game__) __game__ ? 64 * 36 : (MOVE_RATE(__game__) * 36)
+#define EASE(__game__) (__game__ ? BASE_FALL_RATE(__game__) : BASE_FALL_RATE(__game__))
 #define DROP_RATE(__game__) 0 
 #define QUEEN_ME(__game__, __rank__) (\
 	IS_SET(__game__->settings, PAWNS_PROMOTE) ?\
