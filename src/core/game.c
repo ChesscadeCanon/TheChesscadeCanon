@@ -12,6 +12,13 @@
 #define min(A, B) (A < B ? A : B)
 #endif
 
+#define DEFAULT_EASE (3000)
+
+Time _default_ease(const struct Game* game) {
+
+	return DEFAULT_EASE;
+}
+
 struct Game {
 
 	Bool pause;
@@ -39,7 +46,7 @@ struct Game {
 	Piece board[BOARD_LENGTH];
 	Piece captures[CAPTURE_LENGTH];
 	Bool repeat;
-	Settings settings;
+	const Settings settings;
 	Events events;
 	Count white_pieces;
 	Count black_pieces;
@@ -47,6 +54,7 @@ struct Game {
 	Count total_value;
 	Count fall_count;
 	struct Histotrie* histotrie;
+	const Time (*ease_functor)(const struct Game* self);
 };
 
 #define PLAYER_SQUARE(__game__) SQUARE_INDEX(__game__->player_rank, __game__->player_file)
@@ -54,7 +62,7 @@ struct Game {
 #define IS_SET(__settings__, __setting__) (__settings__ & __setting__)
 #define MOVE_RATE(__game__) (64)
 #define SINCE_MOVED(__game__, __passed__) ((__game__->time + __passed__) - (__game__->last_moved))
-#define SINCE_FELL(__game__, __passed__) ((__game__->time + __passed__) - (__game__->last_fell))
+#define SINCE_FELL(__game__, __passed__) ((__game__->time + __passed__) - __game__->last_fell)
 #define SINCE_SPAWNED(__game__, __passed__) ((__game__->time + __passed__) - (__game__->last_spawned))
 #define DRAG(__drag__, __steps__) __drag__ = max(0, __drag__ - (Fraction)__steps__);
 #define PLACE_PLAYER(__game__) SET_SQUARE(__game__->board, PLAYER_SQUARE(__game__), __game__->player)
@@ -62,8 +70,6 @@ struct Game {
 #define DOUBLE_BISHOP(__game__) (PIECE_MAP[__game__->player] == BISHOP && IS_SET(__game__->settings, DOUBLE_BISHOPS))
 #define BISHOP_SPEED(__game__, __moved__) ((__moved__) / (1 + DOUBLE_BISHOP(G)))
 #define PLAYER_DOWN(__game__) SQUARE_INDEX(__game__->player_rank + (DOUBLE_BISHOP(__game__) + 1), __game__->player_file)
-#define BASE_FALL_RATE(__game__) __game__ ? 64 * 36 : (MOVE_RATE(__game__) * 36)
-#define EASE(__game__) (__game__ ? BASE_FALL_RATE(__game__) : BASE_FALL_RATE(__game__))
 #define DROP_RATE(__game__) 0 
 #define QUEEN_ME(__game__, __rank__) (\
 	IS_SET(__game__->settings, PAWNS_PROMOTE) ?\
@@ -268,7 +274,7 @@ Count _chronicle(struct Game* game) {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                const char* LICENSE = "Chesscade is a falling block puzzle game with chess pieces.\nCopyright(C) 2024  George Cesana ne Guy\n\nThis program is free software : you can redistribute it and /or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.If not, see < https://www.gnu.org/licenses/>.";
 void _resolve(struct Game* game, Time time_spent) {
 
-	const Time time = max(game->last_spawned, (max(game->last_moved, max(game->time, game->last_fell)))) + time_spent;
+	const Time time = time_taken(game) + time_spent;
 	game->events |= EVENT_LANDED;
 	const Index from_rank = game->player_rank, from_file = game->player_file;
 	game->player = QUEEN_ME(game, from_rank);
@@ -359,7 +365,7 @@ Bool _drop(struct Game* game) {
 Time _fall(struct Game* game, Time passed) {
 
 	assert(game);
-	const Time falls = SINCE_FELL(game, passed) / EASE(game);
+	const Time falls = SINCE_FELL(game, passed) / ease(game);
 	Time ret = 0;
 	
 	for (Time f = 0; f < falls; ++f) {
@@ -367,7 +373,7 @@ Time _fall(struct Game* game, Time passed) {
 		const Index rank = game->player_rank + (DOUBLE_BISHOP(game) + 1);
 		const Index file = game->player_file;
 		const Index to = SQUARE_INDEX(rank, file);
-		ret += EASE(game);
+		ret += ease(game);
 		++game->fall_count;
 
 		if (_move_player(game, to, ret)) {
@@ -432,7 +438,7 @@ void _take_move(struct Game* game, Time passed) {
 
 	if (!game->moved_left && !game->moved_right && !game->moved_down) {
 
-		game->last_moved = game->time;
+		game->last_moved = time_taken(game);
 	}
 	else if (IS_SET(game->settings, FLYING_PIECES) && game->last_fell < game->last_moved) {
 
@@ -467,7 +473,6 @@ void _init_game(struct Game* game) {
 	game->dragged_left = 0;
 	game->dragged_right = 0;
 	game->dragged_down = 0;
-	game->settings = 0;
 	game->events = 0;
 	game->white_pieces = 0;
 	game->black_pieces = 0;
@@ -648,6 +653,11 @@ Count falls(const struct Game* game)
 	return game->fall_count;
 }
 
+Time time_taken(const struct Game* game)
+{
+	return max(game->last_spawned, (max(game->last_moved, game->last_fell)));
+}
+
 Bool cursor_wrapped(const struct Game* game) {
 
 	return CURSOR_WRAPPED(game);
@@ -675,7 +685,8 @@ Set square_bit(Index rank, Index file) {
 
 Time ease(const struct Game* game) {
 
-	return EASE(game);
+	if (!game || !game->ease_functor) return DEFAULT_EASE;
+	return game->ease_functor(game);
 }
 
 Time ended(const struct Game* game) {
@@ -795,6 +806,7 @@ void pump(struct Game* game, const Time passed) {
 	game->events = 0;
 	_recursive_pump(game, passed);
 	game->time += passed;
+	//assert(time_taken(game) <= game->time);
 }
 
 void begin(struct Game* game) {
@@ -807,13 +819,26 @@ void print_board_state(const struct Game* game) {
 	printf("%s\n", game->board);
 }
 
-struct Game* malloc_init_game(Settings settings) {
+struct Game* malloc_init_game(const Settings settings) {
 
+	const struct Game game = {.settings = settings, .ease_functor = _default_ease};
 	struct Game* ret = malloc(sizeof(struct Game));
+	assert(ret);
+	memcpy(ret, &game, sizeof(struct Game));
+	MEMLOG("malloc game\n");
+	_init_game(ret);
+	ret->histotrie = malloc_init_histotrie();
+	return ret;
+}
+
+struct Game* malloc_init_standard_game_with_ease_functor(EASE_FUNCTOR(ease_func)) {
+
+	const struct Game game = { .settings = STANDARD_SETTINGS, .ease_functor = ease_func };
+	struct Game* ret = malloc(sizeof(struct Game));
+	memcpy(ret, &game, sizeof(struct Game));
 	MEMLOG("malloc game\n");
 	assert(ret);
 	_init_game(ret);
 	ret->histotrie = malloc_init_histotrie();
-	ret->settings = settings;
 	return ret;
 }

@@ -2,6 +2,8 @@
 #include "def.h"
 #include "board.h"
 
+#define EASE_FUNCTOR(__var__) Time (__var__)(const struct Game* game)
+
 void print_rules();
 Time ease(const struct Game*);
 Time ended(const struct Game*);
@@ -11,6 +13,7 @@ Index board_length();
 Piece square_contents(const struct Game*, Index, Index);
 Set square_bit(const Index, const Index);
 struct Game* malloc_init_game(const Settings);
+struct Game* malloc_init_standard_game_with_ease_functor(EASE_FUNCTOR(ease_func));
 void free_game(struct Game*);
 void begin(struct Game*);
 void print_board_state(const struct Game*);
@@ -42,3 +45,4 @@ Time milliseconds(const struct Game*);
 Time move_rate(const struct Game*);
 Index spawn_rank(const struct Game*);
 Count falls(const struct Game*);
+Time time_taken(const struct Game*);

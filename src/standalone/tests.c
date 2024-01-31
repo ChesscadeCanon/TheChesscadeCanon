@@ -91,7 +91,7 @@ Bool _dead_man_validator(const struct Game* game) {
 
 Bool _tenth_dentist_validator(const struct Game* game) {
 
-	return falls(game) == ended(game) || falls(game) == milliseconds(game);
+	return ended(game) >= 0 ? falls(game) * ease(game) == ended(game) : falls(game) * ease(game) == time_taken(game);
 }
 
 void _test_0(const int select, const Bool verbose) {
@@ -121,12 +121,25 @@ void _test_1(const int select, const Bool verbose) {
 	printf("But at 10, the number of milliseconds before a game over is 57.\n");
 	printf("After that, the end time sporadically fluctuates around 59.\n");
 	printf("From 59 mpf onward, games take exactly 7 milliseconds.\n");
-	printf("This test is designed to help pintpoint exactly on what turn the discrepancy occurs.\n");
+	printf("This test is designed to help pinpoint exactly on what turn the discrepancy occurs.\n");
 	struct Game* game = malloc_init_game(WITH_THESE_SETTINGS);
 	const Count pumps = lurk(game, 10, _tenth_dentist_validator);
 	printf("The game ended after fall %llu on millisecond %lld at pump %llu\n", falls(game), ended(game), pumps);
 	assert(_tenth_dentist_validator(game));
 	free_game(game);
+	printf("test 1 complete\n");
+}
+
+void _test_2(const int select, const Bool verbose) {
+
+	SELECT(2, select);
+	const Time mpf = 60;
+	printf("Executing test 2: Too Hard\n");
+	printf("Now the Dead Man's game has a consistent length regardless of frame rate,\n");
+	printf("as long as the fall rate ('ease') is exactly 1.\n");
+	printf("For each millisecond the ease grows, the discrepancy grows by one millisecond.\n");
+	printf("To help pinpoint the discrepancy, this test runs 3000 games, with ease set to the index of the game of the game in the series.\n");
+	printf("The test will then ");
 }
 
 void run_tests(const int select, const Bool verbose) {
