@@ -46,6 +46,7 @@ struct Game {
 	Piece board[BOARD_LENGTH];
 	Piece captures[CAPTURE_LENGTH];
 	Bool repeat;
+	Bool flip_deck;
 	const Settings settings;
 	Events events;
 	Count white_pieces;
@@ -64,6 +65,7 @@ struct Game {
 #define SINCE_MOVED(__game__, __passed__) ((__game__->time + __passed__) - (__game__->last_moved))
 #define SINCE_FELL(__game__, __passed__) ((__game__->time + __passed__) - __game__->last_fell)
 #define SINCE_SPAWNED(__game__, __passed__) ((__game__->time + __passed__) - (__game__->last_spawned))
+#define TIME_TAKEN(__game__) max(__game__->last_spawned, (max(__game__->last_moved, __game__->last_fell)))
 #define DRAG(__drag__, __steps__) __drag__ = max(0, __drag__ - (Fraction)__steps__);
 #define PLACE_PLAYER(__game__) SET_SQUARE(__game__->board, PLAYER_SQUARE(__game__), __game__->player)
 #define REVERSE_CURSOR(__game__) (__game__->cursor *= -1)
@@ -78,7 +80,7 @@ struct Game {
 		: __game__->player) \
 	: __game__->player \
 )
-#define DRAW_NEXT(__game__) DECKS[__game__->cursor_grade][__game__->cursor_increment]
+#define DRAW_NEXT(__game__) deck(__game__, __game__->cursor_grade, __game__->cursor_increment)
 #define SPAWN_RANK(__game__) (IS_SET(__game__->settings, BLACK_PAWN_SPAWN_LOW) && DRAW_NEXT(__game__) == BLACK_PAWN ? 1 : 0)
 #define NEXT_PIECE(__game__) (\
 	EMPTY_SQUARE(__game__->board, SQUARE_INDEX(SPAWN_RANK(__game__), __game__->cursor_increment)) ?\
@@ -274,13 +276,14 @@ Count _chronicle(struct Game* game) {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                const char* LICENSE = "Chesscade is a falling block puzzle game with chess pieces.\nCopyright(C) 2024  George Cesana ne Guy\n\nThis program is free software : you can redistribute it and /or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.If not, see < https://www.gnu.org/licenses/>.";
 void _resolve(struct Game* game, Time time_spent) {
 
-	const Time time = time_taken(game) + time_spent;
+	const Time time = TIME_TAKEN(game) + time_spent;
 	game->events |= EVENT_LANDED;
 	const Index from_rank = game->player_rank, from_file = game->player_file;
 	game->player = QUEEN_ME(game, from_rank);
 	const Set captures = attack(game, True, False, False);
 	_judge(game);
 	LAND(game);
+	game->flip_deck = !game->dropped ? !game->flip_deck : game->flip_deck;
 	_checkmate(game);
 	_chronicle(game);
 	game->cursor_grade = CURSOR_GRADE(game, game->repeat && IS_SET(game->settings, KING_ON_REPEAT));
@@ -387,7 +390,7 @@ Time _fall(struct Game* game, Time passed) {
 	return ret;
 }
 
-Time _do_move(struct Game* game, Bool left, Bool right, Bool down) {
+Time _do_move(struct Game* game, const Time left, const Time right, Time down) {
 
 	Time ret = 0;
 	const Bool diagonals = IS_SET(game->settings, DIAGONALS);
@@ -421,6 +424,7 @@ Time _do_move(struct Game* game, Bool left, Bool right, Bool down) {
 	else if (left == 0 && right == 0 && down > 0) {
 
 		ret = _move(game, max(0, down), 1, 0);
+		if (ret) game->moved_down = False;
 		DRAG(game->dragged_down, ret);
 	}
 
@@ -429,20 +433,25 @@ Time _do_move(struct Game* game, Bool left, Bool right, Bool down) {
 
 void _take_move(struct Game* game, Time passed) {
 
-	const Time down = _buy_move(game, game->moved_down, passed);
-	const Time left = _buy_move(game, game->moved_left, passed);
-	const Time right = _buy_move(game, game->moved_right, passed);
-	const Time count = _do_move(game, left > 0, right > 0, down > 0);
+	const Bool any_move = game->moved_down || game->moved_left || game->moved_right;
+	if (any_move) {
 
-	game->last_moved += count * MOVE_RATE(game);
+		game->last_moved = game->last_moved < 0 ? game->time + passed : game->last_moved;
 
-	if (!game->moved_left && !game->moved_right && !game->moved_down) {
+		const Time down = _buy_move(game, game->moved_down, passed);
+		const Time left = _buy_move(game, game->moved_left, passed);
+		const Time right = _buy_move(game, game->moved_right, passed);
+		const Time count = _do_move(game, left, right, down);
 
-		game->last_moved = time_taken(game);
-	}
-	else if (IS_SET(game->settings, FLYING_PIECES) && game->last_fell < game->last_moved) {
+		game->last_moved += count * MOVE_RATE(game);
 
-		game->last_fell = game->last_moved;
+		if (IS_SET(game->settings, FLYING_PIECES) && game->last_fell < game->last_moved) {
+
+			game->last_fell = game->last_moved;
+		}
+	} else {
+
+		game->last_moved = -1;
 	}
 
 	game->last_fell += _fall(game, passed);
@@ -454,11 +463,12 @@ void _init_game(struct Game* game) {
 	game->combo = 0;
 	game->scored = 0;
 	game->time = 0;
-	game->last_moved = 0;
+	game->last_moved = -1;
 	game->last_fell = 0;
 	game->last_spawned = 0;
 	game->end_time = -1;
 	game->repeat = False;
+	game->flip_deck = False;
 	game->pause = False;
 	game->player = 'W';
 	game->player_rank = 1;
@@ -655,7 +665,7 @@ Count falls(const struct Game* game)
 
 Time time_taken(const struct Game* game)
 {
-	return max(game->last_spawned, (max(game->last_moved, game->last_fell)));
+	return TIME_TAKEN(game);
 }
 
 Bool cursor_wrapped(const struct Game* game) {
@@ -694,9 +704,16 @@ Time ended(const struct Game* game) {
 	return game->end_time;
 }
 
-const char* deck(const Index d) {
+const Piece deck(const struct Game* game, const Index grade, const Index increment) {
 
-	return DECKS[d];
+	const char ret = DECKS[grade][increment];
+
+	if (IS_SET(game->settings, FLIP_DECK) && game->flip_deck) {
+
+		return INVERT_PIECE(ret);
+	}
+
+	return ret;
 }
 
 Piece next_piece(const struct Game* game) {
@@ -795,8 +812,10 @@ void _recursive_pump(struct Game* game, Time passed) {
 	const Bool time_to_fall = SINCE_FELL(game, passed) >= ease(game);
 	if (time_to_fall || time_to_move) {
 
-		_recursive_pump(game, passed);
+		//_recursive_pump(game, passed);
 	}
+
+	game->moved_left = game->moved_right = game->moved_down = False;
 }
 
 void pump(struct Game* game, const Time passed) {
@@ -806,7 +825,7 @@ void pump(struct Game* game, const Time passed) {
 	game->events = 0;
 	_recursive_pump(game, passed);
 	game->time += passed;
-	//assert(time_taken(game) <= game->time);
+	assert(TIME_TAKEN(game) <= game->time);
 }
 
 void begin(struct Game* game) {
@@ -835,9 +854,9 @@ struct Game* malloc_init_standard_game_with_ease_functor(EASE_FUNCTOR(ease_func)
 
 	const struct Game game = { .settings = STANDARD_SETTINGS, .ease_functor = ease_func };
 	struct Game* ret = malloc(sizeof(struct Game));
+	assert(ret);
 	memcpy(ret, &game, sizeof(struct Game));
 	MEMLOG("malloc game\n");
-	assert(ret);
 	_init_game(ret);
 	ret->histotrie = malloc_init_histotrie();
 	return ret;

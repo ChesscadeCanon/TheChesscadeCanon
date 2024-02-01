@@ -2,5 +2,5 @@
 
 struct Game;
 
-void print_raw(struct Game* game);
-void print_pretty(struct Game* game);
+void print_raw(const struct Game* game);
+void print_pretty(const struct Game* game);

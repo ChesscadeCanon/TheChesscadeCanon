@@ -55,7 +55,7 @@ extern "C" {
 	/**
 	* gets the piece from the spawn deck at the given grade and increment
 	*/
-	EXPORT char get_deck_piece(const unsigned short, const unsigned short);
+	EXPORT char get_deck_piece(const struct Game*, const unsigned short, const unsigned short);
 
 	/**
 	* returns the number of milliseconds it currently takes for the piece to fall

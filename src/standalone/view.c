@@ -17,20 +17,19 @@ void _print_instructions() {
 #endif
 }
 
-void _print_info(struct Game* game) {
+void _print_info(const struct Game* game) {
 	printf("score %llu\n", current_score(game));
 	printf("combo %llu\n", current_combo(game));
 	printf("repeat %d\n", repeated(game));
 	printf("time %llu\n", milliseconds(game));
 }
 
-void _print_cursor(struct Game* game) {
+void _print_cursor(const struct Game* game) {
 
 	const Bool wrapped = cursor_wrapped(game);
-	const Index rank = current_cursor_grade(game);
-	const Index file = current_cursor_increment(game);
-	const char* d = deck(rank);
-	char next = d[file];
+	const Index grade = current_cursor_grade(game);
+	const Index increment = current_cursor_increment(game);
+	char next = deck(game, grade, increment);
 	next = wrapped ? IS_WHITE(next) ? 'K' : 'k' : next;
 	char cursor[FOUR_LINES + 1] = {
 		'*', '*', '*', '*', '*', '*', '*', '*', '\n',
@@ -39,18 +38,18 @@ void _print_cursor(struct Game* game) {
 		'*', '*', '*', '*', '*', '*', '*', '*', '\n',
 		'\0'
 	};
-	cursor[rank * (LINE_LENGTH) + file] = next;
+	cursor[grade * (LINE_LENGTH) + increment] = next;
 	printf("%s", cursor);
 }
 
-void print_raw(struct Game* game) {
+void print_raw(const struct Game* game) {
 
 	printf("score %llu\n", current_score(game));
 	printf("time %llu\n", milliseconds(game));
 	printf("%s", board_state(game));
 }
 
-void print_pretty(struct Game* game) {
+void print_pretty(const struct Game* game) {
 
 	Index index = SQUARE_INDEX(player_piece_rank(game), player_piece_file(game));
 	char board[BOARD_LENGTH] = {[BOARD_LENGTH - 1] = '\0'};

@@ -92,7 +92,7 @@ def draw_next(game):
     next_piece = engine.get_next_piece(game).decode('ascii')
     for g in range(style.SQUARES_OFF_TOP):
         for i in range(FILES):
-            piece = engine.get_deck_piece(g, i).decode('ascii')
+            piece = engine.get_deck_piece(game, g, i).decode('ascii')
             draw_piece_on_deck(deck_pieces, piece, g, i)
     draw_piece_on_deck(next_pieces, next_piece, cursor_grade, cursor_increment)
 

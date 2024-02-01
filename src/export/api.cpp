@@ -182,12 +182,10 @@ Set get_square_bit(const Index rank, const Index file) {
 	return square_bit(rank, file);
 }
 
-Piece get_deck_piece(const Index grade, const Index increment) {
+Piece get_deck_piece(const struct Game* game, const Index grade, const Index increment) {
 
-	const char* d = deck(grade);
-	assert(d[FILES] == '\0');
-	assert(strlen(d) == FILES);
-	return d[increment];
+	ASSERT_GAME(game);
+	return deck(game, grade, increment);
 }
 
 struct Game* malloc_init_default_game() {

@@ -40,7 +40,7 @@ def Engine():
     ret.get_cursor_increment.argtypes = [ctypes.POINTER(Game)]
     ret.get_cursor_increment.restype = ctypes.c_ushort
     
-    ret.get_deck_piece.argtypes = [ctypes.c_ushort, ctypes.c_ushort]
+    ret.get_deck_piece.argtypes = [ctypes.POINTER(Game), ctypes.c_ushort, ctypes.c_ushort]
     ret.get_deck_piece.restype = ctypes.c_char
 
     ret.get_ease.argtypes = [ctypes.POINTER(Game)]

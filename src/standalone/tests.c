@@ -8,17 +8,36 @@
 #include <time.h>
 #include <math.h>
 
+#define SELECT(__test_number__, __select__) {if(__select__ >= 0 && __test_number__ != __select__) return;}
+
 #define START_WATCH \
 struct timespec __WATCH__;\
 assert(timespec_get(&__WATCH__, TIME_UTC) == TIME_UTC);
+
 #define STOP_WATCH_AS(__var__) \
 struct timespec __NOW__;\
 assert(timespec_get(&__NOW__, TIME_UTC) == TIME_UTC);\
 Time __var__ = MILLISECONDS_DIFFERENCE(__WATCH__, __NOW__);
-#define SELECT(__test_number__, __select__) {if(__select__ >= 0 && __test_number__ != __select__) return;}
+
+#define TEST_FLIP_DECK 1
+
+#if TEST_FLIP_DECK
+#define WITH_THESE_SETTINGS (WHITE_PAWN_HIT_UP | BLACK_PAWN_SPAWN_LOW | WHITE_PAWN_LAND_HIGH | PAWNS_PROMOTE | KING_ON_REPEAT | DOUBLE_BISHOPS | CHECKMATE | DIAGONALS | FLIP_DECK)
+#define THIS_MUST_BE_THE_NUMBER_OF_FALLS_WITH_NO_INPUT 30
+#define THIS_MUST_BE_THE_FINAL_STATE_WITH_NO_INPUT \
+"\
+________\n\
+________\n\
+________\n\
+________\n\
+________\n\
+________\n\
+_P_____P\n\
+____K___\n\
+"
+#else
 #define WITH_THESE_SETTINGS (WHITE_PAWN_HIT_UP | BLACK_PAWN_SPAWN_LOW | WHITE_PAWN_LAND_HIGH | PAWNS_PROMOTE | KING_ON_REPEAT | DOUBLE_BISHOPS | CHECKMATE | DIAGONALS)
 #define THIS_MUST_BE_THE_NUMBER_OF_FALLS_WITH_NO_INPUT 59
-#define THIS_MUST_BE_THE_END_TIME_WITH_NO_INPUT(__game__) (THIS_MUST_BE_THE_NUMBER_OF_FALLS_WITH_NO_INPUT * ease(__game__))
 #define THIS_MUST_BE_THE_FINAL_STATE_WITH_NO_INPUT \
 "\
 ________\n\
@@ -30,22 +49,53 @@ _______K\n\
 _______P\n\
 __q_KKK_\n\
 "
+#endif
+#define THIS_MUST_BE_THE_END_TIME_WITH_NO_INPUT(__game__) (THIS_MUST_BE_THE_NUMBER_OF_FALLS_WITH_NO_INPUT * ease(__game__))
 
-Time _single_game_test(TACTIC_FUNCTOR(tactic), VALIDATION_FUNCTOR(validator), Time mpf, Bool verbose) {
+void _single_game_test(struct Game* game, TACTIC_FUNCTOR(tactic), Time mpf, Bool verbose) {
 
-	struct Game* game = malloc_init_game(WITH_THESE_SETTINGS);
 	const Count pumps = churn(game, mpf, dead_tactic);
 	assert(ended(game) >= 0);
-	Time ret = ended(game);
 
 	if (verbose) {
 
 		printf("finished in %lld milliseconds game time, with %llu pumps\n", ended(game), pumps);
 		printf("final board state:\n%s", board_state(game));
 	}
+}
 
-	assert(validator(game));
-	free_game(game);
+Time _custom_ease_not_thread_safe = 1;
+
+Time _ease_up(const struct Game* game) {
+
+	return _custom_ease_not_thread_safe;
+}
+
+Time _ease_up_test(TACTIC_FUNCTOR(tactic), VALIDATION_FUNCTOR(validator), Time mpf, Bool verbose) {
+
+	Time ret = 0;
+	_custom_ease_not_thread_safe = 1;
+
+	while(_custom_ease_not_thread_safe < 4096) {
+
+		if (_custom_ease_not_thread_safe > 2048) {
+
+			_custom_ease_not_thread_safe = 3000;
+		}
+
+		if (verbose) {
+
+			printf("Trying game with ease = %lld\n", _custom_ease_not_thread_safe);
+		}
+
+		struct Game* game = malloc_init_standard_game_with_ease_functor(_ease_up);
+		_single_game_test(game, tactic, mpf, verbose);
+		assert(validator(game));
+		ret += ended(game);
+		free_game(game);
+		_custom_ease_not_thread_safe <<= 1;
+	}
+
 	return ret;
 }
 
@@ -63,7 +113,7 @@ Time _tick_bloat_test(TACTIC_FUNCTOR(tactic), VALIDATION_FUNCTOR(validator), Tim
 			printf("beginning round %llu, %lld milliseconds per frame\n", round, mpf);
 		}
 
-		const Time gt = _single_game_test(tactic, validator, mpf, verbose);
+		const Time gt = _ease_up_test(tactic, validator, mpf, verbose);
 
 		if (verbose) {
 
@@ -100,8 +150,9 @@ void _test_0(const int select, const Bool verbose) {
 	printf("Executing test 0: The Dead Man's Game\n");
 	printf("%lld games will be simulated with no user input.\n", THIS_MUST_BE_THE_END_TIME_WITH_NO_INPUT(NULL));
 	printf("%lld ought to be the length in milliseconds of any (the) game with no user input.\n", THIS_MUST_BE_THE_END_TIME_WITH_NO_INPUT(NULL));
-	printf("Each game will be played with milliseconds per frame set to its index in the series.\n");
-	printf("After the game, the state of the board will be compared to the known final state of the Dead Man's Game.\n");
+	printf("Each round will be played with milliseconds per frame set to its index in the series.\n");
+	printf("In each round, games will be played with ease (fall rate) equal to 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, and 3000.\n");
+	printf("After each game, the state of the board will be compared to the known final state of the Dead Man's Game.\n");
 	printf("If all games end in the correct state, the test will pass.\n");
 	printf("This test will help demonstrate that frame rate has no meaningful impact on the course of the game.\n");
 	START_WATCH;

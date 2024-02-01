@@ -11,6 +11,7 @@
 #define SET_CAPTURE(__captures__, __piece_index__, __value__) (__captures__[__piece_index__] = __value__)
 #define SET_SQUARE(__board__, __index__, __value__) (__board__[__index__] = __value__)
 #define IS_WHITE(__piece__) (__piece__ <= 'Z')
+#define INVERT_PIECE(__piece__) (__piece__ + (IS_WHITE(__piece__) ? 1 : -1) * ('a' - 'A'))
 #define SQUARE_INDEX(__rank__, __file__) ((__rank__) * LINE_LENGTH + (__file__))
 #define FOUR_LINES (LINE_LENGTH * 4)
 #define BOARD_LENGTH (LINE_LENGTH * RANKS + 1)
@@ -69,7 +70,7 @@ extern const char SYMBOLS[SYMBOL_COUNT];
 	"bbbbbbbb", \
 	"BBBBBBBB" \
 }
-static const char DECKS[4][9] = STANDARD_DECKS;
+static const char DECKS[GRADES][INCREMENTS + 1] = STANDARD_DECKS;
 
 extern const Count PIECE_VALUES[SQUARE_COUNT];
 #define PIECE_VALUE(P) (PIECE_VALUES[PIECE_MAP[P]])
