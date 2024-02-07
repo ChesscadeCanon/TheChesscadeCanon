@@ -61,7 +61,8 @@ struct Game {
 #define PLAYER_SQUARE(__game__) SQUARE_INDEX(__game__->player_rank, __game__->player_file)
 #define SET(__settings__, __setting__) (__settings__ |= __setting__)
 #define IS_SET(__settings__, __setting__) (__settings__ & __setting__)
-#define MOVE_RATE(__game__) (64)
+#define BASE_MOVE_RATE (64)
+#define MOVE_RATE(__game__) (BASE_MOVE_RATE)
 #define SINCE_MOVED(__game__, __passed__) ((__game__->time + __passed__) - (__game__->last_moved))
 #define SINCE_FELL(__game__, __passed__) ((__game__->time + __passed__) - __game__->last_fell)
 #define SINCE_SPAWNED(__game__, __passed__) ((__game__->time + __passed__) - (__game__->last_spawned))
@@ -436,7 +437,10 @@ void _take_move(struct Game* game, Time passed) {
 	const Bool any_move = game->moved_down || game->moved_left || game->moved_right;
 	if (any_move) {
 
-		game->last_moved = game->last_moved < 0 ? game->time + passed : game->last_moved;
+		if (game->last_moved < 0) {
+
+			game->last_moved = game->time;
+		}
 
 		const Time down = _buy_move(game, game->moved_down, passed);
 		const Time left = _buy_move(game, game->moved_left, passed);
@@ -650,6 +654,7 @@ Time milliseconds(const struct Game* game) {
 
 Time move_rate(const struct Game* game)
 {
+	if (!game) return BASE_MOVE_RATE;
 	return MOVE_RATE(game);
 }
 

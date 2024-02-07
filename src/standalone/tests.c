@@ -19,6 +19,9 @@ struct timespec __NOW__;\
 assert(timespec_get(&__NOW__, TIME_UTC) == TIME_UTC);\
 Time __var__ = MILLISECONDS_DIFFERENCE(__WATCH__, __NOW__);
 
+#define TACTIC_FUNCTOR(__var__) void (__var__)(struct Game*)
+#define VALIDATION_FUNCTOR(__var__) Bool (__var__)(const struct Game* __var__)
+
 #define TEST_FLIP_DECK 1
 
 #if TEST_FLIP_DECK
@@ -34,6 +37,18 @@ ________\n\
 ________\n\
 _P_____P\n\
 ____K___\n\
+"
+#define THIS_MUST_BE_THE_NUMBER_OF_FALLS_WITH_LEFT_INPUT 31
+#define THIS_MUST_BE_THE_FINAL_STATE_WITH_LEFT_INPUT \
+"\
+Q_______\n\
+P_______\n\
+b_______\n\
+p_______\n\
+k_______\n\
+p_______\n\
+P_______\n\
+________\n\
 "
 #else
 #define WITH_THESE_SETTINGS (WHITE_PAWN_HIT_UP | BLACK_PAWN_SPAWN_LOW | WHITE_PAWN_LAND_HIGH | PAWNS_PROMOTE | KING_ON_REPEAT | DOUBLE_BISHOPS | CHECKMATE | DIAGONALS)
@@ -51,10 +66,78 @@ __q_KKK_\n\
 "
 #endif
 #define THIS_MUST_BE_THE_END_TIME_WITH_NO_INPUT(__game__) (THIS_MUST_BE_THE_NUMBER_OF_FALLS_WITH_NO_INPUT * ease(__game__))
+#define THIS_MUST_BE_THE_END_TIME_WITH_LEFT_INPUT(__game__) (THIS_MUST_BE_THE_NUMBER_OF_FALLS_WITH_LEFT_INPUT * ease(__game__))
+
+void _dead_tactic(struct Game* game) {}
+
+void _lefty_tactic(struct Game* game) {
+
+	do_digital_move(game, True, False, False);
+}
+
+Bool _dead_man_validator(const struct Game* game) {
+
+	return ended(game) == THIS_MUST_BE_THE_END_TIME_WITH_NO_INPUT(game) &&
+		falls(game) == THIS_MUST_BE_THE_NUMBER_OF_FALLS_WITH_NO_INPUT &&
+		strncmp(THIS_MUST_BE_THE_FINAL_STATE_WITH_NO_INPUT, board_state(game), BOARD_LENGTH) == 0;
+}
+
+Bool _tenth_dentist_validator(const struct Game* game) {
+
+	return ended(game) >= 0 ? falls(game) * ease(game) == ended(game) : falls(game) * ease(game) == time_taken(game);
+}
+
+Bool _left_hand_validator(const struct Game* game) {
+
+	printf("Target end time: %lld\n", THIS_MUST_BE_THE_END_TIME_WITH_LEFT_INPUT(game));
+	return ended(game) == THIS_MUST_BE_THE_END_TIME_WITH_LEFT_INPUT(game) &&
+		falls(game) == THIS_MUST_BE_THE_NUMBER_OF_FALLS_WITH_LEFT_INPUT &&
+		strncmp(THIS_MUST_BE_THE_FINAL_STATE_WITH_LEFT_INPUT, board_state(game), BOARD_LENGTH) == 0;
+}
+
+Count _playthrough(struct Game* game, const Time mpf) {
+
+	begin(game);
+	Count pumps = 0;
+	while (!game_over(game)) {
+
+		++pumps;
+		pump(game, mpf);
+	}
+	return pumps;
+}
+
+Count _tactical_playthrough(struct Game* game, const Time mpf, TACTIC_FUNCTOR(tactic)) {
+
+	assert(tactic);
+	begin(game);
+	Count pumps = 0;
+	while (!game_over(game)) {
+
+		tactic(game);
+		++pumps;
+		pump(game, mpf);
+	}
+	return pumps;
+}
+
+Count _validated_playthrough(struct Game* game, const Time mpf, VALIDATION_FUNCTOR(validator)) {
+
+	assert(validator);
+	begin(game);
+	Count pumps = 0;
+	while (!game_over(game)) {
+
+		if (!validator(game)) return pumps;
+		++pumps;
+		pump(game, mpf);
+	}
+	return pumps;
+}
 
 void _single_game_test(struct Game* game, TACTIC_FUNCTOR(tactic), Time mpf, Bool verbose) {
 
-	const Count pumps = churn(game, mpf, dead_tactic);
+	const Count pumps = _tactical_playthrough(game, mpf, tactic);
 	assert(ended(game) >= 0);
 
 	if (verbose) {
@@ -66,15 +149,15 @@ void _single_game_test(struct Game* game, TACTIC_FUNCTOR(tactic), Time mpf, Bool
 
 Time _custom_ease_not_thread_safe = 1;
 
-Time _ease_up(const struct Game* game) {
+Time _test_ease_functor_not_thread_safe(const struct Game* game) {
 
 	return _custom_ease_not_thread_safe;
 }
 
-Time _ease_up_test(TACTIC_FUNCTOR(tactic), VALIDATION_FUNCTOR(validator), Time mpf, Bool verbose) {
+Time _ease_up_test(TACTIC_FUNCTOR(tactic), VALIDATION_FUNCTOR(validator), const Time min_ease, const Time mpf, const Bool verbose) {
 
 	Time ret = 0;
-	_custom_ease_not_thread_safe = 1;
+	_custom_ease_not_thread_safe = min_ease;
 
 	while(_custom_ease_not_thread_safe < 4096) {
 
@@ -83,12 +166,15 @@ Time _ease_up_test(TACTIC_FUNCTOR(tactic), VALIDATION_FUNCTOR(validator), Time m
 			_custom_ease_not_thread_safe = 3000;
 		}
 
+		struct Game* game = malloc_init_standard_game_with_ease_functor(_test_ease_functor_not_thread_safe);
+
+		if (_custom_ease_not_thread_safe < move_rate(game) * 36) _custom_ease_not_thread_safe = move_rate(game) * 36;
+
 		if (verbose) {
 
 			printf("Trying game with ease = %lld\n", _custom_ease_not_thread_safe);
 		}
 
-		struct Game* game = malloc_init_standard_game_with_ease_functor(_ease_up);
 		_single_game_test(game, tactic, mpf, verbose);
 		assert(validator(game));
 		ret += ended(game);
@@ -99,7 +185,7 @@ Time _ease_up_test(TACTIC_FUNCTOR(tactic), VALIDATION_FUNCTOR(validator), Time m
 	return ret;
 }
 
-Time _tick_bloat_test(TACTIC_FUNCTOR(tactic), VALIDATION_FUNCTOR(validator), Time max_mpf, Time tolerance, Bool verbose) {
+Time _tick_bloat_test(TACTIC_FUNCTOR(tactic), VALIDATION_FUNCTOR(validator), Time min_ease, Time max_mpf, Time tolerance, Bool verbose) {
 
 	Count round = 0;
 	Time ret = 0;
@@ -113,7 +199,7 @@ Time _tick_bloat_test(TACTIC_FUNCTOR(tactic), VALIDATION_FUNCTOR(validator), Tim
 			printf("beginning round %llu, %lld milliseconds per frame\n", round, mpf);
 		}
 
-		const Time gt = _ease_up_test(tactic, validator, mpf, verbose);
+		const Time gt = _ease_up_test(tactic, validator, min_ease, mpf, verbose);
 
 		if (verbose) {
 
@@ -132,18 +218,6 @@ Time _tick_bloat_test(TACTIC_FUNCTOR(tactic), VALIDATION_FUNCTOR(validator), Tim
 	return ret;
 }
 
-Bool _dead_man_validator(const struct Game* game) {
-
-	return ended(game) == THIS_MUST_BE_THE_END_TIME_WITH_NO_INPUT(game) &&
-	falls(game) == THIS_MUST_BE_THE_NUMBER_OF_FALLS_WITH_NO_INPUT &&
-	strncmp(THIS_MUST_BE_THE_FINAL_STATE_WITH_NO_INPUT, board_state(game), BOARD_LENGTH) == 0;
-}
-
-Bool _tenth_dentist_validator(const struct Game* game) {
-
-	return ended(game) >= 0 ? falls(game) * ease(game) == ended(game) : falls(game) * ease(game) == time_taken(game);
-}
-
 void _test_0(const int select, const Bool verbose) {
 
 	SELECT(0, select);
@@ -156,7 +230,7 @@ void _test_0(const int select, const Bool verbose) {
 	printf("If all games end in the correct state, the test will pass.\n");
 	printf("This test will help demonstrate that frame rate has no meaningful impact on the course of the game.\n");
 	START_WATCH;
-	const Time game_time = _tick_bloat_test(dead_tactic, _dead_man_validator, THIS_MUST_BE_THE_END_TIME_WITH_NO_INPUT(NULL), 0, verbose);
+	const Time game_time = _tick_bloat_test(_dead_tactic, _dead_man_validator, 1, THIS_MUST_BE_THE_END_TIME_WITH_NO_INPUT(NULL), 0, verbose);
 	STOP_WATCH_AS(difference);
 	printf("Completed %lld milliseconds of game time in %lld milliseconds.\n", game_time, difference);
 	printf("test 0 complete\n");
@@ -174,7 +248,7 @@ void _test_1(const int select, const Bool verbose) {
 	printf("From 59 mpf onward, games take exactly 7 milliseconds.\n");
 	printf("This test is designed to help pinpoint exactly on what turn the discrepancy occurs.\n");
 	struct Game* game = malloc_init_game(WITH_THESE_SETTINGS);
-	const Count pumps = lurk(game, 10, _tenth_dentist_validator);
+	const Count pumps = _validated_playthrough(game, 10, _tenth_dentist_validator);
 	printf("The game ended after fall %llu on millisecond %lld at pump %llu\n", falls(game), ended(game), pumps);
 	assert(_tenth_dentist_validator(game));
 	free_game(game);
@@ -185,12 +259,29 @@ void _test_2(const int select, const Bool verbose) {
 
 	SELECT(2, select);
 	const Time mpf = 60;
-	printf("Executing test 2: Too Hard\n");
-	printf("Now the Dead Man's game has a consistent length regardless of frame rate,\n");
-	printf("as long as the fall rate ('ease') is exactly 1.\n");
-	printf("For each millisecond the ease grows, the discrepancy grows by one millisecond.\n");
-	printf("To help pinpoint the discrepancy, this test runs 3000 games, with ease set to the index of the game of the game in the series.\n");
-	printf("The test will then ");
+	printf("Executing test 2: The Left Hand Path\n");
+	printf("This test is similar to the Dead Man's Game, except the left input is held the whole time.\n");
+	START_WATCH;
+	const Time game_time = _tick_bloat_test(_lefty_tactic, _left_hand_validator, move_rate(NULL) * (FILES-1), THIS_MUST_BE_THE_END_TIME_WITH_LEFT_INPUT(NULL), 0, verbose);
+	STOP_WATCH_AS(difference);
+	printf("Completed %lld milliseconds of game time in %lld milliseconds.\n", game_time, difference);
+	printf("test 2 complete\n");
+}
+
+void _test_3(const int select, const Bool verbose) {
+
+	SELECT(3, select);
+	printf("Executing test 3: Lefty Loosey\n");
+	printf("Test 2 revealed that when the left arrow key is held, the game ends incorrectly if the ease is lower than the milliseconds per frame.\n");
+	printf("This test tries a single Left Hand Path game with ease = 64 * 7 and MPF = 64 * 7 * 2 in order to pinpoint the problom.\n");
+	_custom_ease_not_thread_safe = 448;
+	struct Game* game = malloc_init_standard_game_with_ease_functor(_test_ease_functor_not_thread_safe);
+	const Count pumps = _tactical_playthrough(game, 463, _lefty_tactic);
+	printf("The game ended after fall %llu on millisecond %lld at pump %llu\n", falls(game), ended(game), pumps);
+	print_board_state(game);
+	assert(_left_hand_validator(game));
+	free_game(game);
+	printf("test 3 complete\n");
 }
 
 void run_tests(const int select, const Bool verbose) {
@@ -203,4 +294,6 @@ void run_tests(const int select, const Bool verbose) {
 	printf("Running tests.\n");
 	_test_0(select, verbose);
 	_test_1(select, verbose);
+	_test_2(select, verbose);
+	_test_3(select, verbose);
 }
