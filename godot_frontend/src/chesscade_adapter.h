@@ -22,7 +22,7 @@ namespace godot {
 
 		void _ready() override;
 		void _exit_tree() override;
-		godot::String get_player_piece() const;
+		godot::String get_player() const;
 	};
 
 }
