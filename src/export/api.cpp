@@ -129,6 +129,11 @@ Index get_spawn_rank(const struct Game* game)
 	return spawn_rank(game);
 }
 
+Set get_figure(const Piece piece, const int layer, const Index index, const Bool white)
+{
+	return figure(piece, static_cast<enum Layer>(layer), index);
+}
+
 Count get_combo(const struct Game* game) {
 
 	ASSERT_GAME(game);

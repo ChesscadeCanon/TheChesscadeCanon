@@ -8,6 +8,7 @@ void print_rules();
 Time ease(const struct Game*);
 Time ended(const struct Game*);
 const Piece deck(const struct Game*, const Index, const Index);
+const Set figure(const Piece, const enum Layer, const Index);
 const Board board_state(const struct Game*);
 Index board_length();
 Piece square_contents(const struct Game*, Index, Index);

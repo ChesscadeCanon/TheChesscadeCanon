@@ -152,15 +152,20 @@ extern "C" {
 	*/
 	EXPORT unsigned short get_spawn_rank(const struct Game*);
 
-	/**
+	/*
 	* gets the contents of the specified square
 	*/
 	EXPORT char get_square(const struct Game* game, const unsigned short, const unsigned short);
 
-	/**
+	/*
 	* gets the bit that represents the square at the given coordinates for purposes of finding it in a bitflag
 	*/
 	EXPORT unsigned long long get_square_bit(const unsigned short, const unsigned short);
+
+	/*
+	* gets the specified chunk of the binary representation of the specified piece's image
+	*/
+	EXPORT unsigned long long get_figure(const char, const int, const unsigned short, const unsigned short);
 
 	/**
 	* On any given frame, call input_analog_move() with floating point values

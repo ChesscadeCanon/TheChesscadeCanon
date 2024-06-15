@@ -11,7 +11,7 @@ extern "C" {
 
 godot::String godot::ChesscadeAdapter::get_board_state() const {
 
-	return godot::String(board_state(game));
+	return String(board_state(game));
 }
 
 void godot::ChesscadeAdapter::begin_game() {
@@ -33,17 +33,17 @@ void godot::ChesscadeAdapter::input_toggle_pause() {
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::attack_pattern() const {
 
-	return static_cast<godot::ChesscadeAdapter::GodotInt>(attack(game, false, false, True));
+	return static_cast<GodotInt>(attack(game, false, false, True));
 }
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_combo() const {
 
-	return static_cast<godot::ChesscadeAdapter::GodotInt>(current_combo(game));
+	return static_cast<GodotInt>(current_combo(game));
 }
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_cursor_direction() const {
 
-	return static_cast<godot::ChesscadeAdapter::GodotInt>(cursor_direction(game));
+	return static_cast<GodotInt>(cursor_direction(game));
 }
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_cursor_grade() const {
@@ -53,24 +53,24 @@ godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_cursor_grade() co
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_cursor_increment() const {
 
-	return static_cast<godot::ChesscadeAdapter::GodotInt>(current_cursor_increment(game));
+	return static_cast<GodotInt>(current_cursor_increment(game));
 }
 
 godot::ChesscadeAdapter::GodotPiece godot::ChesscadeAdapter::get_deck_piece(godot::Vector2i slot) const {
 
 	char ret[2] = { '\0', '\0' };
 	ret[0] = deck(game, slot.y, slot.x);
-	return godot::ChesscadeAdapter::GodotPiece(ret);
+	return GodotPiece(ret);
 }
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_ease() const {
 
-	return static_cast<godot::ChesscadeAdapter::GodotInt>(ease(game));
+	return static_cast<GodotInt>(ease(game));
 }
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_end_time() const {
 
-	return static_cast<godot::ChesscadeAdapter::GodotInt>(ended(game));
+	return static_cast<GodotInt>(ended(game));
 }
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_events() const {
@@ -80,45 +80,45 @@ godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_events() const {
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_forecast_rank() const {
 
-	return static_cast<godot::ChesscadeAdapter::GodotInt>(forecast_rank(game));
+	return static_cast<GodotInt>(forecast_rank(game));
 }
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_move_rate() const {
 
-	return static_cast<godot::ChesscadeAdapter::GodotInt>(move_rate(game));
+	return static_cast<GodotInt>(move_rate(game));
 }
 
 godot::ChesscadeAdapter::GodotPiece godot::ChesscadeAdapter::get_next_piece() const {
 
 	char ret[2] = { '\0', '\0' };
 	ret[0] = next_piece(game);
-	return godot::ChesscadeAdapter::GodotPiece(ret);
+	return GodotPiece(ret);
 }
 
 godot::ChesscadeAdapter::GodotPiece godot::ChesscadeAdapter::get_player() const {
 
 	char ret[2] = { '\0', '\0' };
 	ret[0] = player_piece(game);
-	return godot::ChesscadeAdapter::GodotPiece(ret);
+	return GodotPiece(ret);
 }
 
 godot::Vector2i godot::ChesscadeAdapter::get_player_square() const {
 
-	const godot::ChesscadeAdapter::GodotInt f = static_cast<godot::ChesscadeAdapter::GodotInt>(player_piece_file(game));
-	const godot::ChesscadeAdapter::GodotInt r = static_cast<godot::ChesscadeAdapter::GodotInt>(player_piece_rank(game));
+	const GodotInt f = static_cast<GodotInt>(player_piece_file(game));
+	const GodotInt r = static_cast<GodotInt>(player_piece_rank(game));
 	return Vector2i(f, r);
 }
 
 godot::Vector2i godot::ChesscadeAdapter::get_board_size() const {
 
-	const godot::ChesscadeAdapter::GodotInt f = static_cast<godot::ChesscadeAdapter::GodotInt>(FILES);
-	const godot::ChesscadeAdapter::GodotInt r = static_cast<godot::ChesscadeAdapter::GodotInt>(RANKS);
+	const GodotInt f = static_cast<GodotInt>(FILES);
+	const GodotInt r = static_cast<GodotInt>(RANKS);
 	return Vector2i(f, r);
 }
 
 godot::ChesscadeAdapter::GodotPiece godot::ChesscadeAdapter::get_rules() const {
 
-	return godot::ChesscadeAdapter::GodotPiece(RULES);
+	return GodotPiece(RULES);
 }
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_score() const {
@@ -140,7 +140,7 @@ godot::ChesscadeAdapter::GodotPiece godot::ChesscadeAdapter::get_square(const go
 
 	char ret[2] = { '\0', '\0' };
 	ret[0] = square_contents(game, square.y, square.x);
-	return godot::ChesscadeAdapter::GodotPiece(ret);
+	return GodotPiece(ret);
 }
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_square_bit(const godot::Vector2i square) const {
@@ -197,6 +197,11 @@ void godot::ChesscadeAdapter::_clear() {
 	}
 }
 
+godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_figure(GodotPiece piece, GodotInt layer, GodotInt index) {
+
+	return figure(piece[0], layer, index);
+}
+
 void godot::ChesscadeAdapter::_ready() {
 
 	reset();
@@ -209,40 +214,43 @@ void godot::ChesscadeAdapter::_exit_tree() {
 
 void godot::ChesscadeAdapter::_bind_methods() {
 
-	godot::ClassDB::bind_method(godot::D_METHOD("get_board_state"), &godot::ChesscadeAdapter::get_board_state);
-	godot::ClassDB::bind_method(godot::D_METHOD("reset"), &godot::ChesscadeAdapter::reset);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_combo"), &godot::ChesscadeAdapter::get_combo);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_cursor_direction"), &godot::ChesscadeAdapter::get_cursor_direction);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_cursor_grade"), &godot::ChesscadeAdapter::get_cursor_grade);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_cursor_increment"), &godot::ChesscadeAdapter::get_cursor_increment);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_deck_piece", "slot"), &godot::ChesscadeAdapter::get_deck_piece);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_ease"), &godot::ChesscadeAdapter::get_ease);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_end_time"), &godot::ChesscadeAdapter::get_end_time);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_events"), &godot::ChesscadeAdapter::get_events);
-	godot::ClassDB::bind_method(godot::D_METHOD("input_toggle_pause"), &godot::ChesscadeAdapter::input_toggle_pause);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_player"), &godot::ChesscadeAdapter::get_player);
-	godot::ClassDB::bind_method(godot::D_METHOD("attack_pattern"), &godot::ChesscadeAdapter::attack_pattern);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_forecast_rank"), &godot::ChesscadeAdapter::get_forecast_rank);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_move_rate"), &godot::ChesscadeAdapter::get_move_rate);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_player_square"), &godot::ChesscadeAdapter::get_player_square);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_board_size"), &godot::ChesscadeAdapter::get_board_size);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_rules"), &godot::ChesscadeAdapter::get_rules);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_score"), &godot::ChesscadeAdapter::get_score);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_scored"), &godot::ChesscadeAdapter::get_scored);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_spawn_rank"), &godot::ChesscadeAdapter::get_spawn_rank);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_square", "square"), &godot::ChesscadeAdapter::get_square);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_square_bit", "square"), &godot::ChesscadeAdapter::get_square_bit);
-	godot::ClassDB::bind_method(godot::D_METHOD("input_analog_move", "move"), &godot::ChesscadeAdapter::input_analog_move);
-	godot::ClassDB::bind_method(godot::D_METHOD("input_digital_move", "left", "right", "down"), &godot::ChesscadeAdapter::input_digital_move);
-	godot::ClassDB::bind_method(godot::D_METHOD("input_drop"), &godot::ChesscadeAdapter::input_drop);
-	godot::ClassDB::bind_method(godot::D_METHOD("is_game_over"), &godot::ChesscadeAdapter::is_game_over);
-	godot::ClassDB::bind_method(godot::D_METHOD("is_on_brink"), &godot::ChesscadeAdapter::is_on_brink);
-	godot::ClassDB::bind_method(godot::D_METHOD("is_paused"), &godot::ChesscadeAdapter::is_paused);
+	ClassDB::bind_method(D_METHOD("get_board_state"), &get_board_state);
+	ClassDB::bind_method(D_METHOD("begin_game"), &begin_game);
+	ClassDB::bind_method(D_METHOD("pump_game", "delta"), &pump_game);
+	ClassDB::bind_method(D_METHOD("reset"), &reset);
+	ClassDB::bind_method(D_METHOD("get_combo"), &get_combo);
+	ClassDB::bind_method(D_METHOD("get_cursor_direction"), &get_cursor_direction);
+	ClassDB::bind_method(D_METHOD("get_cursor_grade"), &get_cursor_grade);
+	ClassDB::bind_method(D_METHOD("get_cursor_increment"), &get_cursor_increment);
+	ClassDB::bind_method(D_METHOD("get_deck_piece", "slot"), &get_deck_piece);
+	ClassDB::bind_method(D_METHOD("get_ease"), &get_ease);
+	ClassDB::bind_method(D_METHOD("get_end_time"), &get_end_time);
+	ClassDB::bind_method(D_METHOD("get_events"), &get_events);
+	ClassDB::bind_method(D_METHOD("input_toggle_pause"), &input_toggle_pause);
+	ClassDB::bind_method(D_METHOD("get_player"), &get_player);
+	ClassDB::bind_method(D_METHOD("attack_pattern"), &attack_pattern);
+	ClassDB::bind_method(D_METHOD("get_forecast_rank"), &get_forecast_rank);
+	ClassDB::bind_method(D_METHOD("get_move_rate"), &get_move_rate);
+	ClassDB::bind_method(D_METHOD("get_player_square"), &get_player_square);
+	ClassDB::bind_method(D_METHOD("get_board_size"), &get_board_size);
+	ClassDB::bind_method(D_METHOD("get_rules"), &get_rules);
+	ClassDB::bind_method(D_METHOD("get_score"), &get_score);
+	ClassDB::bind_method(D_METHOD("get_scored"), &get_scored);
+	ClassDB::bind_method(D_METHOD("get_spawn_rank"), &get_spawn_rank);
+	ClassDB::bind_method(D_METHOD("get_square", "square"), &get_square);
+	ClassDB::bind_method(D_METHOD("get_square_bit", "square"), &get_square_bit);
+	ClassDB::bind_method(D_METHOD("input_analog_move", "move"), &input_analog_move);
+	ClassDB::bind_method(D_METHOD("input_digital_move", "left", "right", "down"), &input_digital_move);
+	ClassDB::bind_method(D_METHOD("input_drop"), &input_drop);
+	ClassDB::bind_method(D_METHOD("is_game_over"), &is_game_over);
+	ClassDB::bind_method(D_METHOD("is_on_brink"), &is_on_brink);
+	ClassDB::bind_method(D_METHOD("is_paused"), &is_paused);
+	ClassDB::bind_method(D_METHOD("get_figure", "piece", "layer", "index"), &get_figure);
 }
 
-godot::ChesscadeAdapter::ChesscadeAdapter() {
-
-	godot::UtilityFunctions::print("Hello?");
+godot::ChesscadeAdapter::ChesscadeAdapter() :
+game(NULL) {
+	
 }
 
 godot::ChesscadeAdapter::~ChesscadeAdapter() {

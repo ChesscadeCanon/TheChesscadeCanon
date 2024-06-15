@@ -721,6 +721,11 @@ const Piece deck(const struct Game* game, const Index grade, const Index increme
 	return ret;
 }
 
+const Set figure(const Piece piece, const enum Layer layer, const Index index)
+{
+	return FIGURES[PIECE_MAP[piece]][layer][index] ^ (IS_WHITE(piece) * 0xffffffff);
+}
+
 Piece next_piece(const struct Game* game) {
 
 	return NEXT_PIECE(game);

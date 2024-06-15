@@ -1,10 +1,9 @@
 #include "histotrie.h"
 #include "board.h"
 #include "config.h"
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 struct Histotrie {
 
@@ -13,6 +12,7 @@ struct Histotrie {
 
 #define HISTOTRIE_TEST 0
 #if HISTOTRIE_TEST
+#include <stdio.h>
 void test_histotrie() {
 
 	const Count n = 1000;

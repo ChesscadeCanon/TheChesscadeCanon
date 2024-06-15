@@ -30,11 +30,14 @@ namespace godot {
 		*/
 		godot::String get_board_state() const;
 
-		/**
+		/*
 		* begins the game by spawning the first piece
 		*/
 		void begin_game();
 
+		/*
+		* destroys the current game and creates a new one
+		*/
 		void reset();
 
 		/**
@@ -195,6 +198,11 @@ namespace godot {
 		* progresses the game by the given number of milliseconds
 		*/
 		void pump_game(double);
+
+		/*
+		* gets the specified chunk of the binary representation of the specified piece's image
+		*/
+		GodotInt get_figure(GodotPiece, GodotInt, GodotInt);
 
 		void _ready() override;
 		void _exit_tree() override;

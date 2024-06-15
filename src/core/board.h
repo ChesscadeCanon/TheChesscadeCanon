@@ -24,6 +24,7 @@
 #define LAST_FILE (FILES - 1)
 #define LAST_RANK (RANKS - 1)
 #define SQUARE_DOWN(__index__) (__index__ + LINE_LENGTH)
+#define FIGURE_HEIGHT 4
 
 typedef char* Board;
 typedef char* Captures;
@@ -39,6 +40,12 @@ enum Square {
 	SQUARE_COUNT
 };
 
+enum Layer {
+	PIXEL,
+	MASK,
+	LAYERS_DEEP
+};
+
 struct MoveSet {
 
 	const Bool repeat;
@@ -48,6 +55,7 @@ struct MoveSet {
 
 extern const enum Square PIECE_MAP[128];
 extern const struct MoveSet MOVES[SQUARE_COUNT];
+extern const Set FIGURES[SQUARE_COUNT][LAYERS_DEEP][FIGURE_HEIGHT];
 #define SYMBOL_COUNT 13
 extern const char SYMBOLS[SYMBOL_COUNT];
 #define SYMBOL_INDEX(P) (PIECE_MAP[P] == NO_PIECE ? SYMBOL_COUNT - 1 : PIECE_MAP[P] + NO_PIECE * IS_WHITE(P))
