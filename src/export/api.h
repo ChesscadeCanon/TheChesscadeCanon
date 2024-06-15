@@ -133,7 +133,7 @@ extern "C" {
 	EXPORT const char* get_rules();
 
 	/**
-	* returns the full text of the rules of Chesscade
+	* returns the length of the full text of the rules of Chesscade
 	*/
 	EXPORT unsigned long long get_rules_length();
 
@@ -153,7 +153,7 @@ extern "C" {
 	EXPORT unsigned short get_spawn_rank(const struct Game*);
 
 	/**
-	* seturns the current state of the board as a string
+	* gets the contents of the specified square
 	*/
 	EXPORT char get_square(const struct Game* game, const unsigned short, const unsigned short);
 

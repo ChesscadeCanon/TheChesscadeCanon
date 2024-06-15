@@ -2,6 +2,7 @@
 #define CHESSCADE_ADAPTER_H
 
 #include <godot_cpp/classes/node.hpp>
+#include <stdint.h>
 
 struct Game;
 
@@ -10,8 +11,12 @@ namespace godot {
 	class ChesscadeAdapter : public Node {
 		GDCLASS(ChesscadeAdapter, Node)
 
+		typedef godot::String GodotPiece;
+		typedef int64_t GodotInt;
+
 	private:
 		struct Game* game = NULL;
+		void _clear();
 
 	protected:
 		static void _bind_methods();
@@ -19,10 +24,180 @@ namespace godot {
 	public:
 		ChesscadeAdapter();
 		~ChesscadeAdapter();
+		
+		/*
+		* gets the current state of the board as a string
+		*/
+		godot::String get_board_state() const;
+
+		/**
+		* begins the game by spawning the first piece
+		*/
+		void begin_game();
+
+		void reset();
+
+		/**
+		* pauses the game if it's unpaused and vice versa
+		*/
+		void input_toggle_pause();
+
+		/**
+ 		* returns a character denoting the type of the current falling piece
+		*/
+		GodotPiece get_player() const;
+
+		/**
+		* returns a bigflag denoting the attack pattern of the current falling piece
+		*/
+		GodotInt attack_pattern() const;
+
+		/**
+		* returns the number of consecutive captures
+		*/
+		GodotInt get_combo() const;
+
+		/**
+		* returns -1 if the cursor is going left or 1 if it's going right
+		*/
+		GodotInt get_cursor_direction() const;
+
+		/**
+		* returns an unsigned short denoting the rank of the board where the falling piece currently is
+		*/
+		GodotInt get_cursor_grade() const;
+
+		/**
+		* returns an unsigned short denoting the file of the board where the falling piece currently is
+		*/
+		GodotInt get_cursor_increment() const;
+
+		/**
+		* gets the piece from the spawn deck at the given grade and increment
+		*/
+		GodotPiece get_deck_piece(godot::Vector2i) const;
+
+		/**
+		* returns the number of milliseconds it currently takes for the piece to fall
+		*/
+		GodotInt get_ease() const;
+
+		/**
+		* returns the time when a finished game ended, or -1 if the game is still going
+		*/
+		GodotInt get_end_time() const;
+
+		/**
+		* returns a bitset denoting what events took place in the last frame
+		*/
+		GodotInt get_events() const;
+
+		/**
+		* returns the rank that the current piece would fall to if it fell right now
+		*/
+		GodotInt get_forecast_rank() const;
+
+		/**
+		* returns the minimum amount of time between player moves
+		*/
+		GodotInt get_move_rate() const;
+
+		/**
+		* returns the next piece that will spawn if the current piece lands right now
+		*/
+		GodotPiece get_next_piece() const;
+
+		/**
+		* returns an integer vector denoting the rank and file of the board where the
+		* falling piece currently is
+		*/
+		godot::Vector2i get_player_square() const;
+
+		/**
+		* returns the height of the board
+		*/
+		godot::Vector2i get_board_size() const;
+
+		/**
+		* returns the full text of the rules of Chesscade
+		*/
+		GodotPiece get_rules() const;
+
+		/**
+		* returns the current score
+		*/
+		GodotInt get_score() const;
+
+		/**
+		* gets the rank where the next piece will spawn
+		*/
+		GodotInt get_spawn_rank() const;
+
+		/**
+		* returns the number of points scored on the last landing
+		*/
+		GodotInt get_scored() const;
+
+		/**
+		* gets the contents of the specified square
+		*/
+		GodotPiece get_square(const godot::Vector2i) const;
+
+		/**
+		* gets the bit that represents the square at the given coordinates for purposes of finding it in a bitflag
+		*/
+		GodotInt get_square_bit(const godot::Vector2i) const;
+
+		/**
+		* On any given frame, call input_analog_move() with floating point values
+		* constituting a vector denoting how far the mouse or touch has moved on the x and y
+		* axes in terms of what fraction of a square width it has moved. For instance, if
+		* the squares were 64 pixels across in your interface, and on some frame the player
+		* dragged the mouse 96 pixels to the left and 16 pixels down, you would call:
+		* input_analog_move(game, -1.5, 0.25);
+		*/
+		void input_analog_move(const godot::Vector2);
+
+		/**
+		* On any given frame, call input_digital_move() with boolean values denoting whether
+		* to try and move the piece left, right and/or down, as indicated by key inputs. For
+		* instance, if the right and down keys were being held, you would call:
+		* input_digital_move(game, false, True, True);
+		*/
+		void input_digital_move(const bool, const bool, const bool);
+
+		/**
+		* drops the current piece
+		*/
+		void input_drop();
+
+		/**
+		* returns whether the game has ended or not
+		*/
+		bool is_game_over() const;
+
+		/**
+		* returns whether dropping the current piece now would result in a game over
+		*/
+		bool is_on_brink() const;
+
+		/**
+		* returns whether not the game is paused
+		*/
+		bool is_paused() const;
+
+		/**
+		* returns whether not the game is paused
+		*/
+		bool is_repeat() const;
+
+		/**
+		* progresses the game by the given number of milliseconds
+		*/
+		void pump_game(double);
 
 		void _ready() override;
 		void _exit_tree() override;
-		godot::String get_player() const;
 	};
 
 }
