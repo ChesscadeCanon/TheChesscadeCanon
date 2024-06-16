@@ -203,7 +203,7 @@ godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_figure(GodotPiece
 		return 0;
 	}
 
-	return figure(static_cast<Piece>(piece[0]), static_cast<enum Layer>(layer), static_cast<Index>(index));
+	return figure(static_cast<Piece>(piece.to_ascii_buffer()[0]), static_cast<enum Layer>(layer), static_cast<Index>(index));
 }
 
 void godot::ChesscadeAdapter::_ready() {
