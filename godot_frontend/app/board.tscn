@@ -5,6 +5,7 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_le6nw"]
 shader = ExtResource("1_b25bu")
+shader_parameter/board_size = null
 shader_parameter/pixel_map = null
 shader_parameter/mask_map = null
 shader_parameter/board_state = null

@@ -1,8 +1,9 @@
+@tool
 extends PanelContainer
-
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	var board_size :Vector2i= ChesscadeModel.get_board_size()
 	var pixel_map :Array[Vector4i]= []
 	var mask_map :Array[Vector4i]= []
 	for code in 128:
@@ -16,6 +17,7 @@ func _ready():
 			mask_vector[chunk] = mask
 		pixel_map.append(pixel_vector)
 		mask_map.append(mask_vector)
+	material.set_shader_parameter("board_size", board_size)
 	material.set_shader_parameter("pixel_map", pixel_map)
 	material.set_shader_parameter("mask_map", mask_map)
 	

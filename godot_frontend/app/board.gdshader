@@ -1,21 +1,54 @@
 shader_type canvas_item;
 
-uniform vec4 pixel_map[128];
-uniform vec4 mask_map[128];
+const int EMPTY = 95;
+
+uniform uvec2 board_size;
+uniform uvec4 pixel_map[128];
+uniform uvec4 mask_map[128];
 uniform int board_state[72];
-uniform ivec2 player_square;
+uniform uvec2 player_square;
+
+varying flat uvec2 square;
+varying flat uint index;
 
 void vertex() {
 	// Called for every vertex the material is visible on.
 }
 
-bool axis_parity(float axis) {
+bool white_square() {
 	
-	return bool(int(floor(axis / (1.0 / 8.0))) % 2);
+	return square.x % 2u == square.y % 2u;
+}
+
+bool occupied() {
+	
+	return board_state[index] != EMPTY;
+}
+
+bool player() {
+	
+	return square == player_square;
+}
+
+bool be_white() {
+	
+	if(player()) {
+		
+		return !white_square();
+	} else if(occupied()) {
+		
+		return !white_square();
+	} else {
+	
+		return white_square();
+	}
 }
 
 void fragment() {
-	COLOR = vec4(1.0) * vec4(float(axis_parity(UV.x) == axis_parity(UV.y)));
+
+	square = uvec2(uint(UV.x * float(board_size.x)), uint(UV.y * float(board_size.y)));
+	index = square.y * (board_size.x + 1u) + square.x;
+	COLOR = vec4(float(be_white()));
 }
 
 //void light() {
