@@ -223,6 +223,12 @@ void init_captures(Captures captures) {
 	captures[CAPTURE_LENGTH - 1] = '\0';
 }
 
+Bool is_piece(const Piece piece)
+{
+	const Piece p = piece - ('a' - 'A') * (piece > 'R');
+	return p == WHITE_PAWN || p == WHITE_KING || p == WHITE_QUEEN || p == WHITE_BISHOP || p == WHITE_KNIGHT || p == WHITE_ROOK;
+}
+
 void init_board(Board board) {
 
 	memset(board, '\n', BOARD_LENGTH * sizeof(char));

@@ -94,7 +94,7 @@ struct Game {
 #define ON_BOARD(__game__, __index__) (IN_BOUNDS(__index__, 0, BOARD_LENGTH) && __game__->board[__index__] != '\n' && __game__->board[__index__])
 #define CAN_CAPTURE(__game__, __index__) (\
 	ON_BOARD(__game__, __index__) &&\
-	IS_PIECE(GET_SQUARE(__game__->board, __index__)) &&\
+	is_piece(GET_SQUARE(__game__->board, __index__)) &&\
 	IS_WHITE(GET_SQUARE(__game__->board, __index__)) != IS_WHITE(__game__->player) \
 )
 #define TALLY_COLORS(__game__, __piece__, __count__) (\
@@ -723,7 +723,12 @@ const Piece deck(const struct Game* game, const Index grade, const Index increme
 
 const Set figure(const Piece piece, const enum Layer layer, const Index index)
 {
-	return FIGURES[PIECE_MAP[piece]][layer][index] ^ (IS_WHITE(piece) * 0xffffffff);
+	if (is_piece(piece) && layer >= 0 && layer < LAYERS_DEEP && index < FIGURE_HEIGHT) {
+
+		return FIGURES[PIECE_MAP[piece]][layer][index];
+	}
+
+	return 0;
 }
 
 Piece next_piece(const struct Game* game) {

@@ -83,23 +83,6 @@ static const char DECKS[GRADES][INCREMENTS + 1] = STANDARD_DECKS;
 extern const Count PIECE_VALUES[SQUARE_COUNT];
 #define PIECE_VALUE(P) (PIECE_VALUES[PIECE_MAP[P]])
 
-#define PIECE_BIT(P) (((Set)1u) << ((Set) (P - 'B')))
-
-static const Set PIECE_SET =
-PIECE_BIT(WHITE_PAWN) |
-PIECE_BIT(BLACK_PAWN) |
-PIECE_BIT(WHITE_BISHOP) |
-PIECE_BIT(BLACK_BISHOP) |
-PIECE_BIT(WHITE_ROOK) |
-PIECE_BIT(BLACK_ROOK) |
-PIECE_BIT(WHITE_KNIGHT) |
-PIECE_BIT(BLACK_KNIGHT) |
-PIECE_BIT(WHITE_QUEEN) |
-PIECE_BIT(BLACK_QUEEN) |
-PIECE_BIT(WHITE_KING) |
-PIECE_BIT(BLACK_KING);
-
-#define IS_PIECE(P) (PIECE_SET & PIECE_BIT(P))
-
+Bool is_piece(const Piece piece);
 void init_board(Board);
 void init_captures(Captures);

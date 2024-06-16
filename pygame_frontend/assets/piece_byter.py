@@ -27,10 +27,10 @@ for file in files:
         ret = ''
         start = 0
         while start < 256:
-            ret += '  ' if start % 64 else '0b'
+            ret += '' if start % 64 else '0b'
             ret += bits[start : start + 16]
             start += 16
-            ret += '\\\n' if start % 64 else ',\n'
+            ret += '' if start % 64 else ',\n'
         return ret
     out = lineify(raw)
     print(out)

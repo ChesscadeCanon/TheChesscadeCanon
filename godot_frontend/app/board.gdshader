@@ -1,6 +1,9 @@
 shader_type canvas_item;
 
-uniform int board_state[64];
+uniform vec4 pixel_map[128];
+uniform vec4 mask_map[128];
+uniform int board_state[72];
+uniform ivec2 player_square;
 
 void vertex() {
 	// Called for every vertex the material is visible on.

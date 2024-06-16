@@ -199,7 +199,11 @@ void godot::ChesscadeAdapter::_clear() {
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_figure(GodotPiece piece, GodotInt layer, GodotInt index) {
 
-	return figure(piece[0], layer, index);
+	if (piece.length() != 1) {
+		return 0;
+	}
+
+	return figure(static_cast<Piece>(piece[0]), static_cast<enum Layer>(layer), static_cast<Index>(index));
 }
 
 void godot::ChesscadeAdapter::_ready() {

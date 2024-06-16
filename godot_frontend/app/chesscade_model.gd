@@ -6,5 +6,5 @@ func debug_board()->void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pump_game(delta)
-	debug_board()
+
 	
