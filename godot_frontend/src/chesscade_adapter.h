@@ -11,7 +11,7 @@ namespace godot {
 	class ChesscadeAdapter : public Node {
 		GDCLASS(ChesscadeAdapter, Node)
 
-		typedef godot::StringName GodotPiece;
+		typedef StringName GodotPiece;
 		typedef int64_t GodotInt;
 
 	private:

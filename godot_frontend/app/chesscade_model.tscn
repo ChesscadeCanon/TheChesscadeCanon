@@ -1,7 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://cgbsttetwj2oq"]
-
-[ext_resource type="Script" path="res://chesscade_model.gd" id="1_lwahr"]
-
-[node name="ChesscadeModel" type="ChesscadeAdapter"]
-process_mode = 4
-script = ExtResource("1_lwahr")

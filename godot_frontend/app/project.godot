@@ -17,18 +17,14 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-ChesscadeModel="*res://chesscade_model.tscn"
+ChesscadeModel="*res://chesscade_adapter.tscn"
 
 [display]
 
-window/size/viewport_width=284
+window/size/viewport_width=288
 window/size/viewport_height=512
-window/stretch/mode="viewport"
-window/stretch/aspect="keep_width"
-window/handheld/orientation=1
 
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-environment/defaults/default_clear_color=Color(0, 0, 0, 1)

@@ -200,6 +200,7 @@ void godot::ChesscadeAdapter::_clear() {
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_figure(GodotPiece piece, GodotInt layer, GodotInt index) {
 
 	if (piece.length() != 1) {
+
 		return 0;
 	}
 
