@@ -6,13 +6,13 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_lpuk7"]
 shader = ExtResource("1_aqoxi")
 shader_parameter/board_size = null
-shader_parameter/sprite_map = null
-shader_parameter/mask_map = null
 shader_parameter/board_state = null
 shader_parameter/player_square = null
 shader_parameter/player = null
+shader_parameter/piece_map = Array[Texture2D]([])
 
 [node name="Board" type="Panel"]
+texture_filter = 1
 material = SubResource("ShaderMaterial_lpuk7")
 offset_right = 40.0
 offset_bottom = 40.0

@@ -3,22 +3,10 @@ extends Panel
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	var board_size :Vector2i= ChesscadeModel.get_board_size()
-	var sprite_map :Array[Vector4i]= []
-	var mask_map :Array[Vector4i]= []
-	for code in 128:
-		var piece := char(code)
-		var sprite_vector := Vector4i(0, 0, 0, 0)
-		var mask_vector := Vector4i(0, 0, 0, 0)
-		for word in 4:
-			var sprite :int= ChesscadeModel.get_figure(piece, 0, word)
-			sprite_vector[word] = sprite
-			var mask :int= ChesscadeModel.get_figure(piece, 1, word)
-			mask_vector[word] = mask
-		sprite_map.append(sprite_vector)
-		mask_map.append(mask_vector)
 	material.set_shader_parameter("board_size", board_size)
-	material.set_shader_parameter("sprite_map", sprite_map)
-	material.set_shader_parameter("mask_map", mask_map)
+	var sprite_map := ChesscadeModel.PIECE_MAP
+	material.set_shader_parameter("piece_map", sprite_map)
+	material.set_shader_parameter("pawn", ChesscadeModel.PAWN)
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta)->void:
