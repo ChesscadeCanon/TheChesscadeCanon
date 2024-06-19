@@ -7,4 +7,5 @@
 script = ExtResource("1_taslj")
 
 [node name="Board" parent="." instance=ExtResource("2_eslwh")]
-custom_minimum_size = Vector2(256, 256)
+custom_minimum_size = Vector2(128, 128)
+scale = Vector2(2, 2)

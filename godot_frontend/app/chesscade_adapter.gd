@@ -6,28 +6,21 @@ const BISHOP := preload("res://bb.png")
 const KNIGHT := preload("res://bn.png")
 const ROOK := preload("res://br.png")
 const PAWN := preload("res://bp.png")
-var PIECE_MAP :Array[Texture2D] = []
+var PIECE_MAP := {}
 
 func debug_board()->void:
 	print(get_board_state())
 
-func ord(s: String)->int:
-	if len(s):
-		return s.to_ascii_buffer()[0]
-	return 0
-
 func _init():
-	PIECE_MAP.resize(128)
-	PIECE_MAP[ord('k')] = KING
-	PIECE_MAP[ord('q')] = QUEEN
-	PIECE_MAP[ord('b')] = BISHOP
-	PIECE_MAP[ord('q')] = KNIGHT
-	PIECE_MAP[ord('r')] = ROOK		
-	PIECE_MAP[ord('p')] = PAWN
+	PIECE_MAP['k'] = KING
+	PIECE_MAP['q'] = QUEEN
+	PIECE_MAP['b'] = BISHOP
+	PIECE_MAP['q'] = KNIGHT
+	PIECE_MAP['r'] = ROOK		
+	PIECE_MAP['p'] = PAWN
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pump_game(delta)
 	debug_board()
 
-	

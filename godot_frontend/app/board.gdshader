@@ -5,10 +5,10 @@ const uint SQUARE_LENGTH = 16u;
 const uint FIGURE_HEIGHT = 4u;
 
 uniform uvec2 board_size;
-uniform sampler2D piece_map[128];
 uniform int board_state[72];
 uniform uvec2 player_square;
 uniform int player;
+uniform sampler2DArray piece_map;
 uniform sampler2D bishop;
 uniform sampler2D king;
 uniform sampler2D knight;
@@ -22,12 +22,11 @@ const int PAWN = 80;
 const int QUEEN = 81;
 const int ROOK = 82;
 
-
 void vertex() {
 	// Called for every vertex the material is visible on.
 }
 
-vec4 piece_color(vec2 uv, int piece) {
+vec4 piece_color(const sampler2D piece_map[128], const vec2 uv, const int piece) {
 	
 	vec4 ret = texture(piece_map[piece], uv * vec2(board_size));
 	return ret;
