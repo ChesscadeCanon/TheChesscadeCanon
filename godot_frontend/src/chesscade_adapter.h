@@ -114,12 +114,12 @@ namespace godot {
 		* returns an integer vector denoting the rank and file of the board where the
 		* falling piece currently is
 		*/
-		godot::Vector2i get_player_square() const;
+		Vector2i get_player_square() const;
 
 		/**
 		* returns the height of the board
 		*/
-		godot::Vector2i get_board_size() const;
+		Vector2i get_board_size() const;
 
 		/**
 		* returns the full text of the rules of Chesscade
