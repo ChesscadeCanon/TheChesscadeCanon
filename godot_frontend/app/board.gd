@@ -29,7 +29,7 @@ func _draw_player()->void:
 	var player_square :Vector2i= ChesscadeModel.get_player_square()
 	var player_string :StringName= ChesscadeModel.get_player()
 	var white := player_string.to_upper() == player_string
-	var dir :=ChesscadeModel.BOARD_PIECES_DIR
+	var dir := ChesscadeModel.PLAYER_PIECES_DIR
 	_draw_piece_on_square(dir, white, player_string, player_square)
 
 func _draw_forecast()->void:
