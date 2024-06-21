@@ -56,6 +56,11 @@ namespace godot {
 		GodotInt attack_pattern() const;
 
 		/**
+		* return a bitset denoting what pieces would be captured by the current piece if it dropped
+		*/
+		GodotInt forecast_captures() const;
+
+		/**
 		* returns the number of consecutive captures
 		*/
 		GodotInt get_combo() const;

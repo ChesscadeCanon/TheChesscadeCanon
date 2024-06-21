@@ -8,7 +8,7 @@ const NEXT_PIECES_DIR :StringName= "orange_pieces"
 const THREATENED_PIECES_DIR :StringName= "red_pieces"
 const SHADOW_PIECES_DIR :StringName= "shadow_pieces"
 const PLAYER_PIECES_DIR :StringName= "purple_pieces"
-const ARROW_PNG :StringName= "play.png"
+const ARROW_TEXTURE := preload("res://assets/play.png")
 
 var _piece_textures := {}
 

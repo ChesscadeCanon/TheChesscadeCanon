@@ -36,6 +36,11 @@ godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::attack_pattern() cons
 	return static_cast<GodotInt>(attack(game, false, false, True));
 }
 
+godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::forecast_captures() const
+{
+	return static_cast<GodotInt>(attack(game, false, True, false));
+}
+
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_combo() const {
 
 	return static_cast<GodotInt>(current_combo(game));
@@ -234,6 +239,7 @@ void godot::ChesscadeAdapter::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("input_toggle_pause"), &input_toggle_pause);
 	ClassDB::bind_method(D_METHOD("get_player"), &get_player);
 	ClassDB::bind_method(D_METHOD("attack_pattern"), &attack_pattern);
+	ClassDB::bind_method(D_METHOD("forecast_captures"), &forecast_captures);
 	ClassDB::bind_method(D_METHOD("get_forecast_rank"), &get_forecast_rank);
 	ClassDB::bind_method(D_METHOD("get_move_rate"), &get_move_rate);
 	ClassDB::bind_method(D_METHOD("get_player_square"), &get_player_square);
@@ -250,6 +256,7 @@ void godot::ChesscadeAdapter::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_game_over"), &is_game_over);
 	ClassDB::bind_method(D_METHOD("is_on_brink"), &is_on_brink);
 	ClassDB::bind_method(D_METHOD("is_paused"), &is_paused);
+	ClassDB::bind_method(D_METHOD("is_repeat"), &is_repeat);
 	ClassDB::bind_method(D_METHOD("get_figure", "piece", "layer", "index"), &get_figure);
 }
 

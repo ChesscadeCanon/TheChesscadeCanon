@@ -5,15 +5,23 @@ func _draw_piece_on_square(dir:StringName, white: bool, piece: StringName, squar
 	draw_texture(texture, square * ChesscadeModel.SQUARE_LENGTH)
 
 func _draw_landed_pieces()->void:
+	var threats :int= ChesscadeModel.forecast_captures()
 	var board_size :Vector2i= ChesscadeModel.get_board_size()
 	var board_state_string :String= ChesscadeModel.get_board_state()
 	var board_state_array :PackedByteArray= board_state_string.to_ascii_buffer()
 	var index := 0
 	for p in board_state_string:
-		var square = Vector2i(index % (board_size.x + 1), index / (board_size.x + 1))
+		var rank := index / (board_size.x + 1)
+		var file := index % (board_size.x + 1)
+		var square = Vector2i(file, rank)
+		var bit := ChesscadeModel.get_square_bit(square)
 		if p.to_lower() in ChesscadeModel.PIECE_NAMES:
 			var white := p.to_upper() == p
-			var dir :=ChesscadeModel.BOARD_PIECES_DIR
+			var dir: StringName
+			if threats & bit:
+				dir = ChesscadeModel.THREATENED_PIECES_DIR
+			else:
+				dir = ChesscadeModel.BOARD_PIECES_DIR
 			_draw_piece_on_square(dir, white, p, square)
 		index += 1
 
@@ -33,23 +41,54 @@ func _draw_forecast()->void:
 	var dir := ChesscadeModel.SHADOW_PIECES_DIR
 	_draw_piece_on_square(dir, white, player_string, square)
 
+func _draw_cursor()->void:
+	var sl := ChesscadeModel.SQUARE_LENGTH
+	var cursor_direction :int= ChesscadeModel.get_cursor_direction()
+	var cursor_rank :int= ChesscadeModel.get_spawn_rank()
+	var cursor_increment :int= ChesscadeModel.get_cursor_increment()
+	var square := Vector2i(cursor_increment, cursor_rank) * sl
+	var src := Rect2(Vector2.ZERO, Vector2.ONE * sl)
+	var dest := Rect2(square, Vector2.ONE * cursor_direction * sl)
+	var texture := ChesscadeModel.ARROW_TEXTURE
+	draw_texture_rect_region(texture, dest, src, Color.WHITE)
+	
 func _draw_board()->void:
+	var white := Color.WHITE
+	var black := Color.BLACK
+	
+	if ChesscadeModel.is_on_brink():
+		white = Color.ORANGE
+		black = Color.ORANGE_RED
+	elif ChesscadeModel.is_repeat():
+		white = Color.AQUA
+		black = Color.DARK_BLUE
+		
+	var pattern_white := Color.DARK_SALMON
+	var pattern_black := Color.DARK_RED
+	
+	var attack_pattern :int= ChesscadeModel.attack_pattern()
+	
 	var board_size :Vector2i= ChesscadeModel.get_board_size()
 	var sl := ChesscadeModel.SQUARE_LENGTH
 	var rect := Rect2(Vector2.ZERO, Vector2(sl, sl))
 	for r in board_size.y:
 		for f in board_size.x:
-			rect.position = Vector2(r, f) * sl
-			var white := r % 2 == f % 2
-			var color := Color.WHITE if white else Color.BLACK
-			draw_rect(rect, color)
+			var bit := ChesscadeModel.get_square_bit(Vector2i(f, r))
+			var attacked :bool= attack_pattern & bit
+			var is_white := r % 2 == f % 2
+			var color := white if is_white else black
+			var pattern_color := pattern_white if is_white else pattern_black
+			var final_color := pattern_color if attacked else color
+			rect.position = Vector2(f, r) * sl
+			draw_rect(rect, final_color)
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _draw()->void:
 	_draw_board()
-	_draw_player()
-	_draw_landed_pieces()
 	_draw_forecast()
+	_draw_cursor()
+	_draw_landed_pieces()
+	_draw_player()
 
 func _process(delta)->void:
 	queue_redraw()
