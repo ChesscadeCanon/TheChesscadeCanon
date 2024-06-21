@@ -44,7 +44,7 @@ godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::attack_pattern() cons
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_grades() const
 {
 	return GRADES;
-}))
+}
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_combo() const {
 
