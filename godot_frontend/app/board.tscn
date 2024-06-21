@@ -1,9 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://cnfruyrwunqhf"]
+[gd_scene load_steps=3 format=3 uid="uid://cnfruyrwunqhf"]
 
 [ext_resource type="Script" path="res://board.gd" id="2_bfxwn"]
 
-[node name="Board" type="Panel"]
-texture_filter = 1
-offset_right = 40.0
-offset_bottom = 40.0
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_bihco"]
+size = Vector2(128, 128)
+
+[node name="Board" type="Sprite2D"]
+texture = SubResource("PlaceholderTexture2D_bihco")
+centered = false
 script = ExtResource("2_bfxwn")

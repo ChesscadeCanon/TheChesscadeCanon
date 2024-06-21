@@ -26,6 +26,7 @@ init_notes()
 RULES = ''.join([chr(b) for b in engine.get_rules()])
 RANKS = engine.get_ranks()
 FILES = engine.get_files()
+GRADES = engine.get_grades()
 SIZE = (FILES + style.SQUARES_OFF_LEFT) * style.SQUARE, (RANKS + style.SQUARES_OFF_TOP) * style.SQUARE
 
 screen = pygame.display.set_mode(SIZE)
@@ -90,7 +91,7 @@ def draw_next(game):
     cursor_grade = engine.get_cursor_grade(game)
     cursor_increment = engine.get_cursor_increment(game)
     next_piece = engine.get_next_piece(game).decode('ascii')
-    for g in range(style.SQUARES_OFF_TOP):
+    for g in range(GRADES):
         for i in range(FILES):
             piece = engine.get_deck_piece(game, g, i).decode('ascii')
             draw_piece_on_deck(deck_pieces, piece, g, i)

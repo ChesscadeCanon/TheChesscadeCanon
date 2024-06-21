@@ -64,6 +64,11 @@ Index get_ranks() {
 	return RANKS;
 }
 
+unsigned short get_grades()
+{
+	return GRADES;
+}
+
 Index get_files() {
 
 	return FILES;

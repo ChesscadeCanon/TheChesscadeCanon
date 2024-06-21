@@ -66,6 +66,11 @@ namespace godot {
 		GodotInt get_combo() const;
 
 		/**
+		* returns the height of the deck
+		*/
+		GodotInt get_grades() const;
+
+		/**
 		* returns -1 if the cursor is going left or 1 if it's going right
 		*/
 		GodotInt get_cursor_direction() const;

@@ -53,6 +53,7 @@ def Engine():
     ret.get_events.restype = ctypes.c_int
     
     ret.get_files.restype = ctypes.c_ushort
+    ret.get_grades.restype = ctypes.c_ushort
     
     ret.forecast_captures.argtypes = [ctypes.POINTER(Game)]
     ret.forecast_captures.restype = ctypes.c_ulonglong

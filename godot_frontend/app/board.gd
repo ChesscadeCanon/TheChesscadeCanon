@@ -1,4 +1,4 @@
-extends Panel
+extends Sprite2D
 
 func _draw_piece_on_square(dir:StringName, white: bool, piece: StringName, square: Vector2i):
 	var texture := ChesscadeModel.piece(dir, white, piece)

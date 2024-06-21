@@ -128,6 +128,11 @@ extern "C" {
 	EXPORT unsigned short get_ranks();
 
 	/**
+	* returns the height of the deck
+	*/
+	EXPORT unsigned short get_grades();
+
+	/**
 	* returns the full text of the rules of Chesscade
 	*/
 	EXPORT const char* get_rules();

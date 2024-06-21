@@ -34,12 +34,17 @@ void godot::ChesscadeAdapter::input_toggle_pause() {
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::attack_pattern() const {
 
 	return static_cast<GodotInt>(attack(game, false, false, True));
-}
+}(
 
-godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::forecast_captures() const
+	godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::forecast_captures() const
 {
 	return static_cast<GodotInt>(attack(game, false, True, false));
 }
+
+godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_grades() const
+{
+	return GRADES;
+}))
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_combo() const {
 
