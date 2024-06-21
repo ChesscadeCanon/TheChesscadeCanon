@@ -34,16 +34,16 @@ void godot::ChesscadeAdapter::input_toggle_pause() {
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::attack_pattern() const {
 
 	return static_cast<GodotInt>(attack(game, false, false, True));
-}(
+}
 
-	godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::forecast_captures() const
+godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::forecast_captures() const
 {
 	return static_cast<GodotInt>(attack(game, false, True, false));
 }
 
-godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_grades() const
-{
-	return GRADES;
+godot::Vector2i godot::ChesscadeAdapter::get_deck_size() const {
+
+	return Vector2i(FILES, GRADES);
 }
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_combo() const {
@@ -56,14 +56,11 @@ godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_cursor_direction(
 	return static_cast<GodotInt>(cursor_direction(game));
 }
 
-godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_cursor_grade() const {
+godot::Vector2i godot::ChesscadeAdapter::get_cursor() const {
 
-	return current_cursor_grade(game);
-}
-
-godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_cursor_increment() const {
-
-	return static_cast<GodotInt>(current_cursor_increment(game));
+	const GodotInt grade = static_cast<GodotInt>(current_cursor_grade(game));
+	const GodotInt increment = static_cast<GodotInt>(current_cursor_increment(game));
+	return Vector2i(increment, grade);
 }
 
 godot::ChesscadeAdapter::GodotPiece godot::ChesscadeAdapter::get_deck_piece(godot::Vector2i slot) const {
@@ -234,9 +231,9 @@ void godot::ChesscadeAdapter::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("pump_game", "delta"), &pump_game);
 	ClassDB::bind_method(D_METHOD("reset"), &reset);
 	ClassDB::bind_method(D_METHOD("get_combo"), &get_combo);
+	ClassDB::bind_method(D_METHOD("get_deck_size"), &get_deck_size);
 	ClassDB::bind_method(D_METHOD("get_cursor_direction"), &get_cursor_direction);
-	ClassDB::bind_method(D_METHOD("get_cursor_grade"), &get_cursor_grade);
-	ClassDB::bind_method(D_METHOD("get_cursor_increment"), &get_cursor_increment);
+	ClassDB::bind_method(D_METHOD("get_cursor"), &get_cursor);
 	ClassDB::bind_method(D_METHOD("get_deck_piece", "slot"), &get_deck_piece);
 	ClassDB::bind_method(D_METHOD("get_ease"), &get_ease);
 	ClassDB::bind_method(D_METHOD("get_end_time"), &get_end_time);

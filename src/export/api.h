@@ -43,12 +43,12 @@ extern "C" {
 	EXPORT short get_cursor_direction(const struct Game*);
 
 	/**
-	* returns an unsigned short denoting the rank of the board where the falling piece currently is
+	* returns an unsigned short denoting the grade of the deck where the falling piece currently is
 	*/
 	EXPORT unsigned short get_cursor_grade(const struct Game*);
 
 	/**
-	* returns an unsigned short denoting the file of the board where the falling piece currently is
+	* returns an unsigned short denoting the grade of the deck where the falling piece currently is
 	*/
 	EXPORT unsigned short get_cursor_increment(const struct Game*);
 

@@ -44,9 +44,10 @@ func _draw_forecast()->void:
 func _draw_cursor()->void:
 	var sl := ChesscadeModel.SQUARE_LENGTH
 	var cursor_direction :int= ChesscadeModel.get_cursor_direction()
-	var cursor_rank :int= ChesscadeModel.get_spawn_rank()
-	var cursor_increment :int= ChesscadeModel.get_cursor_increment()
-	var square := Vector2i(cursor_increment, cursor_rank) * sl
+	var spawn_rank :int= ChesscadeModel.get_spawn_rank()
+	var cursor :Vector2i= ChesscadeModel.get_cursor()
+	print(cursor)
+	var square := Vector2i(cursor.x, spawn_rank) * sl
 	var src := Rect2(Vector2.ZERO, Vector2.ONE * sl)
 	var dest := Rect2(square, Vector2.ONE * cursor_direction * sl)
 	var texture := ChesscadeModel.ARROW_TEXTURE

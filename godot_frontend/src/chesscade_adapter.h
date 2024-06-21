@@ -66,9 +66,9 @@ namespace godot {
 		GodotInt get_combo() const;
 
 		/**
-		* returns the height of the deck
+		* returns the size of the deck
 		*/
-		GodotInt get_grades() const;
+		Vector2i get_deck_size() const;
 
 		/**
 		* returns -1 if the cursor is going left or 1 if it's going right
@@ -76,14 +76,9 @@ namespace godot {
 		GodotInt get_cursor_direction() const;
 
 		/**
-		* returns an unsigned short denoting the rank of the board where the falling piece currently is
+		* returns the location of the cursor on the deck
 		*/
-		GodotInt get_cursor_grade() const;
-
-		/**
-		* returns an unsigned short denoting the file of the board where the falling piece currently is
-		*/
-		GodotInt get_cursor_increment() const;
+		Vector2i get_cursor() const;
 
 		/**
 		* gets the piece from the spawn deck at the given grade and increment

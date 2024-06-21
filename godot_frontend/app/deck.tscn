@@ -1,4 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://bdtwaxt26k7np"]
+[gd_scene load_steps=3 format=3 uid="uid://bdtwaxt26k7np"]
+
+[ext_resource type="Script" path="res://deck.gd" id="1_ch85i"]
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_nipak"]
 size = Vector2(128, 64)
@@ -6,3 +8,4 @@ size = Vector2(128, 64)
 [node name="Deck" type="Sprite2D"]
 texture = SubResource("PlaceholderTexture2D_nipak")
 centered = false
+script = ExtResource("1_ch85i")
