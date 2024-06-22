@@ -86,14 +86,19 @@ namespace godot {
 		GodotPiece get_deck_piece(godot::Vector2i) const;
 
 		/**
-		* returns the number of milliseconds it currently takes for the piece to fall
+		* returns the number of seconds it currently takes for the piece to fall
 		*/
-		GodotInt get_ease() const;
+		double get_ease() const;
 
 		/**
-		* returns the time when a finished game ended, or -1 if the game is still going
+		* returns the time in seconds when a finished game ended, or -1 if the game is still going
 		*/
-		GodotInt get_end_time() const;
+		double get_end_time() const;
+
+		/**
+		* returns the time in seconds for which the game has been going
+		*/
+		double get_time() const;
 
 		/**
 		* returns a bitset denoting what events took place in the last frame

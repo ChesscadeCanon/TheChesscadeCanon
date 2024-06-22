@@ -20,9 +20,8 @@ downward. If a white pawn lands on rank 8 or a black pawn lands on rank\n\
 1, it promotes to a queen before capturing. The points scored when a\n\
 piece lands are equal to:\n\
 \n\
-[total value of pieces captured]\n\
-+ [number of pieces on the board sharing a color with the landing piece]\n\
-x ([number of pieces captured] + [rank where piece landed])\n\
+([total value of pieces captured] + [pieces same color as landed piece])\n\
+x ([number of pieces captured] + [rank piece landed, inverse if white])\n\
 \n\
 Piece values: pawn=1 knight=3 bishop=3 rook=5 queen=9 king=0\n\
 ";

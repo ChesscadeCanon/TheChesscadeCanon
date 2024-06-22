@@ -245,7 +245,9 @@ void _checkmate(struct Game* game) {
 
 void _judge(struct Game* game) {
 
-	game->scored = IS_WHITE(game->player) ? game->white_pieces : game->black_pieces;
+	const Bool white = IS_WHITE(game->player);
+	const Count gain = white ? 1 + game->player_rank : RANKS - game->player_rank;
+	game->scored = white ? game->white_pieces : game->black_pieces;
 	Count count = 0;
 
 	for (Index i = 0; i < FILES; ++i) {
@@ -260,7 +262,7 @@ void _judge(struct Game* game) {
 	}
 
 	count ? ++game->combo : (game->combo = 0);
-	game->scored *= (RANKS - game->player_rank) + count;
+	game->scored *= gain + count;
 	game->score += game->scored;
 }
 

@@ -70,14 +70,22 @@ godot::ChesscadeAdapter::GodotPiece godot::ChesscadeAdapter::get_deck_piece(godo
 	return GodotPiece(ret);
 }
 
-godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_ease() const {
+double godot::ChesscadeAdapter::get_ease() const {
 
-	return static_cast<GodotInt>(ease(game));
+	const long double ret = static_cast<long double>(ease(game)) / 1000.0;
+	return ret;
 }
 
-godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_end_time() const {
+double godot::ChesscadeAdapter::get_end_time() const {
 
-	return static_cast<GodotInt>(ended(game));
+	const long double ret = static_cast<long double>(ended(game)) / 1000.0;
+	return ret;
+}
+
+double godot::ChesscadeAdapter::get_time() const
+{
+	const long double ret = static_cast<long double>(milliseconds(game)) / 1000.0;
+	return ret;
 }
 
 godot::ChesscadeAdapter::GodotInt godot::ChesscadeAdapter::get_events() const {
@@ -237,6 +245,7 @@ void godot::ChesscadeAdapter::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_deck_piece", "slot"), &get_deck_piece);
 	ClassDB::bind_method(D_METHOD("get_ease"), &get_ease);
 	ClassDB::bind_method(D_METHOD("get_end_time"), &get_end_time);
+	ClassDB::bind_method(D_METHOD("get_time"), &get_time);
 	ClassDB::bind_method(D_METHOD("get_events"), &get_events);
 	ClassDB::bind_method(D_METHOD("input_toggle_pause"), &input_toggle_pause);
 	ClassDB::bind_method(D_METHOD("get_player"), &get_player);

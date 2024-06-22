@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://bkn0wt0806u57"]
+[gd_scene load_steps=5 format=3 uid="uid://bkn0wt0806u57"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_taslj"]
+[ext_resource type="PackedScene" uid="uid://d25gmn3o5jty1" path="res://readout.tscn" id="2_27owu"]
 [ext_resource type="PackedScene" uid="uid://cnfruyrwunqhf" path="res://board.tscn" id="2_eslwh"]
 [ext_resource type="PackedScene" uid="uid://bdtwaxt26k7np" path="res://deck.tscn" id="2_q7use"]
 
@@ -10,11 +11,17 @@ offset_right = 288.0
 offset_bottom = 512.0
 script = ExtResource("1_taslj")
 
+[node name="ReadoutCenter" type="CenterContainer" parent="."]
+layout_mode = 2
+
+[node name="Readout" parent="ReadoutCenter" instance=ExtResource("2_27owu")]
+layout_mode = 2
+
 [node name="BoardCenter" type="CenterContainer" parent="."]
 layout_mode = 2
 
 [node name="BoardAspectRatio" type="AspectRatioContainer" parent="BoardCenter"]
-custom_minimum_size = Vector2(256, 256)
+custom_minimum_size = Vector2(256, 128)
 layout_mode = 2
 
 [node name="Deck" parent="BoardCenter/BoardAspectRatio" instance=ExtResource("2_q7use")]

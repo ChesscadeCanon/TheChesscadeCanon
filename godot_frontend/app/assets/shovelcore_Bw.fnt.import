@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://c4hpv5ss4tmdw"
+path="res://.godot/imported/shovelcore_Bw.fnt-8575c945d7c49ad5b4013feb04d52d5e.fontdata"
+
+[deps]
+
+source_file="res://assets/shovelcore_Bw.fnt"
+dest_files=["res://.godot/imported/shovelcore_Bw.fnt-8575c945d7c49ad5b4013feb04d52d5e.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2
