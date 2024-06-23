@@ -4,7 +4,7 @@ NEXT_PIECES_DIR = "assets/orange_pieces/"
 THREATENED_PIECES_DIR = "assets/red_pieces/"
 SHADOW_PIECES_DIR = "assets/shadow_pieces/"
 PLAYER_PIECES_DIR = "assets/purple_pieces/"
-ARROW_PNG = "assets/play.png"
+ARROW_PNG = "assets/cursor.png"
 
 BLACK = ( 0, 0, 0)
 WHITE = ( 255, 255, 255)

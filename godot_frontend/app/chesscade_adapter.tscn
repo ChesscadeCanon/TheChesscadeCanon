@@ -3,4 +3,5 @@
 [ext_resource type="Script" path="res://chesscade_adapter.gd" id="1_uyfh4"]
 
 [node name="ChesscadeAdapter" type="ChesscadeAdapter"]
+process_mode = 4
 script = ExtResource("1_uyfh4")

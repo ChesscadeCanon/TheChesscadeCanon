@@ -1,10 +1,13 @@
-[gd_scene load_steps=8 format=3 uid="uid://bkn0wt0806u57"]
+[gd_scene load_steps=15 format=3 uid="uid://bkn0wt0806u57"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_taslj"]
+[ext_resource type="Texture2D" uid="uid://eigh76doii2n" path="res://assets/play_selected.png" id="2_6q7pj"]
+[ext_resource type="Texture2D" uid="uid://b4ydvl353lxtq" path="res://assets/play.png" id="2_ekr4k"]
 [ext_resource type="PackedScene" uid="uid://cnfruyrwunqhf" path="res://board.tscn" id="2_eslwh"]
 [ext_resource type="PackedScene" uid="uid://kh75d13osrp8" path="res://meter.tscn" id="2_f0ox0"]
 [ext_resource type="PackedScene" uid="uid://bdtwaxt26k7np" path="res://deck.tscn" id="2_q7use"]
 [ext_resource type="FontFile" uid="uid://ducokb7ubk2eh" path="res://assets/ledfont-sharp-Regular.otf" id="3_oql5u"]
+[ext_resource type="Texture2D" uid="uid://dd443vmnejhx8" path="res://assets/shovelcore_Bw.png" id="6_t4lbj"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_anqkw"]
 font = ExtResource("3_oql5u")
@@ -18,31 +21,91 @@ font_size = 18
 font_color = Color(0, 1, 0, 1)
 shadow_color = Color(0, 1, 1, 1)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_v2mh0"]
+atlas = ExtResource("6_t4lbj")
+region = Rect2(176, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0qej4"]
+atlas = ExtResource("6_t4lbj")
+region = Rect2(160, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w6r5a"]
+atlas = ExtResource("6_t4lbj")
+region = Rect2(144, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_otg2k"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v2mh0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0qej4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w6r5a")
+}],
+"loop": false,
+"name": &"default",
+"speed": 1.0
+}]
+
 [node name="Main" type="VBoxContainer"]
 texture_filter = 1
 offset_right = 360.0
 offset_bottom = 640.0
 script = ExtResource("1_taslj")
 
+[node name="ButtonCenter" type="CenterContainer" parent="."]
+layout_mode = 2
+
+[node name="ButtonHBox" type="HBoxContainer" parent="ButtonCenter"]
+layout_mode = 2
+
+[node name="BackButton" type="TextureButton" parent="ButtonCenter/ButtonHBox"]
+layout_mode = 2
+texture_normal = ExtResource("2_6q7pj")
+flip_h = true
+
+[node name="Time" parent="ButtonCenter/ButtonHBox" instance=ExtResource("2_f0ox0")]
+layout_mode = 2
+title = "Time"
+readout_label_settings = SubResource("LabelSettings_anqkw")
+
+[node name="Score" parent="ButtonCenter/ButtonHBox" instance=ExtResource("2_f0ox0")]
+layout_mode = 2
+title = "Score"
+readout_label_settings = SubResource("LabelSettings_yj72o")
+
+[node name="PlayPauseButton" type="TextureButton" parent="ButtonCenter/ButtonHBox"]
+layout_mode = 2
+texture_normal = ExtResource("2_ekr4k")
+
 [node name="DeckCenter" type="CenterContainer" parent="."]
 layout_mode = 2
 
 [node name="DeckAspectRatio" type="AspectRatioContainer" parent="DeckCenter"]
-custom_minimum_size = Vector2(320, 160)
+custom_minimum_size = Vector2(384, 192)
 layout_mode = 2
 
 [node name="Deck" parent="DeckCenter/DeckAspectRatio" instance=ExtResource("2_q7use")]
-scale = Vector2(2.5, 2.5)
+scale = Vector2(3, 3)
 
 [node name="BoardCenter" type="CenterContainer" parent="."]
 layout_mode = 2
 
 [node name="BoardAspectRatio" type="AspectRatioContainer" parent="BoardCenter"]
-custom_minimum_size = Vector2(320, 320)
+custom_minimum_size = Vector2(384, 384)
 layout_mode = 2
 
 [node name="Board" parent="BoardCenter/BoardAspectRatio" instance=ExtResource("2_eslwh")]
-scale = Vector2(2.5, 2.5)
+scale = Vector2(3, 3)
+
+[node name="Countdown" type="AnimatedSprite2D" parent="BoardCenter/BoardAspectRatio"]
+visible = false
+position = Vector2(160, 160)
+scale = Vector2(20, 20)
+sprite_frames = SubResource("SpriteFrames_otg2k")
 
 [node name="ReadoutCenter" type="CenterContainer" parent="."]
 layout_mode = 2
@@ -50,12 +113,6 @@ layout_mode = 2
 [node name="ReadoutHBox" type="HBoxContainer" parent="ReadoutCenter"]
 layout_mode = 2
 
-[node name="Time" parent="ReadoutCenter/ReadoutHBox" instance=ExtResource("2_f0ox0")]
-layout_mode = 2
-title = "Time"
-readout_label_settings = SubResource("LabelSettings_anqkw")
-
-[node name="Score" parent="ReadoutCenter/ReadoutHBox" instance=ExtResource("2_f0ox0")]
-layout_mode = 2
-title = "Score"
-readout_label_settings = SubResource("LabelSettings_yj72o")
+[connection signal="state_changed" from="." to="." method="_on_state_changed"]
+[connection signal="pressed" from="ButtonCenter/ButtonHBox/PlayPauseButton" to="." method="_on_play_pause_button_pressed"]
+[connection signal="animation_finished" from="BoardCenter/BoardAspectRatio/Countdown" to="." method="_on_countdown_animation_finished"]

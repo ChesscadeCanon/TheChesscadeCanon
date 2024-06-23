@@ -8,9 +8,20 @@ const NEXT_PIECES_DIR :StringName= "orange_pieces"
 const THREATENED_PIECES_DIR :StringName= "red_pieces"
 const SHADOW_PIECES_DIR :StringName= "shadow_pieces"
 const PLAYER_PIECES_DIR :StringName= "purple_pieces"
-const ARROW_TEXTURE := preload("res://assets/play.png")
+const ARROW_TEXTURE := preload("res://assets/cursor.png")
 
 var _piece_textures := {}
+
+func is_live()->bool:
+	return not is_paused() and get_time() != 0.0
+
+func pause()->void:
+	if not is_paused():
+		input_toggle_pause()
+		
+func unpause()->void:
+	if is_paused():
+		input_toggle_pause()
 
 func piece(dir:StringName, white: bool, piece: StringName)->Texture2D:
 	var color := 'w' if white else 'b'

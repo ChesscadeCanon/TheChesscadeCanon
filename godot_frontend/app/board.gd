@@ -46,7 +46,6 @@ func _draw_cursor()->void:
 	var cursor_direction :int= ChesscadeModel.get_cursor_direction()
 	var spawn_rank :int= ChesscadeModel.get_spawn_rank()
 	var cursor :Vector2i= ChesscadeModel.get_cursor()
-	print(cursor)
 	var square := Vector2i(cursor.x, spawn_rank) * sl
 	var src := Rect2(Vector2.ZERO, Vector2.ONE * sl)
 	var dest := Rect2(square, Vector2.ONE * cursor_direction * sl)
@@ -56,8 +55,12 @@ func _draw_cursor()->void:
 func _draw_board()->void:
 	var white := Color.WHITE
 	var black := Color.BLACK
+	var live := ChesscadeModel.is_live()
 	
-	if ChesscadeModel.is_on_brink():
+	if not live:
+		white = Color.LIGHT_GRAY
+		black = Color.DARK_GRAY
+	elif ChesscadeModel.is_on_brink():
 		white = Color.ORANGE
 		black = Color.ORANGE_RED
 	elif ChesscadeModel.is_repeat():
@@ -79,17 +82,18 @@ func _draw_board()->void:
 			var is_white := r % 2 == f % 2
 			var color := white if is_white else black
 			var pattern_color := pattern_white if is_white else pattern_black
-			var final_color := pattern_color if attacked else color
+			var final_color := pattern_color if attacked and live else color
 			rect.position = Vector2(f, r) * sl
 			draw_rect(rect, final_color)
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _draw()->void:
 	_draw_board()
-	_draw_forecast()
-	_draw_cursor()
-	_draw_landed_pieces()
-	_draw_player()
+	if ChesscadeModel.is_live():
+		_draw_forecast()
+		_draw_cursor()
+		_draw_landed_pieces()
+		_draw_player()
 
 func _process(delta)->void:
 	queue_redraw()
