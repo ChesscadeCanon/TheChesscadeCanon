@@ -5,6 +5,8 @@ extends VBoxContainer
 func _ready():
 	ChesscadeModel.begin_game()
 	ChesscadeModel.process_mode = Node.PROCESS_MODE_INHERIT
+	$ReadoutCenter/ReadoutHBox/Time.show_time()
+	$ReadoutCenter/ReadoutHBox/Score.show_score()
 
 func _process(delta)->void:
 	var left := Input.is_action_pressed("ui_left")
@@ -14,3 +16,5 @@ func _process(delta)->void:
 	ChesscadeModel.input_digital_move(left, right, down)
 	if drop:
 		ChesscadeModel.input_drop()
+	$ReadoutCenter/ReadoutHBox/Time.show_time()
+	$ReadoutCenter/ReadoutHBox/Score.show_score()

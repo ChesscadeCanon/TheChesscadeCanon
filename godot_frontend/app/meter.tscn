@@ -1,0 +1,64 @@
+[gd_scene load_steps=8 format=3 uid="uid://kh75d13osrp8"]
+
+[ext_resource type="FontFile" uid="uid://c4hpv5ss4tmdw" path="res://assets/shovelcore_Bw.fnt" id="1_exp73"]
+[ext_resource type="Script" path="res://meter.gd" id="1_k1b50"]
+[ext_resource type="FontFile" uid="uid://ducokb7ubk2eh" path="res://assets/ledfont-sharp-Regular.otf" id="2_ts1j8"]
+[ext_resource type="LabelSettings" uid="uid://cpynascr1tfja" path="res://readout_label_settings.tres" id="3_wlp67"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_5tups"]
+font = ExtResource("2_ts1j8")
+font_size = 18
+font_color = Color(1, 1, 0, 1)
+shadow_color = Color(1, 1, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_w1fs7"]
+line_spacing = 1.0
+font = ExtResource("1_exp73")
+font_size = 340
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_68euf"]
+bg_color = Color(0, 0, 0, 1)
+
+[node name="Meter" type="CenterContainer"]
+script = ExtResource("1_k1b50")
+readout_label_settings = SubResource("LabelSettings_5tups")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBoxContainer"]
+texture_filter = 1
+layout_mode = 2
+text = "Title"
+label_settings = SubResource("LabelSettings_w1fs7")
+horizontal_alignment = 1
+
+[node name="ReadoutCenter" type="CenterContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="BackLabel" type="Label" parent="VBoxContainer/ReadoutCenter"]
+clip_contents = true
+custom_minimum_size = Vector2(159, 19)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.121569, 0.121569, 0.121569, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0)
+theme_override_styles/normal = SubResource("StyleBoxFlat_68euf")
+text = "00000000000"
+label_settings = ExtResource("3_wlp67")
+horizontal_alignment = 2
+
+[node name="BackLabel2" type="Label" parent="VBoxContainer/ReadoutCenter"]
+custom_minimum_size = Vector2(159, 19)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.121569, 0.121569, 0.121569, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0)
+text = "+++++++++++"
+label_settings = ExtResource("3_wlp67")
+horizontal_alignment = 2
+
+[node name="ReadoutLabel" type="Label" parent="VBoxContainer/ReadoutCenter"]
+custom_minimum_size = Vector2(159, 19)
+layout_mode = 2
+text = "0"
+label_settings = SubResource("LabelSettings_5tups")
+horizontal_alignment = 2

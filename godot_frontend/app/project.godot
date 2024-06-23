@@ -21,8 +21,8 @@ ChesscadeModel="*res://chesscade_adapter.tscn"
 
 [display]
 
-window/size/viewport_width=288
-window/size/viewport_height=512
+window/size/viewport_width=360
+window/size/viewport_height=640
 
 [rendering]
 

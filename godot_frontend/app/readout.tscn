@@ -1,35 +1,20 @@
-[gd_scene load_steps=12 format=3 uid="uid://d25gmn3o5jty1"]
+[gd_scene load_steps=9 format=3 uid="uid://d25gmn3o5jty1"]
 
 [ext_resource type="Script" path="res://readout.gd" id="1_g28ca"]
 [ext_resource type="FontFile" uid="uid://c4hpv5ss4tmdw" path="res://assets/shovelcore_Bw.fnt" id="2_77idt"]
+[ext_resource type="PackedScene" uid="uid://kh75d13osrp8" path="res://meter.tscn" id="2_jsyxd"]
 [ext_resource type="FontFile" uid="uid://ducokb7ubk2eh" path="res://assets/ledfont-sharp-Regular.otf" id="2_wm6h2"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_w1fs7"]
+[sub_resource type="LabelSettings" id="LabelSettings_4wtnb"]
 font = ExtResource("2_77idt")
-font_size = 324
+font_size = 316
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_68euf"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2q724"]
 bg_color = Color(0, 0, 0, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_qgg0a"]
-font = ExtResource("2_wm6h2")
-font_color = Color(0.121569, 0.121569, 0.121569, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_y5gwo"]
 font = ExtResource("2_wm6h2")
 font_color = Color(0.121569, 0.121569, 0.121569, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_vlmbg"]
-font = ExtResource("2_wm6h2")
-font_color = Color(1, 0, 0, 1)
-shadow_color = Color(1, 1, 0, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_4wtnb"]
-font = ExtResource("2_77idt")
-font_size = 324
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2q724"]
-bg_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_vsybj"]
 font = ExtResource("2_wm6h2")
@@ -52,39 +37,8 @@ grow_vertical = 2
 alignment = 1
 script = ExtResource("1_g28ca")
 
-[node name="TimeCenter" type="CenterContainer" parent="."]
+[node name="TimeCenter" parent="." instance=ExtResource("2_jsyxd")]
 layout_mode = 2
-
-[node name="TimeVBox" type="VBoxContainer" parent="TimeCenter"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="TimeCenter/TimeVBox"]
-layout_mode = 2
-text = "Time"
-label_settings = SubResource("LabelSettings_w1fs7")
-horizontal_alignment = 1
-
-[node name="ReadoutCenter" type="CenterContainer" parent="TimeCenter/TimeVBox"]
-layout_mode = 2
-
-[node name="BackLabel" type="Label" parent="TimeCenter/TimeVBox/ReadoutCenter"]
-clip_contents = true
-layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_68euf")
-text = "00000000000"
-label_settings = SubResource("LabelSettings_qgg0a")
-
-[node name="BackLabel2" type="Label" parent="TimeCenter/TimeVBox/ReadoutCenter"]
-layout_mode = 2
-text = "+++++++++++"
-label_settings = SubResource("LabelSettings_y5gwo")
-horizontal_alignment = 2
-
-[node name="TimeLabel" type="Label" parent="TimeCenter/TimeVBox/ReadoutCenter"]
-custom_minimum_size = Vector2(141, 19)
-layout_mode = 2
-text = "00:00:00:00"
-label_settings = SubResource("LabelSettings_vlmbg")
 
 [node name="ScoreCenter" type="CenterContainer" parent="."]
 layout_mode = 2

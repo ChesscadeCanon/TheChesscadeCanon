@@ -1,38 +1,61 @@
-[gd_scene load_steps=5 format=3 uid="uid://bkn0wt0806u57"]
+[gd_scene load_steps=8 format=3 uid="uid://bkn0wt0806u57"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_taslj"]
-[ext_resource type="PackedScene" uid="uid://d25gmn3o5jty1" path="res://readout.tscn" id="2_27owu"]
 [ext_resource type="PackedScene" uid="uid://cnfruyrwunqhf" path="res://board.tscn" id="2_eslwh"]
+[ext_resource type="PackedScene" uid="uid://kh75d13osrp8" path="res://meter.tscn" id="2_f0ox0"]
 [ext_resource type="PackedScene" uid="uid://bdtwaxt26k7np" path="res://deck.tscn" id="2_q7use"]
+[ext_resource type="FontFile" uid="uid://ducokb7ubk2eh" path="res://assets/ledfont-sharp-Regular.otf" id="3_oql5u"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_anqkw"]
+font = ExtResource("3_oql5u")
+font_size = 18
+font_color = Color(1, 0, 0, 1)
+shadow_color = Color(1, 1, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_yj72o"]
+font = ExtResource("3_oql5u")
+font_size = 18
+font_color = Color(0, 1, 0, 1)
+shadow_color = Color(0, 1, 1, 1)
 
 [node name="Main" type="VBoxContainer"]
 texture_filter = 1
-offset_right = 288.0
-offset_bottom = 512.0
+offset_right = 360.0
+offset_bottom = 640.0
 script = ExtResource("1_taslj")
-
-[node name="ReadoutCenter" type="CenterContainer" parent="."]
-layout_mode = 2
-
-[node name="Readout" parent="ReadoutCenter" instance=ExtResource("2_27owu")]
-layout_mode = 2
-
-[node name="BoardCenter" type="CenterContainer" parent="."]
-layout_mode = 2
-
-[node name="BoardAspectRatio" type="AspectRatioContainer" parent="BoardCenter"]
-custom_minimum_size = Vector2(256, 128)
-layout_mode = 2
-
-[node name="Deck" parent="BoardCenter/BoardAspectRatio" instance=ExtResource("2_q7use")]
-scale = Vector2(2, 2)
 
 [node name="DeckCenter" type="CenterContainer" parent="."]
 layout_mode = 2
 
 [node name="DeckAspectRatio" type="AspectRatioContainer" parent="DeckCenter"]
-custom_minimum_size = Vector2(256, 256)
+custom_minimum_size = Vector2(320, 160)
 layout_mode = 2
 
-[node name="Board" parent="DeckCenter/DeckAspectRatio" instance=ExtResource("2_eslwh")]
-scale = Vector2(2, 2)
+[node name="Deck" parent="DeckCenter/DeckAspectRatio" instance=ExtResource("2_q7use")]
+scale = Vector2(2.5, 2.5)
+
+[node name="BoardCenter" type="CenterContainer" parent="."]
+layout_mode = 2
+
+[node name="BoardAspectRatio" type="AspectRatioContainer" parent="BoardCenter"]
+custom_minimum_size = Vector2(320, 320)
+layout_mode = 2
+
+[node name="Board" parent="BoardCenter/BoardAspectRatio" instance=ExtResource("2_eslwh")]
+scale = Vector2(2.5, 2.5)
+
+[node name="ReadoutCenter" type="CenterContainer" parent="."]
+layout_mode = 2
+
+[node name="ReadoutHBox" type="HBoxContainer" parent="ReadoutCenter"]
+layout_mode = 2
+
+[node name="Time" parent="ReadoutCenter/ReadoutHBox" instance=ExtResource("2_f0ox0")]
+layout_mode = 2
+title = "Time"
+readout_label_settings = SubResource("LabelSettings_anqkw")
+
+[node name="Score" parent="ReadoutCenter/ReadoutHBox" instance=ExtResource("2_f0ox0")]
+layout_mode = 2
+title = "Score"
+readout_label_settings = SubResource("LabelSettings_yj72o")

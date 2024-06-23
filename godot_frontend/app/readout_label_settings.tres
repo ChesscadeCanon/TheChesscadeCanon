@@ -1,0 +1,8 @@
+[gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://cpynascr1tfja"]
+
+[ext_resource type="FontFile" uid="uid://ducokb7ubk2eh" path="res://assets/ledfont-sharp-Regular.otf" id="1_1gbh6"]
+
+[resource]
+font = ExtResource("1_1gbh6")
+font_size = 18
+font_color = Color(0.121569, 0.121569, 0.121569, 1)
