@@ -9,18 +9,6 @@
 [ext_resource type="FontFile" uid="uid://ducokb7ubk2eh" path="res://assets/ledfont-sharp-Regular.otf" id="3_oql5u"]
 [ext_resource type="Texture2D" uid="uid://dd443vmnejhx8" path="res://assets/shovelcore_Bw.png" id="6_t4lbj"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_anqkw"]
-font = ExtResource("3_oql5u")
-font_size = 18
-font_color = Color(1, 0, 0, 1)
-shadow_color = Color(1, 1, 0, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_yj72o"]
-font = ExtResource("3_oql5u")
-font_size = 18
-font_color = Color(0, 1, 0, 1)
-shadow_color = Color(0, 1, 1, 1)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_v2mh0"]
 atlas = ExtResource("6_t4lbj")
 region = Rect2(176, 0, 16, 16)
@@ -50,6 +38,18 @@ animations = [{
 "speed": 1.0
 }]
 
+[sub_resource type="LabelSettings" id="LabelSettings_anqkw"]
+font = ExtResource("3_oql5u")
+font_size = 18
+font_color = Color(1, 0, 0, 1)
+shadow_color = Color(1, 1, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_yj72o"]
+font = ExtResource("3_oql5u")
+font_size = 18
+font_color = Color(0, 1, 0, 1)
+shadow_color = Color(0, 1, 1, 1)
+
 [node name="Main" type="VBoxContainer"]
 texture_filter = 1
 offset_right = 360.0
@@ -67,16 +67,6 @@ layout_mode = 2
 texture_normal = ExtResource("2_6q7pj")
 flip_h = true
 
-[node name="Time" parent="ButtonCenter/ButtonHBox" instance=ExtResource("2_f0ox0")]
-layout_mode = 2
-title = "Time"
-readout_label_settings = SubResource("LabelSettings_anqkw")
-
-[node name="Score" parent="ButtonCenter/ButtonHBox" instance=ExtResource("2_f0ox0")]
-layout_mode = 2
-title = "Score"
-readout_label_settings = SubResource("LabelSettings_yj72o")
-
 [node name="PlayPauseButton" type="TextureButton" parent="ButtonCenter/ButtonHBox"]
 layout_mode = 2
 texture_normal = ExtResource("2_ekr4k")
@@ -85,21 +75,21 @@ texture_normal = ExtResource("2_ekr4k")
 layout_mode = 2
 
 [node name="DeckAspectRatio" type="AspectRatioContainer" parent="DeckCenter"]
-custom_minimum_size = Vector2(384, 192)
+custom_minimum_size = Vector2(320, 160)
 layout_mode = 2
 
 [node name="Deck" parent="DeckCenter/DeckAspectRatio" instance=ExtResource("2_q7use")]
-scale = Vector2(3, 3)
+scale = Vector2(2.5, 2.5)
 
 [node name="BoardCenter" type="CenterContainer" parent="."]
 layout_mode = 2
 
 [node name="BoardAspectRatio" type="AspectRatioContainer" parent="BoardCenter"]
-custom_minimum_size = Vector2(384, 384)
+custom_minimum_size = Vector2(320, 320)
 layout_mode = 2
 
 [node name="Board" parent="BoardCenter/BoardAspectRatio" instance=ExtResource("2_eslwh")]
-scale = Vector2(3, 3)
+scale = Vector2(0.156, 0.156)
 
 [node name="Countdown" type="AnimatedSprite2D" parent="BoardCenter/BoardAspectRatio"]
 visible = false
@@ -112,6 +102,16 @@ layout_mode = 2
 
 [node name="ReadoutHBox" type="HBoxContainer" parent="ReadoutCenter"]
 layout_mode = 2
+
+[node name="Time" parent="ReadoutCenter/ReadoutHBox" instance=ExtResource("2_f0ox0")]
+layout_mode = 2
+title = "Time"
+readout_label_settings = SubResource("LabelSettings_anqkw")
+
+[node name="Score" parent="ReadoutCenter/ReadoutHBox" instance=ExtResource("2_f0ox0")]
+layout_mode = 2
+title = "Score"
+readout_label_settings = SubResource("LabelSettings_yj72o")
 
 [connection signal="state_changed" from="." to="." method="_on_state_changed"]
 [connection signal="pressed" from="ButtonCenter/ButtonHBox/PlayPauseButton" to="." method="_on_play_pause_button_pressed"]

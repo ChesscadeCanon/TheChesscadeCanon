@@ -20,8 +20,8 @@ var state :State= State.TITLE: set = set_state
 
 @onready var back_button := $ButtonCenter/ButtonHBox/BackButton
 @onready var play_pause_button := $ButtonCenter/ButtonHBox/PlayPauseButton
-@onready var time := $ButtonCenter/ButtonHBox/Time
-@onready var score := $ButtonCenter/ButtonHBox/Score
+@onready var time := $ReadoutCenter/ReadoutHBox/Time
+@onready var score := $ReadoutCenter/ReadoutHBox/Score
 @onready var countdown := $BoardCenter/BoardAspectRatio/Countdown
 
 func set_state(to: State)->void:

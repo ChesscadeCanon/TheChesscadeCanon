@@ -5,7 +5,10 @@
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_bihco"]
 size = Vector2(128, 128)
 
-[node name="Board" type="Sprite2D"]
+[node name="Scaler" type="Node2D"]
+
+[node name="Board" type="Sprite2D" parent="."]
+scale = Vector2(16, 16)
 texture = SubResource("PlaceholderTexture2D_bihco")
 centered = false
 script = ExtResource("2_bfxwn")
