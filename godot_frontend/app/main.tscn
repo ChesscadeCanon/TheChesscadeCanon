@@ -79,7 +79,7 @@ custom_minimum_size = Vector2(320, 160)
 layout_mode = 2
 
 [node name="Deck" parent="DeckCenter/DeckAspectRatio" instance=ExtResource("2_q7use")]
-scale = Vector2(2.5, 2.5)
+scale = Vector2(0.039, 0.039)
 
 [node name="BoardCenter" type="CenterContainer" parent="."]
 layout_mode = 2
@@ -89,7 +89,7 @@ custom_minimum_size = Vector2(320, 320)
 layout_mode = 2
 
 [node name="Board" parent="BoardCenter/BoardAspectRatio" instance=ExtResource("2_eslwh")]
-scale = Vector2(0.156, 0.156)
+scale = Vector2(0.039, 0.039)
 
 [node name="Countdown" type="AnimatedSprite2D" parent="BoardCenter/BoardAspectRatio"]
 visible = false

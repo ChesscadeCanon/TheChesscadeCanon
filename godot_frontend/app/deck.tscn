@@ -5,7 +5,10 @@
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_nipak"]
 size = Vector2(128, 64)
 
-[node name="Deck" type="Sprite2D"]
+[node name="Stretcher" type="Node2D"]
+
+[node name="Deck" type="Sprite2D" parent="."]
+scale = Vector2(64, 64)
 texture = SubResource("PlaceholderTexture2D_nipak")
 centered = false
 script = ExtResource("1_ch85i")
