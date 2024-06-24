@@ -1,6 +1,6 @@
 # The Chesscade Canon
 
-Chesscade is an open source, deterministic, perfect-information, falling block puzzle game with
+Chesscade is a deterministic, perfect-information, falling block puzzle game with
 chess pieces. The Chesscade Canon seeks to be a universal, canonical implementation of Chesscade,
 in the form of a lightweight, thread-safe, optimized dynamic library that can be used as a backend
 to graphical interfaces written in any language, as well as AI engines for experimentation.
