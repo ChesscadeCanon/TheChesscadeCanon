@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://bkn0wt0806u57"]
+[gd_scene load_steps=20 format=3 uid="uid://bkn0wt0806u57"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_taslj"]
 [ext_resource type="Texture2D" uid="uid://eigh76doii2n" path="res://assets/play_selected.png" id="2_6q7pj"]
@@ -6,8 +6,20 @@
 [ext_resource type="PackedScene" uid="uid://cnfruyrwunqhf" path="res://board.tscn" id="2_eslwh"]
 [ext_resource type="PackedScene" uid="uid://kh75d13osrp8" path="res://meter.tscn" id="2_f0ox0"]
 [ext_resource type="PackedScene" uid="uid://bdtwaxt26k7np" path="res://deck.tscn" id="2_q7use"]
+[ext_resource type="FontFile" uid="uid://c4hpv5ss4tmdw" path="res://assets/shovelcore_Bw.fnt" id="3_4xyad"]
 [ext_resource type="FontFile" uid="uid://ducokb7ubk2eh" path="res://assets/ledfont-sharp-Regular.otf" id="3_oql5u"]
 [ext_resource type="Texture2D" uid="uid://dd443vmnejhx8" path="res://assets/shovelcore_Bw.png" id="6_t4lbj"]
+[ext_resource type="PackedScene" uid="uid://cjrguv7p3bcj6" path="res://menu_button.tscn" id="8_j1fw2"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_yeceq"]
+font = ExtResource("3_4xyad")
+font_size = 308
+
+[sub_resource type="LabelSettings" id="LabelSettings_7la8a"]
+line_spacing = 1.0
+font = ExtResource("3_4xyad")
+font_size = 392
+font_color = Color(0, 0, 0, 1)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_v2mh0"]
 atlas = ExtResource("6_t4lbj")
@@ -38,6 +50,10 @@ animations = [{
 "speed": 1.0
 }]
 
+[sub_resource type="Theme" id="Theme_kitfa"]
+default_font = ExtResource("3_4xyad")
+default_font_size = 432
+
 [sub_resource type="LabelSettings" id="LabelSettings_anqkw"]
 font = ExtResource("3_oql5u")
 font_size = 18
@@ -65,11 +81,20 @@ layout_mode = 2
 [node name="BackButton" type="TextureButton" parent="ButtonCenter/ButtonHBox"]
 layout_mode = 2
 texture_normal = ExtResource("2_6q7pj")
+texture_pressed = ExtResource("2_ekr4k")
+texture_disabled = ExtResource("2_ekr4k")
 flip_h = true
+
+[node name="Title" type="Label" parent="ButtonCenter/ButtonHBox"]
+texture_filter = 1
+layout_mode = 2
+text = "Chesscade"
+label_settings = SubResource("LabelSettings_yeceq")
 
 [node name="PlayPauseButton" type="TextureButton" parent="ButtonCenter/ButtonHBox"]
 layout_mode = 2
 texture_normal = ExtResource("2_ekr4k")
+texture_pressed = ExtResource("2_6q7pj")
 
 [node name="DeckCenter" type="CenterContainer" parent="."]
 layout_mode = 2
@@ -79,7 +104,14 @@ custom_minimum_size = Vector2(320, 160)
 layout_mode = 2
 
 [node name="Deck" parent="DeckCenter/DeckAspectRatio" instance=ExtResource("2_q7use")]
+texture_filter = 1
 scale = Vector2(0.039, 0.039)
+
+[node name="Header" type="Label" parent="DeckCenter/DeckAspectRatio"]
+layout_mode = 2
+text = "Chesscade"
+label_settings = SubResource("LabelSettings_7la8a")
+horizontal_alignment = 1
 
 [node name="BoardCenter" type="CenterContainer" parent="."]
 layout_mode = 2
@@ -96,6 +128,65 @@ visible = false
 position = Vector2(160, 160)
 scale = Vector2(20, 20)
 sprite_frames = SubResource("SpriteFrames_otg2k")
+
+[node name="TitleMenu" type="VBoxContainer" parent="BoardCenter/BoardAspectRatio"]
+modulate = Color(0, 0, 0, 1)
+texture_filter = 1
+layout_mode = 2
+theme = SubResource("Theme_kitfa")
+alignment = 1
+
+[node name="PlayButton" parent="BoardCenter/BoardAspectRatio/TitleMenu" instance=ExtResource("8_j1fw2")]
+layout_mode = 2
+
+[node name="VSeparator" type="VSeparator" parent="BoardCenter/BoardAspectRatio/TitleMenu"]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+
+[node name="BackButton" parent="BoardCenter/BoardAspectRatio/TitleMenu" instance=ExtResource("8_j1fw2")]
+layout_mode = 2
+text = "Quit"
+
+[node name="QuitMenu" type="VBoxContainer" parent="BoardCenter/BoardAspectRatio"]
+modulate = Color(0, 0, 0, 1)
+texture_filter = 1
+layout_mode = 2
+theme = SubResource("Theme_kitfa")
+alignment = 1
+
+[node name="QuitButton" parent="BoardCenter/BoardAspectRatio/QuitMenu" instance=ExtResource("8_j1fw2")]
+layout_mode = 2
+text = "Quit"
+
+[node name="VSeparator" type="VSeparator" parent="BoardCenter/BoardAspectRatio/QuitMenu"]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+
+[node name="CancelButton" parent="BoardCenter/BoardAspectRatio/QuitMenu" instance=ExtResource("8_j1fw2")]
+layout_mode = 2
+text = "Cancel"
+
+[node name="PauseMenu" type="VBoxContainer" parent="BoardCenter/BoardAspectRatio"]
+modulate = Color(0, 0, 0, 1)
+texture_filter = 1
+layout_mode = 2
+theme = SubResource("Theme_kitfa")
+alignment = 1
+
+[node name="ResumeButton" parent="BoardCenter/BoardAspectRatio/PauseMenu" instance=ExtResource("8_j1fw2")]
+layout_mode = 2
+text = "Resume"
+
+[node name="VSeparator" type="VSeparator" parent="BoardCenter/BoardAspectRatio/PauseMenu"]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+
+[node name="BackButton" parent="BoardCenter/BoardAspectRatio/PauseMenu" instance=ExtResource("8_j1fw2")]
+layout_mode = 2
+text = "Quit"
 
 [node name="ReadoutCenter" type="CenterContainer" parent="."]
 layout_mode = 2
@@ -114,5 +205,12 @@ title = "Score"
 readout_label_settings = SubResource("LabelSettings_yj72o")
 
 [connection signal="state_changed" from="." to="." method="_on_state_changed"]
+[connection signal="pressed" from="ButtonCenter/ButtonHBox/BackButton" to="." method="_on_back_button_pressed"]
 [connection signal="pressed" from="ButtonCenter/ButtonHBox/PlayPauseButton" to="." method="_on_play_pause_button_pressed"]
 [connection signal="animation_finished" from="BoardCenter/BoardAspectRatio/Countdown" to="." method="_on_countdown_animation_finished"]
+[connection signal="pressed" from="BoardCenter/BoardAspectRatio/TitleMenu/PlayButton" to="." method="_on_play_pause_button_pressed"]
+[connection signal="pressed" from="BoardCenter/BoardAspectRatio/TitleMenu/BackButton" to="." method="_on_back_button_pressed"]
+[connection signal="pressed" from="BoardCenter/BoardAspectRatio/QuitMenu/QuitButton" to="." method="_on_quit_button_pressed"]
+[connection signal="pressed" from="BoardCenter/BoardAspectRatio/QuitMenu/CancelButton" to="." method="_on_cancel_button_pressed"]
+[connection signal="pressed" from="BoardCenter/BoardAspectRatio/PauseMenu/ResumeButton" to="." method="_on_resume_button_pressed"]
+[connection signal="pressed" from="BoardCenter/BoardAspectRatio/PauseMenu/BackButton" to="." method="_on_back_button_pressed"]

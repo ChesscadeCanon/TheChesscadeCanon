@@ -7,14 +7,14 @@
 
 [sub_resource type="LabelSettings" id="LabelSettings_5tups"]
 font = ExtResource("2_ts1j8")
-font_size = 15
+font_size = 18
 font_color = Color(1, 1, 0, 1)
 shadow_color = Color(1, 1, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_w1fs7"]
 line_spacing = 1.0
 font = ExtResource("1_exp73")
-font_size = 288
+font_size = 340
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_68euf"]
 bg_color = Color(0, 0, 0, 1)
@@ -38,7 +38,7 @@ layout_mode = 2
 
 [node name="BackLabel" type="Label" parent="VBoxContainer/ReadoutCenter"]
 clip_contents = true
-custom_minimum_size = Vector2(132, 0)
+custom_minimum_size = Vector2(159, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.121569, 0.121569, 0.121569, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0)
@@ -48,7 +48,7 @@ label_settings = ExtResource("3_wlp67")
 horizontal_alignment = 2
 
 [node name="BackLabel2" type="Label" parent="VBoxContainer/ReadoutCenter"]
-custom_minimum_size = Vector2(132, 19)
+custom_minimum_size = Vector2(159, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.121569, 0.121569, 0.121569, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0)
@@ -57,8 +57,7 @@ label_settings = ExtResource("3_wlp67")
 horizontal_alignment = 2
 
 [node name="ReadoutLabel" type="Label" parent="VBoxContainer/ReadoutCenter"]
-custom_minimum_size = Vector2(132, 19)
+custom_minimum_size = Vector2(159, 19)
 layout_mode = 2
-text = "0"
 label_settings = SubResource("LabelSettings_5tups")
 horizontal_alignment = 2

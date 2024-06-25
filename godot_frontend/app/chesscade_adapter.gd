@@ -35,5 +35,6 @@ func debug_board()->void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	pump_game(delta)
+	if not is_game_over() and not is_paused():
+		pump_game(delta)
 

@@ -2,8 +2,8 @@ extends Sprite2D
 
 func _draw_square(slot: Vector2i)->void:
 	var sl := ChesscadeModel.SQUARE_LENGTH
-	var white := Color(0.75, 0.75, 0.75)
-	var black := Color(0.25, 0.25, 0.25)
+	var white := Color.LIGHT_GRAY
+	var black := Color.DARK_GRAY
 	var is_white := slot.x % 2 == slot.y % 2
 	var color := white if is_white else black
 	var rect := Rect2(slot * sl, Vector2.ONE * sl)
@@ -26,7 +26,8 @@ func _draw_deck()->void:
 		for i in deck_size.x:
 			var slot := Vector2i(i, g)
 			_draw_square(slot)
-			_draw_piece(slot)
+			if !ChesscadeModel.is_paused():
+				_draw_piece(slot)
 
 func _draw()->void:
 	_draw_deck()

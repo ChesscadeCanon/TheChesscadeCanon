@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dulgvgjq4ddmi"]
-
-[ext_resource type="Script" path="res://pixel_stretcher.gd" id="1_bkibs"]
-
-[node name="PixelStretcher" type="Node2D"]
-script = ExtResource("1_bkibs")

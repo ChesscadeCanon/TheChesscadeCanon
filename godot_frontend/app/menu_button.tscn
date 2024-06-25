@@ -1,0 +1,28 @@
+[gd_scene load_steps=8 format=3 uid="uid://cjrguv7p3bcj6"]
+
+[ext_resource type="FontFile" uid="uid://c4hpv5ss4tmdw" path="res://assets/shovelcore_Bw.fnt" id="1_jnvfd"]
+
+[sub_resource type="Theme" id="Theme_3x6aw"]
+default_font = ExtResource("1_jnvfd")
+default_font_size = 432
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_oa7yj"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ntcys"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_abbvt"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_s2lrq"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lrpmj"]
+
+[node name="MenuButton" type="Button"]
+modulate = Color(0, 0, 0, 1)
+texture_filter = 1
+theme = SubResource("Theme_3x6aw")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_oa7yj")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_ntcys")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_abbvt")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_s2lrq")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_lrpmj")
+text = "Play"
