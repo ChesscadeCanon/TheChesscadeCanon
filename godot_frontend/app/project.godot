@@ -24,6 +24,10 @@ ChesscadeModel="*res://chesscade_adapter.tscn"
 window/size/viewport_width=360
 window/size/viewport_height=640
 
+[gui]
+
+fonts/dynamic_fonts/use_oversampling=false
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

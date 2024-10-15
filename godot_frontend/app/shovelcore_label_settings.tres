@@ -1,0 +1,11 @@
+[gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://bfa7sb0v26glu"]
+
+[ext_resource type="FontFile" uid="uid://c4hpv5ss4tmdw" path="res://assets/shovelcore_Bw.fnt" id="1_aln85"]
+
+[resource]
+line_spacing = 1.0
+font = ExtResource("1_aln85")
+font_size = 388
+font_color = Color(0.305616, 0.753084, 0, 1)
+outline_size = 16
+outline_color = Color(0.160784, 0, 0.219608, 1)

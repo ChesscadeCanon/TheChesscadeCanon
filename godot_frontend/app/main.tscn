@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://bkn0wt0806u57"]
+[gd_scene load_steps=19 format=3 uid="uid://bkn0wt0806u57"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_taslj"]
 [ext_resource type="Texture2D" uid="uid://eigh76doii2n" path="res://assets/play_selected.png" id="2_6q7pj"]
@@ -8,18 +8,9 @@
 [ext_resource type="PackedScene" uid="uid://bdtwaxt26k7np" path="res://deck.tscn" id="2_q7use"]
 [ext_resource type="FontFile" uid="uid://c4hpv5ss4tmdw" path="res://assets/shovelcore_Bw.fnt" id="3_4xyad"]
 [ext_resource type="FontFile" uid="uid://ducokb7ubk2eh" path="res://assets/ledfont-sharp-Regular.otf" id="3_oql5u"]
+[ext_resource type="LabelSettings" uid="uid://bfa7sb0v26glu" path="res://shovelcore_label_settings.tres" id="4_5yc7f"]
 [ext_resource type="Texture2D" uid="uid://dd443vmnejhx8" path="res://assets/shovelcore_Bw.png" id="6_t4lbj"]
 [ext_resource type="PackedScene" uid="uid://cjrguv7p3bcj6" path="res://menu_button.tscn" id="8_j1fw2"]
-
-[sub_resource type="LabelSettings" id="LabelSettings_yeceq"]
-font = ExtResource("3_4xyad")
-font_size = 308
-
-[sub_resource type="LabelSettings" id="LabelSettings_7la8a"]
-line_spacing = 1.0
-font = ExtResource("3_4xyad")
-font_size = 392
-font_color = Color(0, 0, 0, 1)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_v2mh0"]
 atlas = ExtResource("6_t4lbj")
@@ -85,11 +76,9 @@ texture_pressed = ExtResource("2_ekr4k")
 texture_disabled = ExtResource("2_ekr4k")
 flip_h = true
 
-[node name="Title" type="Label" parent="ButtonCenter/ButtonHBox"]
-texture_filter = 1
+[node name="HSeparator" type="HSeparator" parent="ButtonCenter/ButtonHBox"]
+custom_minimum_size = Vector2(248, 0)
 layout_mode = 2
-text = "Chesscade"
-label_settings = SubResource("LabelSettings_yeceq")
 
 [node name="PlayPauseButton" type="TextureButton" parent="ButtonCenter/ButtonHBox"]
 layout_mode = 2
@@ -110,7 +99,7 @@ scale = Vector2(0.039, 0.039)
 [node name="Header" type="Label" parent="DeckCenter/DeckAspectRatio"]
 layout_mode = 2
 text = "Chesscade"
-label_settings = SubResource("LabelSettings_7la8a")
+label_settings = ExtResource("4_5yc7f")
 horizontal_alignment = 1
 
 [node name="BoardCenter" type="CenterContainer" parent="."]
