@@ -19,7 +19,7 @@ Included is an extremely basic frontend written in Python using the PyGame engin
 
 ## To play on Unix:
 
-1. Install Git, CMake, Pip, and PyGame.
+1. Install Git, CMake, Python 3.9+ x64, Pip, and PyGame.
 2. In a terminal:
 ```
 $ git clone https://github.com/ChesscadeCanon/TheChesscadeCanon
@@ -32,17 +32,18 @@ $ python pygame_frontend/pygame_frontend.py
 ## To play on Windows using Visual Studio:
 
 1. Install Visual Studio, including the Desktop Development with C++ workload and the Python Development workload.
-2. Install Pip and PyGame.
-3. Open Visual Studio.
-4. Under "Get Started" click "Clone a Repository".
-5. For the repository location, enter https://github.com/ChesscadeCanon/TheChesscadeCanon
-6. Choose a path to download into.
-7. Click "Clone". VS will open the "pygame_frontend" project, because that's the part that has an .sln file.
-8. Go to "File->Open->Folder..."
-9. Navigate to wherever you put the ChesscadeBox directory.
-10. Click "Open".
-11. In the Solution Explorer, select CMakeLists.txt.
-12. Go to "Build->Rebuild All".
-13. If the build is successful, go to "File->Open->Project/Solution...".
-14. Open "ChesscadeBox\pygame_frontend\pygame_frontend.sln".
-15. The green play button at the top of the screen should now launch the game.
+2. Install a Python 3.9+ x64 runtime environment.
+3. Install Pip and PyGame.
+4. Open Visual Studio.
+5. Under "Get Started" click "Clone a Repository".
+6. For the repository location, enter https://github.com/ChesscadeCanon/TheChesscadeCanon
+7. Choose a path to download into.
+8. Click "Clone". VS will open the "pygame_frontend" project, because that's the part that has an .sln file.
+9. Go to "File->Open->Folder..."
+10. Navigate to wherever you put the ChesscadeBox directory.
+11. Click "Open".
+12. In the Solution Explorer, select CMakeLists.txt.
+13. Go to "Build->Rebuild All".
+14. If the build is successful, go to "File->Open->Project/Solution...".
+15. Open "ChesscadeBox\pygame_frontend\pygame_frontend.sln".
+16. The green play button at the top of the screen should now launch the game.
