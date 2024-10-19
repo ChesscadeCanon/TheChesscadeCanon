@@ -1,0 +1,2 @@
+Only edit the copy of this folder in the project root.
+CMake will copy assets to all frontend apps.

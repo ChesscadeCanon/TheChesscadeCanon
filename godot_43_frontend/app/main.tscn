@@ -1,11 +1,31 @@
-[gd_scene load_steps=10 format=3 uid="uid://bd1tq8i1ywny1"]
+[gd_scene load_steps=22 format=3 uid="uid://bd1tq8i1ywny1"]
 
+[ext_resource type="Script" path="res://main.gd" id="1_ocixn"]
 [ext_resource type="Texture2D" uid="uid://bjns1d0l82h4c" path="res://assets/back.png" id="1_t01xj"]
 [ext_resource type="Texture2D" uid="uid://dyw18fooitfv5" path="res://assets/back_selected.png" id="2_67je7"]
 [ext_resource type="FontFile" uid="uid://c4hpv5ss4tmdw" path="res://assets/shovelcore_Bw.fnt" id="3_tbymo"]
 [ext_resource type="Texture2D" uid="uid://b4ydvl353lxtq" path="res://assets/play.png" id="4_7e1cq"]
 [ext_resource type="Script" path="res://banner.gd" id="4_kjitl"]
 [ext_resource type="Texture2D" uid="uid://n87hwolvqhxp" path="res://assets/pause.png" id="5_5bmuf"]
+[ext_resource type="PackedScene" uid="uid://c0t6jos0mxdx0" path="res://meter.tscn" id="7_vu3dy"]
+[ext_resource type="Texture2D" uid="uid://bbgw1nonmlyw5" path="res://assets/shovelcore_Bw.png" id="8_8x2e4"]
+[ext_resource type="Script" path="res://board.gd" id="8_xy7sm"]
+[ext_resource type="Script" path="res://deck.gd" id="9_ufnpj"]
+
+[sub_resource type="Animation" id="Animation_thcet"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:theme_override_font_sizes/font_size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [220]
+}
 
 [sub_resource type="Animation" id="Animation_fw14n"]
 resource_name = "pulse"
@@ -24,29 +44,57 @@ tracks/0/keys = {
 "values": [220, 227, 220]
 }
 
-[sub_resource type="Animation" id="Animation_thcet"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:theme_override_font_sizes/font_size")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [220]
-}
-
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_xkrbq"]
 _data = {
 "RESET": SubResource("Animation_thcet"),
 "pulse": SubResource("Animation_fw14n")
 }
 
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_m035j"]
+size = Vector2(256, 128)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_kh33v"]
+size = Vector2(256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m6yuw"]
+atlas = ExtResource("8_8x2e4")
+region = Rect2(176, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ge8c5"]
+atlas = ExtResource("8_8x2e4")
+region = Rect2(160, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3xq1b"]
+atlas = ExtResource("8_8x2e4")
+region = Rect2(144, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mr4ns"]
+atlas = ExtResource("8_8x2e4")
+region = Rect2(128, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2g5u4"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m6yuw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ge8c5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3xq1b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mr4ns")
+}],
+"loop": false,
+"name": &"default",
+"speed": 1.0
+}]
+
 [node name="Main" type="VBoxContainer"]
 custom_minimum_size = Vector2(288, 512)
+script = ExtResource("1_ocixn")
 
 [node name="ButtonHBox" type="HBoxContainer" parent="."]
 layout_mode = 2
@@ -72,9 +120,60 @@ script = ExtResource("4_kjitl")
 libraries = {
 "": SubResource("AnimationLibrary_xkrbq")
 }
+speed_scale = 0.25
 
 [node name="PlayPauseButton" type="TextureButton" parent="ButtonHBox"]
 layout_mode = 2
-toggle_mode = true
 texture_normal = ExtResource("4_7e1cq")
 texture_pressed = ExtResource("5_5bmuf")
+
+[node name="ReadoutHBox" type="HBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="Score" parent="ReadoutHBox" instance=ExtResource("7_vu3dy")]
+layout_mode = 2
+title = "Score"
+
+[node name="HSeparator" type="HSeparator" parent="ReadoutHBox"]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(8, 0)
+layout_mode = 2
+
+[node name="Time" parent="ReadoutHBox" instance=ExtResource("7_vu3dy")]
+layout_mode = 2
+title = "Time"
+
+[node name="DeckCenter" type="CenterContainer" parent="."]
+layout_mode = 2
+
+[node name="DeckAspectRatio" type="AspectRatioContainer" parent="DeckCenter"]
+custom_minimum_size = Vector2(256, 128)
+layout_mode = 2
+
+[node name="Deck" type="Sprite2D" parent="DeckCenter/DeckAspectRatio"]
+texture = SubResource("PlaceholderTexture2D_m035j")
+centered = false
+script = ExtResource("9_ufnpj")
+
+[node name="BoardCenter" type="CenterContainer" parent="."]
+layout_mode = 2
+
+[node name="BoardAspectRatio" type="AspectRatioContainer" parent="BoardCenter"]
+custom_minimum_size = Vector2(256, 256)
+layout_mode = 2
+
+[node name="Board" type="Sprite2D" parent="BoardCenter/BoardAspectRatio"]
+texture = SubResource("PlaceholderTexture2D_kh33v")
+centered = false
+script = ExtResource("8_xy7sm")
+
+[node name="Countdown" type="AnimatedSprite2D" parent="BoardCenter/BoardAspectRatio"]
+scale = Vector2(16, 16)
+sprite_frames = SubResource("SpriteFrames_2g5u4")
+centered = false
+
+[connection signal="state_changed" from="." to="." method="_on_state_changed"]
+[connection signal="pressed" from="ButtonHBox/BackButton" to="." method="_on_back_button_pressed"]
+[connection signal="pressed" from="ButtonHBox/PlayPauseButton" to="." method="_on_play_pause_button_pressed"]
+[connection signal="animation_finished" from="BoardCenter/BoardAspectRatio/Countdown" to="." method="_on_countdown_animation_finished"]

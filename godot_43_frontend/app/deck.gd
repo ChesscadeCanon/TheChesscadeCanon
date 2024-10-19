@@ -1,6 +1,7 @@
 extends Sprite2D
 
 func _draw_square(slot: Vector2i)->void:
+	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE * 2)
 	var sl := ChesscadeModel.SQUARE_LENGTH
 	var white := Color.LIGHT_GRAY
 	var black := Color.DARK_GRAY
@@ -10,6 +11,7 @@ func _draw_square(slot: Vector2i)->void:
 	draw_rect(rect, color)	
 
 func _draw_piece(slot: Vector2i):
+	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE * 2)
 	var sl := ChesscadeModel.SQUARE_LENGTH
 	var deck_dir := ChesscadeModel.DECK_PIECES_DIR
 	var next_dir := ChesscadeModel.NEXT_PIECES_DIR

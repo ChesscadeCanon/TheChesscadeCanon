@@ -1,3 +1,6 @@
-[gd_scene format=3 uid="uid://drieitq1uflr"]
+[gd_scene load_steps=2 format=3 uid="uid://drieitq1uflr"]
+
+[ext_resource type="Script" path="res://chesscade_adapter.gd" id="1_ijca2"]
 
 [node name="ChesscadeModel" type="ChesscadeAdapter"]
+script = ExtResource("1_ijca2")

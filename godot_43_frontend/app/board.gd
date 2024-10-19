@@ -1,10 +1,12 @@
 extends Sprite2D
 
 func _draw_piece_on_square(dir:StringName, white: bool, piece: StringName, square: Vector2i):
+	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE * 2)
 	var texture := ChesscadeModel.piece(dir, white, piece)
 	draw_texture(texture, square * ChesscadeModel.SQUARE_LENGTH)
 
 func _draw_landed_pieces()->void:
+	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE * 2)
 	var threats :int= ChesscadeModel.forecast_captures()
 	var board_size :Vector2i= ChesscadeModel.get_board_size()
 	var board_state_string :String= ChesscadeModel.get_board_state()
@@ -26,6 +28,7 @@ func _draw_landed_pieces()->void:
 		index += 1
 
 func _draw_player()->void:
+	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE * 2)
 	var player_square :Vector2i= ChesscadeModel.get_player_square()
 	var player_string :StringName= ChesscadeModel.get_player()
 	var white := player_string.to_upper() == player_string
@@ -33,6 +36,7 @@ func _draw_player()->void:
 	_draw_piece_on_square(dir, white, player_string, player_square)
 
 func _draw_forecast()->void:
+	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE * 2)
 	var forecast_rank :int= ChesscadeModel.get_forecast_rank()
 	var player_string :StringName= ChesscadeModel.get_player()
 	var player_square :Vector2i= ChesscadeModel.get_player_square()
@@ -42,6 +46,7 @@ func _draw_forecast()->void:
 	_draw_piece_on_square(dir, white, player_string, square)
 
 func _draw_cursor()->void:
+	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE * 2)
 	var sl := ChesscadeModel.SQUARE_LENGTH
 	var cursor_direction :int= ChesscadeModel.get_cursor_direction()
 	var spawn_rank :int= ChesscadeModel.get_spawn_rank()
@@ -53,6 +58,7 @@ func _draw_cursor()->void:
 	draw_texture_rect_region(texture, dest, src, Color.WHITE)
 	
 func _draw_board()->void:
+	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE * 2)
 	var white := Color.WHITE
 	var black := Color.BLACK
 	var live := ChesscadeModel.is_live()
@@ -88,6 +94,7 @@ func _draw_board()->void:
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _draw()->void:
+	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE * 2)
 	_draw_board()
 	if ChesscadeModel.is_live():
 		_draw_forecast()
