@@ -37,11 +37,13 @@ public:
 
 	/*
 	* destroys the current game
+	* call in _exit_tree()
 	*/
 	void clear();
 
 	/*
 	* destroys the current game and creates a new one
+	* call in _ready()
 	*/
 	void reset();
 

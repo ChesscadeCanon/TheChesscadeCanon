@@ -1,0 +1,43 @@
+[gd_scene load_steps=7 format=3 uid="uid://c6x6ue5jy4a2p"]
+
+[ext_resource type="FontFile" uid="uid://c4hpv5ss4tmdw" path="res://assets/shovelcore_Bw.fnt" id="1_ipnub"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_ta6m5"]
+line_spacing = 1.0
+font = ExtResource("1_ipnub")
+font_size = 220
+
+[sub_resource type="GDScript" id="GDScript_xiylj"]
+script/source = "extends Label
+
+var font_size: int: set=set_font_size, get=get_font_size
+
+func get_font_size()->int:
+	return label_settings.font_size
+
+func set_font_size(size: int)->void:
+	label_settings.font_size = size
+"
+
+[sub_resource type="Animation" id="Animation_kkbgr"]
+length = 0.001
+
+[sub_resource type="Animation" id="Animation_trt0j"]
+resource_name = "pulsate"
+step = 1.0
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_g3v6h"]
+_data = {
+"RESET": SubResource("Animation_kkbgr"),
+"pulsate": SubResource("Animation_trt0j")
+}
+
+[node name="Banner" type="Label"]
+text = "Chesscade"
+label_settings = SubResource("LabelSettings_ta6m5")
+script = SubResource("GDScript_xiylj")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_g3v6h")
+}

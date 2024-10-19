@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://tyralyguxowe"]
-
-[ext_resource type="Script" path="res://chesscade_adapter.gd" id="1_nbbnn"]
-
-[node name="ChesscadeAdapter" type="ChesscadeAdapter"]
-script = ExtResource("1_nbbnn")

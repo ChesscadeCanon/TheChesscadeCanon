@@ -7,6 +7,7 @@ add_library(ChesscadeLib SHARED)
 target_include_directories(ChesscadeLib PUBLIC export)
 target_sources(ChesscadeLib PUBLIC src/export/api.cpp PRIVATE src/core/game.c rules.h src/core/histotrie.c src/core/board.c)
 file(COPY assets DESTINATION ${PROJECT_SOURCE_DIR}/godot_frontend/app)
+file(COPY assets DESTINATION ${PROJECT_SOURCE_DIR}/godot_43_frontend/app)
 file(COPY assets DESTINATION ${PROJECT_SOURCE_DIR}/pygame_frontend)
 add_custom_command(
 	TARGET ChesscadeLib
