@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://bd1tq8i1ywny1"]
+[gd_scene load_steps=27 format=3 uid="uid://bd1tq8i1ywny1"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_ocixn"]
 [ext_resource type="Texture2D" uid="uid://bjns1d0l82h4c" path="res://assets/back.png" id="1_t01xj"]
@@ -6,11 +6,12 @@
 [ext_resource type="FontFile" uid="uid://c4hpv5ss4tmdw" path="res://assets/shovelcore_Bw.fnt" id="3_tbymo"]
 [ext_resource type="Texture2D" uid="uid://b4ydvl353lxtq" path="res://assets/play.png" id="4_7e1cq"]
 [ext_resource type="Texture2D" uid="uid://n87hwolvqhxp" path="res://assets/pause.png" id="5_5bmuf"]
-[ext_resource type="Texture2D" uid="uid://bpkxjsoavgrir" path="res://assets/equal_ink.png" id="6_mx32g"]
+[ext_resource type="FontFile" uid="uid://c318kmtxa18kl" path="res://assets/equal-ink/equal-ink.ttf" id="6_16vgc"]
 [ext_resource type="PackedScene" uid="uid://c0t6jos0mxdx0" path="res://meter.tscn" id="7_vu3dy"]
 [ext_resource type="Texture2D" uid="uid://bbgw1nonmlyw5" path="res://assets/shovelcore_Bw.png" id="8_8x2e4"]
 [ext_resource type="Script" path="res://board.gd" id="8_xy7sm"]
 [ext_resource type="Script" path="res://deck.gd" id="9_ufnpj"]
+[ext_resource type="PackedScene" uid="uid://dbjbfpi8qxaij" path="res://rules.tscn" id="12_dhs5m"]
 
 [sub_resource type="Animation" id="Animation_thcet"]
 length = 0.001
@@ -27,9 +28,22 @@ tracks/0/keys = {
 "update": 1,
 "values": [220]
 }
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
 
 [sub_resource type="Animation" id="Animation_fw14n"]
 resource_name = "pulse"
+length = 4.0
 loop_mode = 1
 step = 0.5
 tracks/0/type = "value"
@@ -39,21 +53,45 @@ tracks/0/path = NodePath(".:theme_override_font_sizes/font_size")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.5, 1),
+"times": PackedFloat32Array(0, 2, 4),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
 "values": [220, 227, 220]
 }
 
+[sub_resource type="Animation" id="Animation_uwbqs"]
+resource_name = "flash"
+loop_mode = 1
+step = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_xkrbq"]
 _data = {
 "RESET": SubResource("Animation_thcet"),
+"flash": SubResource("Animation_uwbqs"),
 "pulse": SubResource("Animation_fw14n")
 }
+
+[sub_resource type="LabelSettings" id="LabelSettings_dsjd2"]
+font = ExtResource("6_16vgc")
 
 [sub_resource type="LabelSettings" id="LabelSettings_so6ri"]
 font = ExtResource("3_tbymo")
 font_size = 192
+
+[sub_resource type="LabelSettings" id="LabelSettings_u4fgj"]
+font = ExtResource("6_16vgc")
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_m035j"]
 size = Vector2(256, 128)
@@ -97,264 +135,199 @@ animations = [{
 "speed": 1.0
 }]
 
-[node name="Main" type="VBoxContainer"]
+[node name="Main" type="Control"]
 custom_minimum_size = Vector2(288, 512)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 288.0
+offset_bottom = 512.0
 script = ExtResource("1_ocixn")
 
-[node name="ButtonHBox" type="HBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+offset_right = 288.0
+offset_bottom = 501.0
+
+[node name="ButtonHBox" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="BackButton" type="TextureButton" parent="ButtonHBox"]
+[node name="BackButton" type="TextureButton" parent="VBoxContainer/ButtonHBox"]
 layout_mode = 2
 texture_normal = ExtResource("1_t01xj")
 texture_pressed = ExtResource("2_67je7")
 
-[node name="CenterContainer" type="CenterContainer" parent="ButtonHBox"]
+[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer/ButtonHBox"]
 custom_minimum_size = Vector2(184, 0)
 layout_mode = 2
 
-[node name="Title" type="Label" parent="ButtonHBox/CenterContainer"]
+[node name="Title" type="Label" parent="VBoxContainer/ButtonHBox/CenterContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_tbymo")
 theme_override_font_sizes/font_size = 220
 text = "Chesscade"
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="ButtonHBox/CenterContainer/Title"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="VBoxContainer/ButtonHBox/CenterContainer/Title"]
 libraries = {
 "": SubResource("AnimationLibrary_xkrbq")
 }
-speed_scale = 0.25
 
-[node name="Instructions" type="HBoxContainer" parent="ButtonHBox/CenterContainer"]
+[node name="Instructions" type="HBoxContainer" parent="VBoxContainer/ButtonHBox/CenterContainer"]
 layout_mode = 2
 
-[node name="Directions" type="VBoxContainer" parent="ButtonHBox/CenterContainer/Instructions"]
+[node name="Directions" type="VBoxContainer" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions"]
 layout_mode = 2
 
-[node name="Keys" type="CenterContainer" parent="ButtonHBox/CenterContainer/Instructions/Directions"]
+[node name="Keys" type="CenterContainer" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Directions"]
 layout_mode = 2
 
-[node name="Arrows" type="HBoxContainer" parent="ButtonHBox/CenterContainer/Instructions/Directions/Keys"]
+[node name="Arrows" type="HBoxContainer" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Directions/Keys"]
 layout_mode = 2
 alignment = 1
 
-[node name="Left" type="PanelContainer" parent="ButtonHBox/CenterContainer/Instructions/Directions/Keys/Arrows"]
+[node name="Left" type="PanelContainer" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Directions/Keys/Arrows"]
 self_modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 
-[node name="Arrow" type="Sprite2D" parent="ButtonHBox/CenterContainer/Instructions/Directions/Keys/Arrows/Left"]
+[node name="Arrow" type="Sprite2D" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Directions/Keys/Arrows/Left"]
 texture = ExtResource("8_8x2e4")
 centered = false
 hframes = 94
 frame = 92
 
-[node name="Down" type="PanelContainer" parent="ButtonHBox/CenterContainer/Instructions/Directions/Keys/Arrows"]
+[node name="Down" type="PanelContainer" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Directions/Keys/Arrows"]
 self_modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 
-[node name="Arrow" type="Sprite2D" parent="ButtonHBox/CenterContainer/Instructions/Directions/Keys/Arrows/Down"]
+[node name="Arrow" type="Sprite2D" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Directions/Keys/Arrows/Down"]
 texture = ExtResource("8_8x2e4")
 centered = false
 hframes = 94
 frame = 90
 
-[node name="Right" type="PanelContainer" parent="ButtonHBox/CenterContainer/Instructions/Directions/Keys/Arrows"]
+[node name="Right" type="PanelContainer" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Directions/Keys/Arrows"]
 self_modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 
-[node name="Arrow" type="Sprite2D" parent="ButtonHBox/CenterContainer/Instructions/Directions/Keys/Arrows/Right"]
+[node name="Arrow" type="Sprite2D" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Directions/Keys/Arrows/Right"]
 texture = ExtResource("8_8x2e4")
 centered = false
 hframes = 94
 frame = 88
 
-[node name="Action" type="CenterContainer" parent="ButtonHBox/CenterContainer/Instructions/Directions"]
+[node name="Action" type="CenterContainer" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Directions"]
 layout_mode = 2
 
-[node name="Pseudolabel" type="HBoxContainer" parent="ButtonHBox/CenterContainer/Instructions/Directions/Action"]
+[node name="Label" type="Label" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Directions/Action"]
 layout_mode = 2
-alignment = 1
+text = "Move"
+label_settings = SubResource("LabelSettings_dsjd2")
 
-[node name="M" type="PanelContainer" parent="ButtonHBox/CenterContainer/Instructions/Directions/Action/Pseudolabel"]
-self_modulate = Color(1, 1, 1, 0.258824)
-custom_minimum_size = Vector2(16, 16)
-layout_mode = 2
-
-[node name="Letter" type="Sprite2D" parent="ButtonHBox/CenterContainer/Instructions/Directions/Action/Pseudolabel/M"]
-scale = Vector2(2, 2)
-texture = ExtResource("6_mx32g")
-centered = false
-hframes = 81
-frame = 13
-
-[node name="O" type="PanelContainer" parent="ButtonHBox/CenterContainer/Instructions/Directions/Action/Pseudolabel"]
-self_modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(16, 16)
-layout_mode = 2
-
-[node name="Letter" type="Sprite2D" parent="ButtonHBox/CenterContainer/Instructions/Directions/Action/Pseudolabel/O"]
-scale = Vector2(2, 2)
-texture = ExtResource("6_mx32g")
-centered = false
-hframes = 81
-frame = 15
-
-[node name="V" type="PanelContainer" parent="ButtonHBox/CenterContainer/Instructions/Directions/Action/Pseudolabel"]
-self_modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(16, 16)
-layout_mode = 2
-
-[node name="Letter" type="Sprite2D" parent="ButtonHBox/CenterContainer/Instructions/Directions/Action/Pseudolabel/V"]
-scale = Vector2(2, 2)
-texture = ExtResource("6_mx32g")
-centered = false
-hframes = 81
-frame = 22
-
-[node name="E" type="PanelContainer" parent="ButtonHBox/CenterContainer/Instructions/Directions/Action/Pseudolabel"]
-self_modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(16, 16)
-layout_mode = 2
-
-[node name="Letter" type="Sprite2D" parent="ButtonHBox/CenterContainer/Instructions/Directions/Action/Pseudolabel/E"]
-scale = Vector2(2, 2)
-texture = ExtResource("6_mx32g")
-centered = false
-hframes = 81
-frame = 5
-
-[node name="HSeparator" type="HSeparator" parent="ButtonHBox/CenterContainer/Instructions"]
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 
-[node name="Drop" type="VBoxContainer" parent="ButtonHBox/CenterContainer/Instructions"]
+[node name="Drop" type="VBoxContainer" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions"]
 layout_mode = 2
 
-[node name="Keys" type="CenterContainer" parent="ButtonHBox/CenterContainer/Instructions/Drop"]
+[node name="Keys" type="CenterContainer" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Drop"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="ButtonHBox/CenterContainer/Instructions/Drop/Keys"]
+[node name="Label" type="Label" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Drop/Keys"]
 layout_mode = 2
 text = "SPACE"
 label_settings = SubResource("LabelSettings_so6ri")
 
-[node name="Action" type="CenterContainer" parent="ButtonHBox/CenterContainer/Instructions/Drop"]
+[node name="Action" type="CenterContainer" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Drop"]
 layout_mode = 2
 
-[node name="Pseudolabel" type="HBoxContainer" parent="ButtonHBox/CenterContainer/Instructions/Drop/Action"]
+[node name="Label" type="Label" parent="VBoxContainer/ButtonHBox/CenterContainer/Instructions/Drop/Action"]
 layout_mode = 2
-alignment = 1
+text = "DROP"
+label_settings = SubResource("LabelSettings_u4fgj")
 
-[node name="D" type="PanelContainer" parent="ButtonHBox/CenterContainer/Instructions/Drop/Action/Pseudolabel"]
-self_modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(16, 16)
-layout_mode = 2
-
-[node name="Letter" type="Sprite2D" parent="ButtonHBox/CenterContainer/Instructions/Drop/Action/Pseudolabel/D"]
-scale = Vector2(2, 2)
-texture = ExtResource("6_mx32g")
-centered = false
-hframes = 81
-frame = 4
-
-[node name="R" type="PanelContainer" parent="ButtonHBox/CenterContainer/Instructions/Drop/Action/Pseudolabel"]
-self_modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(16, 16)
-layout_mode = 2
-
-[node name="Letter" type="Sprite2D" parent="ButtonHBox/CenterContainer/Instructions/Drop/Action/Pseudolabel/R"]
-scale = Vector2(2, 2)
-texture = ExtResource("6_mx32g")
-centered = false
-hframes = 81
-frame = 18
-
-[node name="V" type="PanelContainer" parent="ButtonHBox/CenterContainer/Instructions/Drop/Action/Pseudolabel"]
-self_modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(16, 16)
-layout_mode = 2
-
-[node name="Letter" type="Sprite2D" parent="ButtonHBox/CenterContainer/Instructions/Drop/Action/Pseudolabel/V"]
-scale = Vector2(2, 2)
-texture = ExtResource("6_mx32g")
-centered = false
-hframes = 81
-frame = 15
-
-[node name="E" type="PanelContainer" parent="ButtonHBox/CenterContainer/Instructions/Drop/Action/Pseudolabel"]
-self_modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(16, 16)
-layout_mode = 2
-
-[node name="Letter" type="Sprite2D" parent="ButtonHBox/CenterContainer/Instructions/Drop/Action/Pseudolabel/E"]
-scale = Vector2(2, 2)
-texture = ExtResource("6_mx32g")
-centered = false
-hframes = 81
-frame = 16
-
-[node name="PlayPauseButton" type="TextureButton" parent="ButtonHBox"]
+[node name="PlayPauseButton" type="TextureButton" parent="VBoxContainer/ButtonHBox"]
 layout_mode = 2
 texture_normal = ExtResource("4_7e1cq")
 texture_pressed = ExtResource("5_5bmuf")
 
-[node name="ReadoutHBox" type="HBoxContainer" parent="."]
+[node name="ReadoutHBox" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 alignment = 1
 
-[node name="Score" parent="ReadoutHBox" instance=ExtResource("7_vu3dy")]
+[node name="Score" parent="VBoxContainer/ReadoutHBox" instance=ExtResource("7_vu3dy")]
 layout_mode = 2
 title = "Score"
 
-[node name="HSeparator" type="HSeparator" parent="ReadoutHBox"]
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer/ReadoutHBox"]
 modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(8, 0)
 layout_mode = 2
 
-[node name="Time" parent="ReadoutHBox" instance=ExtResource("7_vu3dy")]
+[node name="Time" parent="VBoxContainer/ReadoutHBox" instance=ExtResource("7_vu3dy")]
 layout_mode = 2
 title = "Time"
 
-[node name="DeckCenter" type="CenterContainer" parent="."]
+[node name="DeckCenter" type="CenterContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="DeckAspectRatio" type="AspectRatioContainer" parent="DeckCenter"]
+[node name="DeckAspectRatio" type="AspectRatioContainer" parent="VBoxContainer/DeckCenter"]
 custom_minimum_size = Vector2(256, 128)
 layout_mode = 2
 
-[node name="Deck" type="Sprite2D" parent="DeckCenter/DeckAspectRatio"]
+[node name="Deck" type="Sprite2D" parent="VBoxContainer/DeckCenter/DeckAspectRatio"]
 texture = SubResource("PlaceholderTexture2D_m035j")
 centered = false
 script = ExtResource("9_ufnpj")
 
-[node name="BoardCenter" type="CenterContainer" parent="."]
+[node name="BoardCenter" type="CenterContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="BoardAspectRatio" type="AspectRatioContainer" parent="BoardCenter"]
+[node name="BoardAspectRatio" type="AspectRatioContainer" parent="VBoxContainer/BoardCenter"]
 custom_minimum_size = Vector2(256, 256)
 layout_mode = 2
 
-[node name="Board" type="Sprite2D" parent="BoardCenter/BoardAspectRatio"]
+[node name="Board" type="Sprite2D" parent="VBoxContainer/BoardCenter/BoardAspectRatio"]
 texture = SubResource("PlaceholderTexture2D_kh33v")
 centered = false
 script = ExtResource("8_xy7sm")
 
-[node name="Countdown" type="AnimatedSprite2D" parent="BoardCenter/BoardAspectRatio"]
+[node name="Countdown" type="AnimatedSprite2D" parent="VBoxContainer/BoardCenter/BoardAspectRatio"]
 scale = Vector2(16, 16)
 sprite_frames = SubResource("SpriteFrames_2g5u4")
 centered = false
 
-[node name="MenuHBox" type="HBoxContainer" parent="."]
+[node name="MenuHBox" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
+alignment = 1
 
-[node name="Button" type="Button" parent="MenuHBox"]
+[node name="OptionsButton" type="Button" parent="VBoxContainer/MenuHBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("6_16vgc")
+theme_override_font_sizes/font_size = 11
+text = "options"
+
+[node name="RulesButton" type="Button" parent="VBoxContainer/MenuHBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("6_16vgc")
+theme_override_font_sizes/font_size = 11
+text = "rules"
+
+[node name="CreditsButton" type="Button" parent="VBoxContainer/MenuHBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("6_16vgc")
+theme_override_font_sizes/font_size = 11
+text = "credits"
+
+[node name="Rules" parent="." instance=ExtResource("12_dhs5m")]
+visible = false
 layout_mode = 2
 
 [connection signal="state_changed" from="." to="." method="_on_state_changed"]
-[connection signal="pressed" from="ButtonHBox/BackButton" to="." method="_on_back_button_pressed"]
-[connection signal="pressed" from="ButtonHBox/PlayPauseButton" to="." method="_on_play_pause_button_pressed"]
-[connection signal="animation_finished" from="BoardCenter/BoardAspectRatio/Countdown" to="." method="_on_countdown_animation_finished"]
+[connection signal="pressed" from="VBoxContainer/ButtonHBox/BackButton" to="." method="_on_back_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonHBox/PlayPauseButton" to="." method="_on_play_pause_button_pressed"]
+[connection signal="animation_finished" from="VBoxContainer/BoardCenter/BoardAspectRatio/Countdown" to="." method="_on_countdown_animation_finished"]
+[connection signal="pressed" from="VBoxContainer/MenuHBox/RulesButton" to="." method="_on_rules_button_pressed"]

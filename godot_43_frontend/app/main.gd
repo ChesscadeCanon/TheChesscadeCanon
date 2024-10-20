@@ -1,4 +1,4 @@
-extends VBoxContainer
+extends Control
 
 const PLAY := preload('res://assets/play.png')
 const PLAY_SELECTED := preload('res://assets/play_selected.png')
@@ -22,15 +22,15 @@ signal state_changed(from: State, to: State)
 var state :State= State.TITLE: set = set_state
 var last_state :State= State.TITLE
 
-@onready var title := $ButtonHBox/CenterContainer/Title
-@onready var title_animator := $ButtonHBox/CenterContainer/Title/AnimationPlayer
-@onready var instructions := $ButtonHBox/CenterContainer/Instructions
-@onready var back_button := $ButtonHBox/BackButton
-@onready var play_pause_button := $ButtonHBox/PlayPauseButton
-@onready var time := $ReadoutHBox/Time
-@onready var score := $ReadoutHBox/Score
-@onready var countdown := $BoardCenter/BoardAspectRatio/Countdown
-@onready var header := $DeckCenter/DeckAspectRatio/Header
+@onready var title := $VBoxContainer/ButtonHBox/CenterContainer/Title
+@onready var title_animator := $VBoxContainer/ButtonHBox/CenterContainer/Title/AnimationPlayer
+@onready var instructions := $VBoxContainer/ButtonHBox/CenterContainer/Instructions
+@onready var back_button := $VBoxContainer/ButtonHBox/BackButton
+@onready var play_pause_button := $VBoxContainer/ButtonHBox/PlayPauseButton
+@onready var time := $VBoxContainer/ReadoutHBox/Time
+@onready var score := $VBoxContainer/ReadoutHBox/Score
+@onready var countdown := $VBoxContainer/BoardCenter/BoardAspectRatio/Countdown
+@onready var header := $VBoxContainer/DeckCenter/DeckAspectRatio/Header
 
 func set_state(to: State)->void:
 	emit_signal("state_changed", state, to)
@@ -98,6 +98,7 @@ func _on_state_changed(from: State, to: State):
 		State.TITLE:
 			_pause()
 			ChesscadeModel.reset()
+			title_animator.stop()
 			title_animator.play('pulse')
 			title.visible = true
 			title.text = 'Chesscade'
@@ -107,7 +108,8 @@ func _on_state_changed(from: State, to: State):
 			score.show_high_score(get_high_score())
 		State.COUNTDOWN:
 			_pause()
-			title_animator.play('pulse')
+			title_animator.stop()
+			title_animator.play('flash')
 			title.visible = true
 			title.text = 'Get Ready'
 			instructions.visible = false
@@ -125,6 +127,7 @@ func _on_state_changed(from: State, to: State):
 			_back_be_back()
 		State.PAUSE:
 			_pause()
+			title_animator.stop()
 			title_animator.play('pulse')
 			title.visible = true
 			title.text = 'Paused'
@@ -133,20 +136,14 @@ func _on_state_changed(from: State, to: State):
 			_back_be_back()
 		State.OVER:
 			_pause()
+			title_animator.stop()
 			title_animator.play('pulse')
 			title.visible = true
 			title.text = 'Game Over'
 			instructions.visible = false
 			_play_pause_be_play()
 			_back_be_back()
-
-	#if to in [State.PLAY, State.OVER]:
-	#	ChesscadeModel.process_mode = Node.PROCESS_MODE_ALWAYS
-	#	ChesscadeModel.unpause()
-	#else:
-	#	ChesscadeModel.process_mode = Node.PROCESS_MODE_DISABLED
-	#	ChesscadeModel.pause()
-
+			
 func _on_play_pause_button_pressed()->void:
 	play_pause_button.release_focus()
 	match state:
@@ -187,3 +184,10 @@ func _on_back_button_pressed():
 			state = State.PAUSE
 		_:
 			state = State.TITLE
+
+func _on_rules_button_pressed() -> void:
+	$Rules.visible = true
+	$Rules/ScrollContainer.grab_focus.call_deferred()
+	
+	if state == State.PLAY:
+		state = State.PAUSE

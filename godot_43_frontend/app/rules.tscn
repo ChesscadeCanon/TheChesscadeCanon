@@ -1,0 +1,91 @@
+[gd_scene load_steps=7 format=3 uid="uid://dbjbfpi8qxaij"]
+
+[ext_resource type="Script" path="res://rules.gd" id="1_5q1wq"]
+[ext_resource type="FontFile" uid="uid://c4hpv5ss4tmdw" path="res://assets/shovelcore_Bw.fnt" id="2_jg7oi"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_ibudq"]
+size = Vector2(280, 592)
+
+[sub_resource type="LabelSettings" id="LabelSettings_3vmx6"]
+font = ExtResource("2_jg7oi")
+font_size = 256
+
+[sub_resource type="SystemFont" id="SystemFont_ph8hc"]
+font_names = PackedStringArray("Courier New")
+
+[sub_resource type="LabelSettings" id="LabelSettings_oy0wj"]
+font = SubResource("SystemFont_ph8hc")
+font_size = 12
+
+[node name="Rules" type="Button"]
+self_modulate = Color(0, 0, 0, 1)
+custom_minimum_size = Vector2(280, 504)
+offset_right = 288.0
+offset_bottom = 512.0
+icon = SubResource("PlaceholderTexture2D_ibudq")
+script = ExtResource("1_5q1wq")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+custom_minimum_size = Vector2(288, 512)
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+scroll_deadzone = 10
+
+[node name="Contents" type="VBoxContainer" parent="ScrollContainer"]
+custom_minimum_size = Vector2(280, 608)
+layout_mode = 2
+
+[node name="VSeparator" type="VSeparator" parent="ScrollContainer/Contents"]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="Header" type="Label" parent="ScrollContainer/Contents"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+text = "Rules"
+label_settings = SubResource("LabelSettings_3vmx6")
+horizontal_alignment = 1
+
+[node name="VSeparator2" type="VSeparator" parent="ScrollContainer/Contents"]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="Body" type="Label" parent="ScrollContainer/Contents"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+label_settings = SubResource("LabelSettings_oy0wj")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="VSeparator3" type="VSeparator" parent="ScrollContainer/Contents"]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="Scoring" type="Label" parent="ScrollContainer/Contents"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+label_settings = SubResource("LabelSettings_oy0wj")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="VSeparator4" type="VSeparator" parent="ScrollContainer/Contents"]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="Values" type="Label" parent="ScrollContainer/Contents"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+label_settings = SubResource("LabelSettings_oy0wj")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[connection signal="button_down" from="." to="." method="_on_button_down"]
+[connection signal="button_up" from="." to="." method="_on_button_up"]
