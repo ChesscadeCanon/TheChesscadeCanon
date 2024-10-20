@@ -22,6 +22,9 @@ signal state_changed(from: State, to: State)
 var state :State= State.TITLE: set = set_state
 var last_state :State= State.TITLE
 
+@onready var title := $ButtonHBox/CenterContainer/Title
+@onready var title_animator := $ButtonHBox/CenterContainer/Title/AnimationPlayer
+@onready var instructions := $ButtonHBox/CenterContainer/Instructions
 @onready var back_button := $ButtonHBox/BackButton
 @onready var play_pause_button := $ButtonHBox/PlayPauseButton
 @onready var time := $ReadoutHBox/Time
@@ -37,8 +40,6 @@ func set_state(to: State)->void:
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	set_state(State.TITLE)
-	time.show_time()
-	score.show_score()
 
 func _process(delta)->void:
 	if ChesscadeModel.is_game_over():
@@ -57,39 +58,94 @@ func _process(delta)->void:
 	time.show_time()
 	score.show_score()
 
+func get_high_score()->int:
+	var ret := 0
+	if FileAccess.file_exists("user://high_score.dat"):
+		var in_file := FileAccess.open("user://high_score.dat", FileAccess.READ)
+		var text := in_file.get_line()
+		ret = int(text)
+		in_file.close()
+	return ret
+
+func submit_score()->void:
+	var score := ChesscadeModel.get_score()
+	var high_score := get_high_score()
+	if score > high_score:
+		var out_file := FileAccess.open("user://high_score.dat", FileAccess.WRITE)
+		out_file.resize(0)
+		out_file.store_string(str(score))
+		out_file.close()
+
+func _pause()->void:
+	set_process(false)
+	ChesscadeModel.process_mode = Node.PROCESS_MODE_DISABLED
+	ChesscadeModel.pause()
+	
+func _unpause()->void:
+	set_process(true)
+	ChesscadeModel.process_mode = Node.PROCESS_MODE_ALWAYS
+	ChesscadeModel.unpause()
+	
 func _on_state_changed(from: State, to: State):
 	countdown.stop()
 	countdown.visible = to == State.COUNTDOWN
-	
 	set_process_input(to == State.PLAY)
+	
+	if from == State.PLAY:
+		submit_score()
 
 	match to:
 		State.TITLE:
+			_pause()
 			ChesscadeModel.reset()
+			title_animator.play('pulse')
+			title.visible = true
+			title.text = 'Chesscade'
+			instructions.visible = false
 			_play_pause_be_play()
 			_back_be_quit()
+			score.show_high_score(get_high_score())
 		State.COUNTDOWN:
+			_pause()
+			title_animator.play('pulse')
+			title.visible = true
+			title.text = 'Get Ready'
+			instructions.visible = false
 			countdown.play('default')
 			_play_pause_be_pause()
 			_back_be_back()
 		State.PLAY:
+			_unpause()
+			title_animator.stop()
+			title.visible = false
+			instructions.visible = true
 			if ChesscadeModel.get_time() == 0.0:
 				ChesscadeModel.begin_game()
 			_play_pause_be_pause()
 			_back_be_back()
 		State.PAUSE:
+			_pause()
+			title_animator.play('pulse')
+			title.visible = true
+			title.text = 'Paused'
+			instructions.visible = false
 			_play_pause_be_play()
 			_back_be_back()
 		State.OVER:
+			_pause()
+			title_animator.play('pulse')
+			title.visible = true
+			title.text = 'Game Over'
+			instructions.visible = false
 			_play_pause_be_play()
 			_back_be_back()
 
-	if to in [State.PLAY, State.OVER]:
-		ChesscadeModel.process_mode = Node.PROCESS_MODE_ALWAYS
-		ChesscadeModel.unpause()
-	else:
-		ChesscadeModel.process_mode = Node.PROCESS_MODE_DISABLED
-		ChesscadeModel.pause()
+	#if to in [State.PLAY, State.OVER]:
+	#	ChesscadeModel.process_mode = Node.PROCESS_MODE_ALWAYS
+	#	ChesscadeModel.unpause()
+	#else:
+	#	ChesscadeModel.process_mode = Node.PROCESS_MODE_DISABLED
+	#	ChesscadeModel.pause()
 
 func _on_play_pause_button_pressed()->void:
 	play_pause_button.release_focus()

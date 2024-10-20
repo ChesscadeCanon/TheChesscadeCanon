@@ -28,7 +28,7 @@ func _draw_deck()->void:
 		for i in deck_size.x:
 			var slot := Vector2i(i, g)
 			_draw_square(slot)
-			if !ChesscadeModel.is_paused():
+			if ChesscadeModel.is_live() and not ChesscadeModel.is_paused():
 				_draw_piece(slot)
 
 func _draw()->void:

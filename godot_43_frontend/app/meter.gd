@@ -25,6 +25,9 @@ func set_readout_label_settings(to: LabelSettings)->void:
 func show_score()->void:
 	var current_score :int= ChesscadeModel.get_score()
 	$VBoxContainer/ReadoutCenter/ReadoutLabel.text = str(current_score)
+	
+func show_high_score(score: int)->void:
+	$VBoxContainer/ReadoutCenter/ReadoutLabel.text = str(score)
 
 func show_time()->void:
 	var text := ''
