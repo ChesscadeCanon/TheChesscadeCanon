@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://dbjbfpi8qxaij"]
+[gd_scene load_steps=9 format=3 uid="uid://dbjbfpi8qxaij"]
 
 [ext_resource type="Script" path="res://rules.gd" id="1_5q1wq"]
 [ext_resource type="FontFile" uid="uid://c4hpv5ss4tmdw" path="res://assets/shovelcore_Bw.fnt" id="2_jg7oi"]
@@ -9,6 +9,13 @@ size = Vector2(280, 592)
 [sub_resource type="LabelSettings" id="LabelSettings_3vmx6"]
 font = ExtResource("2_jg7oi")
 font_size = 256
+
+[sub_resource type="SystemFont" id="SystemFont_ikmb3"]
+font_names = PackedStringArray("Courier New")
+font_italic = true
+
+[sub_resource type="LabelSettings" id="LabelSettings_e0xvu"]
+font = SubResource("SystemFont_ikmb3")
 
 [sub_resource type="SystemFont" id="SystemFont_ph8hc"]
 font_names = PackedStringArray("Courier New")
@@ -46,6 +53,12 @@ custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 text = "Rules"
 label_settings = SubResource("LabelSettings_3vmx6")
+horizontal_alignment = 1
+
+[node name="Subheader" type="Label" parent="ScrollContainer/Contents"]
+layout_mode = 2
+text = "Tap to dismiss."
+label_settings = SubResource("LabelSettings_e0xvu")
 horizontal_alignment = 1
 
 [node name="VSeparator2" type="VSeparator" parent="ScrollContainer/Contents"]
