@@ -23,6 +23,8 @@ ChesscadeModel="*res://chesscade_model.tscn"
 
 window/size/viewport_width=288
 window/size/viewport_height=512
+window/stretch/aspect="keep_width"
+window/handheld/orientation=1
 window/canvas_textures/default_texture_filter=1
 
 [input]

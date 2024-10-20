@@ -5,7 +5,7 @@ func _draw_square(slot: Vector2i)->void:
 	var sl := ChesscadeModel.SQUARE_LENGTH
 	var white := Color.LIGHT_GRAY
 	var black := Color.DARK_GRAY
-	var is_white := slot.x % 2 == slot.y % 2
+	var is_white := slot.x % 2 != slot.y % 2
 	var color := white if is_white else black
 	var rect := Rect2(slot * sl, Vector2.ONE * sl)
 	draw_rect(rect, color)	

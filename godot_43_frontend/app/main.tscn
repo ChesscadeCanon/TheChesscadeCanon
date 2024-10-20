@@ -146,7 +146,8 @@ script = ExtResource("1_ocixn")
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
 offset_right = 288.0
-offset_bottom = 501.0
+offset_bottom = 512.0
+alignment = 1
 
 [node name="ButtonHBox" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2

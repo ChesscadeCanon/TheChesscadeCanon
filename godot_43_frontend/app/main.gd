@@ -40,6 +40,23 @@ func set_state(to: State)->void:
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	set_state(State.TITLE)
+	get_tree().get_root().size_changed.connect(_resize)
+
+func _resize()->void:
+	var target := Vector2i(
+		ProjectSettings.get_setting("display/window/size/viewport_width"),
+		ProjectSettings.get_setting("display/window/size/viewport_width")
+	)
+	var actual := get_viewport_rect().size
+	var loss := target.y - actual.y
+	var deck_aspect := $VBoxContainer/DeckCenter/DeckAspectRatio
+	var board_aspect := $VBoxContainer/BoardCenter/BoardAspectRatio
+	var deck := $VBoxContainer/DeckCenter/DeckAspectRatio/Deck
+	var board := $VBoxContainer/BoardCenter/BoardAspectRatio/Board
+	var countdown := $VBoxContainer/BoardCenter/BoardAspectRatio/Countdown
+	custom_minimum_size.y = actual.y
+	size.y = actual.y
+	$VBoxContainer.custom_minimum_size.y = actual.y
 
 func _process(delta)->void:
 	if ChesscadeModel.is_game_over():
@@ -189,5 +206,5 @@ func _on_rules_button_pressed() -> void:
 	$Rules.visible = true
 	$Rules/ScrollContainer.grab_focus.call_deferred()
 	
-	if state == State.PLAY:
+	if state in [State.PLAY, State.COUNTDOWN]:
 		state = State.PAUSE
