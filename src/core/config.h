@@ -1,6 +1,7 @@
-#define VERBOSE 0
-#define VERBOSE_MALLOC_FREE 0
+#define VERBOSE 1
+#define VERBOSE_MALLOC_FREE 1
 #if VERBOSE
+#include <stdio.h>
 #define ERRLOG(M) fprintf(stderr, M)
 #define ERRLOGF(M, F) fprintf(stderr, M, F)
 #else

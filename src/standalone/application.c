@@ -4,6 +4,7 @@
 #include "control.h"
 #include "view.h"
 #include "main.h"
+#include "simulator.h"
 #include <stdio.h>
 #include <assert.h>
 #include <time.h>
@@ -25,6 +26,14 @@ void pretty_view(struct Game* game) {
 void default_control(struct Game* game, const Time passed) {
 
 	key_control(game, passed);
+}
+
+void auto_control(struct Game* game, const Time passed) {
+
+	if (last_move(game) == LANDED) {
+
+		find_best(game);
+	}
 }
 
 void tock(struct Game* game, struct timespec* then, struct timespec* now) {
@@ -80,6 +89,14 @@ void play_pretty(struct Game* game) {
 	play(game, &start, default_control, default_model, pretty_view);
 }
 
+void play_pretty_auto(struct Game* game) {
+
+	struct timespec start;
+	assert(timespec_get(&start, TIME_UTC) == TIME_UTC);
+	begin(game);
+	play(game, &start, auto_control, default_model, pretty_view);
+}
+
 void run_pretty_text_game(Settings settings) {
 
 	struct Game* game = malloc_init_game(settings);
@@ -87,4 +104,10 @@ void run_pretty_text_game(Settings settings) {
 	free_game(game);
 }
 
+void run_pretty_auto_text_game(Settings settings) {
+
+	struct Game* game = malloc_init_game(settings);
+	play_pretty_auto(game);
+	free_game(game);
+}
 

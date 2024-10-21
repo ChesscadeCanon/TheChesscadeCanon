@@ -29,6 +29,7 @@ struct Game {
 	Fraction dragged_left;
 	Fraction dragged_right;
 	Fraction dragged_down;
+	char last_move;
 	Count score;
 	Count combo;
 	Count scored;
@@ -56,6 +57,8 @@ struct Game {
 	Count fall_count;
 	struct Histotrie* histotrie;
 	const Time (*ease_functor)(const struct Game* self);
+	struct Game* source;
+	Count copies;
 };
 
 #define PLAYER_SQUARE(__game__) SQUARE_INDEX(__game__->player_rank, __game__->player_file)
@@ -71,7 +74,8 @@ struct Game {
 #define PLACE_PLAYER(__game__) SET_SQUARE(__game__->board, PLAYER_SQUARE(__game__), __game__->player)
 #define REVERSE_CURSOR(__game__) (__game__->cursor *= -1)
 #define DOUBLE_BISHOP(__game__) (PIECE_MAP[__game__->player] == BISHOP && IS_SET(__game__->settings, DOUBLE_BISHOPS))
-#define BISHOP_SPEED(__game__, __moved__) ((__moved__) / (1 + DOUBLE_BISHOP(G)))
+#define BISHOP_SPEED(__game__, __moved__) ((__moved__) / (1 + DOUBLE_BISHOP(__game__)))
+#define BISHOP_RATE(__game__, __moved__) ((__moved__) * (1 + DOUBLE_BISHOP(__game__)))
 #define PLAYER_DOWN(__game__) SQUARE_INDEX(__game__->player_rank + (DOUBLE_BISHOP(__game__) + 1), __game__->player_file)
 #define DROP_RATE(__game__) 0 
 #define QUEEN_ME(__game__, __rank__) (\
@@ -281,6 +285,7 @@ void _resolve(struct Game* game, Time time_spent) {
 
 	const Time time = TIME_TAKEN(game) + time_spent;
 	game->events |= EVENT_LANDED;
+	game->last_move = LANDED;
 	const Index from_rank = game->player_rank, from_file = game->player_file;
 	game->player = QUEEN_ME(game, from_rank);
 	const Set captures = attack(game, True, False, False);
@@ -385,6 +390,7 @@ Time _fall(struct Game* game, Time passed) {
 		if (_move_player(game, to, ret)) {
 
 			game->events |= EVENT_FELL;
+			game->last_move = FALL;
 			_update_cursor(game);
 		}
 		else break;
@@ -406,6 +412,7 @@ Time _do_move(struct Game* game, const Time left, const Time right, Time down) {
 		ret = _move(game, steps, 1, -1);
 		DRAG(game->dragged_left, ret);
 		DRAG(game->dragged_down, ret);
+		game->last_move = DOWN_LEFT;
 	}
 	else if (diagonals && left == 0 && down > 0 && right > 0) {
 
@@ -413,22 +420,26 @@ Time _do_move(struct Game* game, const Time left, const Time right, Time down) {
 		ret = _move(game, steps, 1, 1);
 		DRAG(game->dragged_right, ret);
 		DRAG(game->dragged_down, ret);
+		game->last_move = DOWN_RIGHT;
 	}
 	else if (left == 0 && right > 0 && down == 0) {
 		
 		ret = _move(game, right, 0, 1);
 		DRAG(game->dragged_right, ret);
+		game->last_move = RIGHT;
 	}
 	else if (left > 0 && right == 0 && down == 0) {
 
 		ret = _move(game, left, 0, -1);
 		DRAG(game->dragged_left, ret);
+		game->last_move = LEFT;
 	}
 	else if (left == 0 && right == 0 && down > 0) {
 
 		ret = _move(game, max(0, down), 1, 0);
 		if (ret) game->moved_down = False;
 		DRAG(game->dragged_down, ret);
+		game->last_move = DOWN;
 	}
 
 	return ret;
@@ -471,6 +482,7 @@ void _init_game(struct Game* game) {
 	game->time = 0;
 	game->last_moved = -1;
 	game->last_fell = 0;
+	game->last_move = LANDED;
 	game->last_spawned = 0;
 	game->end_time = -1;
 	game->repeat = False;
@@ -495,6 +507,8 @@ void _init_game(struct Game* game) {
 	game->total_pieces = 0;
 	game->total_value = 0;
 	game->fall_count = 0;
+	game->source = NULL;
+	game->copies = 1;
 	init_board(game->board);
 	init_captures(game->captures);
 }
@@ -675,6 +689,16 @@ Time time_taken(const struct Game* game)
 	return TIME_TAKEN(game);
 }
 
+const struct Game* get_source(const struct Game* game)
+{
+	return game->source;
+}
+
+char last_move(const struct Game* game)
+{
+	return game->last_move;
+}
+
 Bool cursor_wrapped(const struct Game* game) {
 
 	return CURSOR_WRAPPED(game);
@@ -738,14 +762,31 @@ Piece next_piece(const struct Game* game) {
 	return NEXT_PIECE(game);
 }
 
-void free_game(struct Game* game) {
+Bool free_game(struct Game* game) {
 
 	if (game) {
 
+		if (--game->copies > 0) return False;
+		if(free_game(game->source)) game->source = NULL;
 		free_histotrie(game->histotrie);
 		MEMLOG("freed game\n");
 		free(game);
 	}
+
+	return True;
+}
+
+Bool free_game_shallow(struct Game* game) {
+
+	if (game) {
+
+		if (--game->copies > 0) return False;
+		if(free_game_shallow(game->source)) game->source = NULL;
+		MEMLOG("freed game\n");
+		free(game);
+	}
+
+	return True;
 }
 
 Set attack(struct Game* game, const Bool execute, const Bool forecast, const Bool pattern) {
@@ -814,7 +855,7 @@ void _take_drop(struct Game* game, Time passed) {
 	game->dropped = False;
 }
 
-void _recursive_pump(struct Game* game, Time passed) {
+void _pump(struct Game* game, Time passed) {
 
 	if (game_over(game)) return;
 
@@ -827,10 +868,6 @@ void _recursive_pump(struct Game* game, Time passed) {
 	const Bool moved = game->moved_left || game->moved_right || game->moved_down;
 	const Bool time_to_move = SINCE_MOVED(game, passed) >= move_rate(game) && moved;
 	const Bool time_to_fall = SINCE_FELL(game, passed) >= ease(game);
-	if (time_to_fall || time_to_move) {
-
-		//_recursive_pump(game, passed);
-	}
 
 	game->moved_left = game->moved_right = game->moved_down = False;
 }
@@ -840,7 +877,7 @@ void pump(struct Game* game, const Time passed) {
 	if (game_over(game) || game->pause) return;
 
 	game->events = 0;
-	_recursive_pump(game, passed);
+	_pump(game, passed);
 	game->time += passed;
 	assert(TIME_TAKEN(game) <= game->time);
 }
@@ -876,5 +913,18 @@ struct Game* malloc_init_standard_game_with_ease_functor(EASE_FUNCTOR(ease_func)
 	MEMLOG("malloc game\n");
 	_init_game(ret);
 	ret->histotrie = malloc_init_histotrie();
+	return ret;
+}
+
+struct Game* malloc_init_game_shallow_copy(struct Game* game)
+{
+	struct Game* ret = malloc(sizeof(struct Game));
+	assert(ret);
+	memcpy(ret, game, sizeof(struct Game));
+	MEMLOG("malloc game\n");
+	ret->histotrie = NULL;
+	ret->source = game;
+	ret->copies = 1;
+	game->copies++;
 	return ret;
 }

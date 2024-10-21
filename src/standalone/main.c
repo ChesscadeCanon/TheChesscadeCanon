@@ -41,7 +41,7 @@ int main(int argc, const char** argv) {
 
 	if (argc == 1) {
 #ifdef _WIN32
-		run_pretty_text_game(STANDARD_SETTINGS);
+		run_pretty_auto_text_game(STANDARD_SETTINGS);
 #else
 		print_help();
 #endif
