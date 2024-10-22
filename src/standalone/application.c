@@ -30,10 +30,7 @@ void default_control(struct Game* game, const Time passed) {
 
 void auto_control(struct Game* game, const Time passed) {
 
-	if (last_move(game) == LANDED) {
-
-		find_best(game);
-	}
+	automate(game);
 }
 
 void tock(struct Game* game, struct timespec* then, struct timespec* now) {

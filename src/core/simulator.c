@@ -3,17 +3,11 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
-typedef char Step;
-typedef char* Path;
-typedef Path* Guide;
-typedef struct Game** Field;
+const char WAYS[WAY_COUNT + 1] = { DOWN, DOWN_LEFT, DOWN_RIGHT, RIGHT, LEFT, FALL, LANDED };
 
 #define IS_LEAF(__game__) (current_events(__game__) & EVENT_LANDED)
-#define STEP_FALLS(__step__) (__step__ / BOARD_LENGTH)
-#define STEP_INDEX(__step__) (__step__ % BOARD_LENGTH)
-#define INDEX_STEP(__index__, __falls__) (__index__ * __falls__)
-#define SQUARE_STEP(__rank__, __file__, __falls__) (INDEX_STEP(SQUARE_INDEX(__rank__, __file__), __falls__))
 #define STEP_GAME(__game__) (\
 	SQUARE_STEP(\
 		player_piece_rank(__game__),\
@@ -21,36 +15,15 @@ typedef struct Game** Field;
 		current_cursor_increment(__game__)\
 	)\
 )
-#define MAX_PATH ((RANKS >> 1) * FILES + (RANKS >> 1))
-#define STEPS (BOARD_LENGTH * RANKS)
-#define GUIDE_LENGTH (MAX_PATH * STEPS)
-#define GUIDE_PATH(__guide__, __index__) (__guide__ + (__index__ * MAX_PATH))
-#define WAY_COUNT 6
-const char WAYS[WAY_COUNT + 1] = "dlrDLR";
 
-void _init_path(Step path[MAX_PATH]) {
+void _init_path(Step path[MAX_STEPS]) {
 
-	memset(path, LANDED, MAX_PATH * sizeof(Step));
-}
-
-void _init_guide(Step guide[GUIDE_LENGTH]) {
-
-	memset(guide, LANDED, GUIDE_LENGTH * sizeof(Step));
+	memset(path, LANDED, MAX_STEPS * sizeof(Step));
 }
 
 void _init_field(struct Game* field[STEPS]) {
 
 	memset(field, 0, STEPS * sizeof(struct Game*));
-}
-
-Count _trace(const struct Game* game, Step path[MAX_PATH]) {
-
-	if (!game) return 0;
-	else {
-		const Count ret = _trace(get_source(game), path);
-		path[ret] = last_move(game);
-		return ret + 1;
-	}
 }
 
 void _free_field(struct Game* field[STEPS]) {
@@ -61,7 +34,7 @@ void _free_field(struct Game* field[STEPS]) {
 	}
 }
 
-void _search(struct Game* game, Step guide[GUIDE_LENGTH], struct Game* leaves[STEPS]) {
+void _search(struct Game* game, struct Game* leaves[STEPS]) {
 
 	struct Game* discovered[STEPS];
 	struct Game* visited[STEPS];
@@ -70,8 +43,7 @@ void _search(struct Game* game, Step guide[GUIDE_LENGTH], struct Game* leaves[ST
 	_init_field(discovered);
 	_init_field(visited);
 	_init_field(leaves);
-	_init_guide(guide);
-	discovered[open++] = game;
+	visited[STEP_GAME(game)] = discovered[open++] = malloc_init_game_shallow_copy(game);
 
 	for (Count start = 0, limit = 1; discoveries > 0;) {
 
@@ -79,32 +51,21 @@ void _search(struct Game* game, Step guide[GUIDE_LENGTH], struct Game* leaves[ST
 
 			struct Game* previous = discovered[d];
 			assert(previous);
+
+			if (path_length(previous) >= MAX_STEPS) {
+				discoveries--;
+				discovered[d] = NULL;
+				continue;
+			}
+
 			const Count had = STEP_GAME(previous);
 			
 			for (Count w = 0; w < WAY_COUNT; ++w) {
 
-				char way = WAYS[w];
-				struct Game* next = malloc_init_game_shallow_copy(previous);
+				Step way = WAYS[w];
+				struct Game* next = malloc_init_game_moved_copy_or_null(previous, way);
 
-				switch (way) {
-
-				case DOWN: do_digital_move(next, 0, 0, 1); break;
-				case LEFT: do_digital_move(next, 1, 0, 0); break;
-				case RIGHT: do_digital_move(next, 0, 1, 0); break;
-				case DOWN_LEFT: do_digital_move(next, 1, 0, 1); break;
-				case DOWN_RIGHT: do_digital_move(next, 0, 1, 1); break;
-				case FALL: break;
-				default: assert(False);
-				}
-
-				if (way == FALL) {
-
-					pump(next, ease(next));
-				}
-				else {
-
-					pump(next, move_rate(next));
-				}
+				if (!next) continue;
 
 				const Count has = STEP_GAME(next);
 				const struct Game* was = visited[has];
@@ -112,6 +73,7 @@ void _search(struct Game* game, Step guide[GUIDE_LENGTH], struct Game* leaves[ST
 				if (IS_LEAF(next) && !leaves[had]) {
 
 					leaves[had] = next;
+					take_path(next, current_path(previous));
 				}
 				else if (was) {
 
@@ -124,6 +86,8 @@ void _search(struct Game* game, Step guide[GUIDE_LENGTH], struct Game* leaves[ST
 					discovered[open++] = next;
 					++discoveries;
 				}
+
+				take_step(next, way);
 			}
 
 			discovered[d] = NULL;
@@ -134,20 +98,49 @@ void _search(struct Game* game, Step guide[GUIDE_LENGTH], struct Game* leaves[ST
 		limit = open;
 	}
 
-	for (Count p = 0; p < STEPS; ++p) {
-
-		const struct Game* outcome = leaves[p];
-		_trace(outcome, GUIDE_PATH(guide, p));
-	}
-
 	_free_field(visited);
 }
 
-void find_best(struct Game* game) {
+void _select_random(struct Game* game, struct Game* leaves[STEPS]) {
 
-	Step* guide = malloc(sizeof(Step) * GUIDE_LENGTH);
+
+}
+
+void _select_first(struct Game* game, struct Game* leaves[STEPS]) {
+
+	for (Count p = 0; p < STEPS; ++p) {
+
+		const struct Game* leaf = leaves[p];
+
+		if (leaf) {
+
+			const Step* path = current_path(leaf);
+
+			take_path(game, path);
+			break;
+		}
+	}
+}
+
+void _find_best(struct Game* game) {
+
 	struct Game* leaves[STEPS];
-	_search(game, guide, leaves);
-	free(guide);
+	_search(game, leaves);
+	_select_first(game, leaves);
 	_free_field(leaves);
+}
+
+void init_simulator()
+{
+	srand((unsigned int)time(NULL));
+}
+
+void automate(struct Game* game) {
+
+	if (path_length(game) == 0) {
+
+		_find_best(game);
+	}
+
+	follow_path(game);
 }

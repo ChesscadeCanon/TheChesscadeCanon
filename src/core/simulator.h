@@ -2,4 +2,5 @@
 #include "def.h"
 #include "game.h"
 
-void find_best(struct Game* game);
+void init_simulator();
+void automate(struct Game* game);

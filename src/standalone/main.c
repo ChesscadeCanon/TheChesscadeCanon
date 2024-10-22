@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <simulator.h>
 
 void print_help() {
 
@@ -41,6 +42,7 @@ int main(int argc, const char** argv) {
 
 	if (argc == 1) {
 #ifdef _WIN32
+		init_simulator();
 		run_pretty_auto_text_game(STANDARD_SETTINGS);
 #else
 		print_help();

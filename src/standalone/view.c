@@ -59,4 +59,5 @@ void print_pretty(const struct Game* game) {
 	_print_info(game);
 	_print_cursor(game);
 	printf("%s", board);
+	printf("%s\n", current_path(game));
 }

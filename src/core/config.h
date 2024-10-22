@@ -1,4 +1,4 @@
-#define VERBOSE 1
+#define VERBOSE 0
 #define VERBOSE_MALLOC_FREE 1
 #if VERBOSE
 #include <stdio.h>

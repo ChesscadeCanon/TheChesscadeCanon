@@ -59,6 +59,8 @@ struct Game {
 	const Time (*ease_functor)(const struct Game* self);
 	struct Game* source;
 	Count copies;
+	Step path[MAX_STEPS];
+	Index step;
 };
 
 #define PLAYER_SQUARE(__game__) SQUARE_INDEX(__game__->player_rank, __game__->player_file)
@@ -69,7 +71,7 @@ struct Game {
 #define SINCE_MOVED(__game__, __passed__) ((__game__->time + __passed__) - (__game__->last_moved))
 #define SINCE_FELL(__game__, __passed__) ((__game__->time + __passed__) - __game__->last_fell)
 #define SINCE_SPAWNED(__game__, __passed__) ((__game__->time + __passed__) - (__game__->last_spawned))
-#define TIME_TAKEN(__game__) max(__game__->last_spawned, (max(__game__->last_moved, __game__->last_fell)))
+#define TIME_TAKEN(__game__) (max(__game__->last_spawned, (max(__game__->last_moved, __game__->last_fell))))
 #define DRAG(__drag__, __steps__) __drag__ = max(0, __drag__ - (Fraction)__steps__);
 #define PLACE_PLAYER(__game__) SET_SQUARE(__game__->board, PLAYER_SQUARE(__game__), __game__->player)
 #define REVERSE_CURSOR(__game__) (__game__->cursor *= -1)
@@ -285,6 +287,8 @@ void _resolve(struct Game* game, Time time_spent) {
 
 	const Time time = TIME_TAKEN(game) + time_spent;
 	game->events |= EVENT_LANDED;
+	init_path(game->path);
+	game->step = 0;
 	game->last_move = LANDED;
 	const Index from_rank = game->player_rank, from_file = game->player_file;
 	game->player = QUEEN_ME(game, from_rank);
@@ -409,37 +413,37 @@ Time _do_move(struct Game* game, const Time left, const Time right, Time down) {
 	if (diagonals && left > 0 && down > 0 && right == 0) {
 
 		const Time steps = min(left, down);
+		game->last_move = DOWN_LEFT;
 		ret = _move(game, steps, 1, -1);
 		DRAG(game->dragged_left, ret);
 		DRAG(game->dragged_down, ret);
-		game->last_move = DOWN_LEFT;
 	}
 	else if (diagonals && left == 0 && down > 0 && right > 0) {
 
 		const Time steps = min(right, down);
+		game->last_move = DOWN_RIGHT;
 		ret = _move(game, steps, 1, 1);
 		DRAG(game->dragged_right, ret);
 		DRAG(game->dragged_down, ret);
-		game->last_move = DOWN_RIGHT;
 	}
 	else if (left == 0 && right > 0 && down == 0) {
 		
+		game->last_move = RIGHT;
 		ret = _move(game, right, 0, 1);
 		DRAG(game->dragged_right, ret);
-		game->last_move = RIGHT;
 	}
 	else if (left > 0 && right == 0 && down == 0) {
 
+		game->last_move = LEFT;
 		ret = _move(game, left, 0, -1);
 		DRAG(game->dragged_left, ret);
-		game->last_move = LEFT;
 	}
 	else if (left == 0 && right == 0 && down > 0) {
-
+		
+		game->last_move = DOWN;
 		ret = _move(game, max(0, down), 1, 0);
 		if (ret) game->moved_down = False;
 		DRAG(game->dragged_down, ret);
-		game->last_move = DOWN;
 	}
 
 	return ret;
@@ -472,6 +476,24 @@ void _take_move(struct Game* game, Time passed) {
 	}
 
 	game->last_fell += _fall(game, passed);
+}
+
+void init_path(Step path[MAX_STEPS]) {
+
+	memset(path, LANDED, sizeof(Step) * MAX_STEPS);
+}
+
+void take_path(struct Game* game, const Step path[MAX_STEPS])
+{
+	memcpy(game->path, path, MAX_STEPS * sizeof(Step));
+}
+
+void take_step(struct Game* game, const Step step)
+{
+	Count open = strnlen(game->path, MAX_STEPS);
+	assert(open < MAX_STEPS);
+	assert(open >= 0);
+	game->path[open] = step;
 }
 
 void _init_game(struct Game* game) {
@@ -509,8 +531,10 @@ void _init_game(struct Game* game) {
 	game->fall_count = 0;
 	game->source = NULL;
 	game->copies = 1;
+	game->step = 0;
 	init_board(game->board);
 	init_captures(game->captures);
+	init_path(game->path);
 }
 
 Bool game_over(const struct Game* game) {
@@ -551,6 +575,32 @@ Bool _will_overflow(const struct Game* game) {
 	const Index index = SQUARE_INDEX(rank, file);
 	const Index square = GET_SQUARE(game->board, index);
 	return square != EMPTY;
+}
+
+void _go_way(struct Game* game, const Step way) {
+
+	switch (way) {
+
+	case DOWN:
+		do_digital_move(game, 0, 0, 1);
+		break;
+	case LEFT:
+		do_digital_move(game, 1, 0, 0);
+		break;
+	case RIGHT:
+		do_digital_move(game, 0, 1, 0);
+		break;
+	case DOWN_LEFT:
+		do_digital_move(game, 1, 0, 1);
+		break;
+	case DOWN_RIGHT:
+		do_digital_move(game, 0, 1, 1);
+		break;
+	case FALL:
+		break;
+	default:
+		break;
+	}
 }
 
 Bool on_brink(struct Game* game) {
@@ -699,6 +749,29 @@ char last_move(const struct Game* game)
 	return game->last_move;
 }
 
+const char* current_path(const struct Game* game)
+{
+	return game->path;
+}
+
+Count path_length(const struct Game* game)
+{
+	return strnlen(game->path, MAX_STEPS);
+}
+
+void follow_path(struct Game* game) {
+
+	const enum Event event_moved = EVENT_LEFT | EVENT_RIGHT | EVENT_DOWN | EVENT_FELL;
+
+	if (event_moved & current_events(game)) {
+
+		assert(++game->step < MAX_STEPS);
+	}
+
+	Step way = game->path[game->step];
+	_go_way(game, way);
+}
+
 Bool cursor_wrapped(const struct Game* game) {
 
 	return CURSOR_WRAPPED(game);
@@ -781,7 +854,9 @@ Bool free_game_shallow(struct Game* game) {
 	if (game) {
 
 		if (--game->copies > 0) return False;
-		if(free_game_shallow(game->source)) game->source = NULL;
+		if (free_game_shallow(game->source)) {
+			game->source = NULL;
+		}
 		MEMLOG("freed game\n");
 		free(game);
 	}
@@ -879,7 +954,6 @@ void pump(struct Game* game, const Time passed) {
 	game->events = 0;
 	_pump(game, passed);
 	game->time += passed;
-	assert(TIME_TAKEN(game) <= game->time);
 }
 
 void begin(struct Game* game) {
@@ -927,4 +1001,59 @@ struct Game* malloc_init_game_shallow_copy(struct Game* game)
 	ret->copies = 1;
 	game->copies++;
 	return ret;
+}
+
+struct Game* malloc_init_game_moved_copy(struct Game* previous, const Step way)
+{
+	struct Game* next = malloc_init_game_shallow_copy(previous);
+
+	_go_way(next, way);
+
+	if (way == FALL) {
+
+		pump(next, ease(next));
+	}
+	else {
+
+		pump(next, move_rate(next));
+	}
+
+	return next;
+}
+
+struct Game* malloc_init_game_moved_copy_or_null(struct Game* previous, const Step way)
+{
+	struct Game* next = malloc_init_game_moved_copy(previous, way);
+	const Index
+		r = player_piece_rank(previous),
+		f = player_piece_file(previous),
+		R = player_piece_rank(next),
+		F = player_piece_file(next);
+	const Bool L = last_move(next) == LANDED;
+
+	Bool good = True;
+	switch (way) {
+
+	case LEFT:
+		good = r == R && f > F; break;
+	case RIGHT:
+		good = r == R && f < F; break;
+	case DOWN_LEFT:
+		good = r < R && f > F; break;
+	case DOWN_RIGHT:
+		good = r < R && f < F; break;
+	case FALL:
+		good = r < R && f == F; break;
+	case DOWN:
+		good = r < R && f == F || L;
+	default: break;
+	}
+
+	if (good) {
+
+		return next;
+	}
+
+	free_game_shallow(next);
+	return NULL;
 }
