@@ -80,7 +80,7 @@ extern const char SYMBOLS[SYMBOL_COUNT];
 	"BbBbBbBb", \
 	"BbBbBbBb" \
 }
-static const char DECKS[GRADES][INCREMENTS + 1] = STANDARD_DECKS;
+static const char DECKS[GRADES][INCREMENTS + 1] = BISHOP_DECKS;
 
 extern const Count PIECE_VALUES[SQUARE_COUNT];
 #define PIECE_VALUE(P) (PIECE_VALUES[PIECE_MAP[P]])

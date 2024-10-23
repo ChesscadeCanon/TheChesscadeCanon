@@ -75,8 +75,6 @@ enum Setting {
 	KING_ON_REPEAT = 1 << 8,
 	// a piece doesn't automatically fall in rank as long as the player continues moving it
 	FLYING_PIECES = 1 << 9,
-	// when a piece lands without being dropped, the colors of the pieces in the deck are inverted
-	FLIP_DECK = 1 << 10,
 	STANDARD_SETTINGS = 
 		WHITE_PAWN_HIT_UP
 		| BLACK_PAWN_SPAWN_LOW 

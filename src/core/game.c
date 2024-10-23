@@ -47,7 +47,6 @@ struct Game {
 	Piece board[BOARD_LENGTH];
 	Piece captures[CAPTURE_LENGTH];
 	Bool repeat;
-	Bool flip_deck;
 	const Settings settings;
 	Events events;
 	Count white_pieces;
@@ -339,14 +338,17 @@ void _resolve(struct Game* game, const Time passed, const Time time_spent) {
 
 	const Index length = path_length(game);
 
-	if (length && path_length(game) <= game->step) {
+	if (length) {
 
-		assert(False);
-	}
+		if (path_length(game) <= game->step) {
 
-	if (game->path[game->step + 1]) {
+			assert(False);
+		}
 
-		assert(False);
+		if (game->path[game->step + 1]) {
+
+			assert(False);
+		}
 	}
 
 	if (_can_move(game, SQUARE_RANK(PLAYER_DOWN(game)), game->player_file)) {
@@ -364,7 +366,6 @@ void _resolve(struct Game* game, const Time passed, const Time time_spent) {
 	const Set captures = attack(game, True, False, False);
 	_judge(game);
 	LAND(game);
-	game->flip_deck = !game->dropped ? !game->flip_deck : game->flip_deck;
 	_checkmate(game);
 	_chronicle(game);
 	game->cursor_grade = CURSOR_GRADE(game, game->repeat && IS_SET(game->settings, KING_ON_REPEAT));
@@ -584,7 +585,6 @@ void _init_game(struct Game* game) {
 	game->last_spawned = 0;
 	game->end_time = -1;
 	game->repeat = False;
-	game->flip_deck = False;
 	game->pause = False;
 	game->player = 'W';
 	game->player_rank = 1;
@@ -960,12 +960,6 @@ Time ended(const struct Game* game) {
 const Piece deck(const struct Game* game, const Index grade, const Index increment) {
 
 	const char ret = DECKS[grade][increment];
-
-	if (IS_SET(game->settings, FLIP_DECK) && game->flip_deck) {
-
-		return INVERT_PIECE(ret);
-	}
-
 	return ret;
 }
 
