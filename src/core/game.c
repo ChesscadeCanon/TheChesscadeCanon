@@ -79,6 +79,8 @@ struct Game {
 #define BISHOP_SPEED(__game__, __moved__) ((__moved__) / (1 + DOUBLE_BISHOP(__game__)))
 #define BISHOP_RATE(__game__, __moved__) ((__moved__) * (1 + DOUBLE_BISHOP(__game__)))
 #define PLAYER_DOWN(__game__) SQUARE_INDEX(__game__->player_rank + (DOUBLE_BISHOP(__game__) + 1), __game__->player_file)
+#define PLAYER_RIGHT(__game__) SQUARE_INDEX(__game__->player_file, __game__->player_file + (DOUBLE_BISHOP(__game__) + 1))
+#define PLAYER_LEFT(__game__) SQUARE_INDEX(__game__->player_file, __game__->player_file - (DOUBLE_BISHOP(__game__) + 1))
 #define DROP_RATE(__game__) 0 
 #define QUEEN_ME(__game__, __rank__) (\
 	IS_SET(__game__->settings, PAWNS_PROMOTE) ?\
@@ -118,7 +120,10 @@ struct Game {
 )
 #define PACMAN(__game__, __index__) (abs(SQUARE_FILE(__index__) - (__game__->player_file)) > 2)
 #define CAN_STRIKE(__game__, __index__) (ON_BOARD(__game__, __index__ + RAISE_FLOOR(__game__)) && EMPTY_SQUARE(__game__->board, __index__))
-#define CAN_MOVE(__game__, __index__) (CAN_STRIKE(__game__, __index__) && !PACMAN(__game__, __index__))
+#define CAN_MOVE(__game__, __index__) (\
+	CAN_STRIKE(__game__, __index__) && !PACMAN(__game__, __index__) &&\
+	(DOUBLE_BISHOP(__game__) ? IS_WHITE(__game__->player) == SQUARE_IS_WHITE(PLAYER_SQUARE(__game__)) : 1)\
+)
 #define CURSOR_WRAPPED(__game__) (__game__->cursor_grade > 1)
 #define CURSOR_GRADE(__game__, __king__) (!HAS_CAPTURED(__game__->captures) + (__king__) * 2)
 #define CURSOR_INCREMENT(__game__) (\
@@ -282,8 +287,49 @@ Count _chronicle(struct Game* game) {
 	game->repeat = !ret;
 	return ret;
 }
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																const char* LICENSE = "Chesscade is a falling block puzzle game with chess pieces.\nCopyright(C) 2024  George Cesana ne Guy\n";
-void _resolve(struct Game* game, Time time_spent) {
+
+void _assert_on_time(const struct Game* game, const Time time) {
+
+	if (TIME_TAKEN(game) > time) {
+
+		//assert(False);
+	}
+}
+
+void _set_last_moved(struct Game* game, const Time time, const Time to) {
+
+	game->last_moved = to;
+	_assert_on_time(game, time);
+}
+
+void _set_last_spawned(struct Game* game, const Time passed, const Time to) {
+
+	game->last_spawned = to;
+	_assert_on_time(game, game->time + passed);
+}
+
+void _set_last_fell(struct Game* game, const Time passed, const Time to) {
+
+	game->last_fell = to;
+	_assert_on_time(game, game->time + passed);
+}
+
+void _resolve(struct Game* game, const Time passed, const Time time_spent) {
+
+	if (path_length(game) <= game->step) {
+
+		assert(False);
+	}
+
+	if (game->path[game->step + 1]) {
+
+		assert(False);
+	}
+
+	if (CAN_MOVE(game, PLAYER_DOWN(game))) {
+
+		assert(False);
+	}
 
 	const Time time = TIME_TAKEN(game) + time_spent;
 	game->events |= EVENT_LANDED;
@@ -306,7 +352,7 @@ void _resolve(struct Game* game, Time time_spent) {
 		REVERSE_CURSOR(game);
 	}
 
-	game->last_spawned = time;
+	_set_last_spawned(game, passed, time);
 
 	if (game->end_time < 0 && game_over(game)) {
 
@@ -314,7 +360,7 @@ void _resolve(struct Game* game, Time time_spent) {
 	}
 }
 
-Bool _move_player(struct Game* game, Index to, Time time_spent) {
+Bool _move_player(struct Game* game, const Index to, const Time passed, const Time time_spent) {
 
 	const Index to_rank = SQUARE_RANK(to), to_file = SQUARE_FILE(to);
 
@@ -324,9 +370,13 @@ Bool _move_player(struct Game* game, Index to, Time time_spent) {
 		game->player_file = to_file;
 		return True;
 	}
+	else if (to_file != game->player_file) {
+
+		return False;
+	}
 	else if (to_rank > game->player_rank && to_rank <= RANKS + 1) {
 
-		_resolve(game, time_spent);
+		_resolve(game, passed, time_spent);
 	}
 
 	return False;
@@ -337,12 +387,12 @@ Time _buy_move(struct Game* game, const Bool moved, const Time passed) {
 	if (!moved) return 0;
 	const Time rate = MOVE_RATE(game);
 	const Time since = SINCE_MOVED(game, passed);
-	const Time steps = since / rate;
+	const Time steps = game->path[0] || !game->histotrie ? 1 : since / rate;
 	assert(steps >= 0);
 	return steps;
 }
 
-Time _move(struct Game* game, Time steps, const short by_rank, const short by_file) {
+Time _move(struct Game* game, const Time passed, Time steps, const short by_rank, const short by_file) {
 
 	if (steps == 0) return 0;
 	const Bool orthogonal = !by_rank != !by_file;
@@ -359,25 +409,25 @@ Time _move(struct Game* game, Time steps, const short by_rank, const short by_fi
 		const Index to_file = game->player_file + by_files;
 		const Index to = SQUARE_INDEX(to_rank, to_file);
 		const Time time_spent = (ret + 1) * MOVE_RATE(game);
-		if (!_move_player(game, to, time_spent)) break;
+		if (!_move_player(game, to, passed, time_spent)) break;
 		++ret;
 	};
 
 	return ret;
 }
 
-Bool _drop(struct Game* game) {
+Bool _drop(struct Game* game, const Time passed) {
 
 	const Index from = PLAYER_SQUARE(game);
 	const Index to = _drop_to(game, from);
 	const Bool ret = to != from;
-	_move_player(game, to, 0);
-	_move(game, 1, 1, 0);
+	_move_player(game, to, passed, 0);
+	_move(game, passed, 1, 1, 0);
 	game->events |= EVENT_DROPPED * ret;
 	return ret;
 }
 
-Time _fall(struct Game* game, Time passed) {
+Time _fall(struct Game* game, const Time passed) {
 
 	assert(game);
 	const Time falls = SINCE_FELL(game, passed) / ease(game);
@@ -391,7 +441,7 @@ Time _fall(struct Game* game, Time passed) {
 		ret += ease(game);
 		++game->fall_count;
 
-		if (_move_player(game, to, ret)) {
+		if (_move_player(game, to, passed, ret)) {
 
 			game->events |= EVENT_FELL;
 			game->last_move = FALL;
@@ -403,7 +453,7 @@ Time _fall(struct Game* game, Time passed) {
 	return ret;
 }
 
-Time _do_move(struct Game* game, const Time left, const Time right, Time down) {
+Time _do_move(struct Game* game, const Time passed, const Time left, const Time right, Time down) {
 
 	Time ret = 0;
 	const Bool diagonals = IS_SET(game->settings, DIAGONALS);
@@ -414,7 +464,7 @@ Time _do_move(struct Game* game, const Time left, const Time right, Time down) {
 
 		const Time steps = min(left, down);
 		game->last_move = DOWN_LEFT;
-		ret = _move(game, steps, 1, -1);
+		ret = _move(game, passed, steps, 1, -1);
 		DRAG(game->dragged_left, ret);
 		DRAG(game->dragged_down, ret);
 	}
@@ -422,26 +472,26 @@ Time _do_move(struct Game* game, const Time left, const Time right, Time down) {
 
 		const Time steps = min(right, down);
 		game->last_move = DOWN_RIGHT;
-		ret = _move(game, steps, 1, 1);
+		ret = _move(game, passed, steps, 1, 1);
 		DRAG(game->dragged_right, ret);
 		DRAG(game->dragged_down, ret);
 	}
 	else if (left == 0 && right > 0 && down == 0) {
 		
 		game->last_move = RIGHT;
-		ret = _move(game, right, 0, 1);
+		ret = _move(game, passed, right, 0, 1);
 		DRAG(game->dragged_right, ret);
 	}
 	else if (left > 0 && right == 0 && down == 0) {
 
 		game->last_move = LEFT;
-		ret = _move(game, left, 0, -1);
+		ret = _move(game, passed, left, 0, -1);
 		DRAG(game->dragged_left, ret);
 	}
 	else if (left == 0 && right == 0 && down > 0) {
 		
 		game->last_move = DOWN;
-		ret = _move(game, max(0, down), 1, 0);
+		ret = _move(game, passed, max(0, down), 1, 0);
 		if (ret) game->moved_down = False;
 		DRAG(game->dragged_down, ret);
 	}
@@ -456,26 +506,28 @@ void _take_move(struct Game* game, Time passed) {
 
 		if (game->last_moved < 0) {
 
-			game->last_moved = game->time;
+			_set_last_moved(game, game->time + passed, game->time);
 		}
 
 		const Time down = _buy_move(game, game->moved_down, passed);
 		const Time left = _buy_move(game, game->moved_left, passed);
 		const Time right = _buy_move(game, game->moved_right, passed);
-		const Time count = _do_move(game, left, right, down);
+		const Time count = _do_move(game, passed, left, right, down);
+		const Time move_time = count * MOVE_RATE(game);
 
-		game->last_moved += count * MOVE_RATE(game);
+		_set_last_moved(game, game->time + passed, game->last_moved + move_time);
 
 		if (IS_SET(game->settings, FLYING_PIECES) && game->last_fell < game->last_moved) {
 
-			game->last_fell = game->last_moved;
+			_set_last_fell(game, game->time + passed, game->last_moved);
 		}
 	} else {
 
 		game->last_moved = -1;
 	}
 
-	game->last_fell += _fall(game, passed);
+	const Time fall_time = _fall(game, passed);
+	_set_last_fell(game, game->time + passed, game->last_fell + fall_time);
 }
 
 void init_path(Step path[MAX_STEPS]) {
@@ -488,12 +540,13 @@ void take_path(struct Game* game, const Step path[MAX_STEPS])
 	memcpy(game->path, path, MAX_STEPS * sizeof(Step));
 }
 
-void take_step(struct Game* game, const Step step)
+void _take_step(struct Game* game, const Step step)
 {
-	Count open = strnlen(game->path, MAX_STEPS);
+	const Count open = strnlen(game->path, MAX_STEPS);
 	assert(open < MAX_STEPS);
 	assert(open >= 0);
 	game->path[open] = step;
+	game->step = (Index) open;
 }
 
 void _init_game(struct Game* game) {
@@ -630,6 +683,27 @@ void do_drop(struct Game* game) {
 
 void do_digital_move(struct Game* game, Bool left, Bool right, Bool down) {
 
+	if (left && down && !(game->moved_left && game->moved_down && !game->moved_right)) {
+
+		_set_last_moved(game, game->time, game->time);
+	}
+	else if (right && down && !(game->moved_right && game->moved_down && !game->moved_left)) {
+
+		_set_last_moved(game, game->time, game->time);
+	}
+	else if (right && !down && (game->moved_left || game->moved_down)) {
+
+		_set_last_moved(game, game->time, game->time);
+	}
+	else if (left && !down && (game->moved_right || game->moved_down)) {
+
+		_set_last_moved(game, game->time, game->time);
+	}
+	else if (down && !left && !right && (game->moved_right || game->moved_left)) {
+
+		_set_last_moved(game, game->time, game->time);
+	}
+
 	game->moved_left = left;
 	game->moved_right = right;
 	game->moved_down = down;
@@ -762,14 +836,66 @@ Count path_length(const struct Game* game)
 void follow_path(struct Game* game) {
 
 	const enum Event event_moved = EVENT_LEFT | EVENT_RIGHT | EVENT_DOWN | EVENT_FELL;
+	const enum Event events = current_events(game);
+	const enum Event event_down_left = EVENT_LEFT | EVENT_DOWN;
+	const enum Event event_down_right = EVENT_RIGHT | EVENT_DOWN;
+	
+	if (event_moved & events) {
 
-	if (event_moved & current_events(game)) {
+		Bool done = False;
+		Bool wrong = False;
+		const Step step = game->path[game->step];
+		switch (step) {
 
-		assert(++game->step < MAX_STEPS);
+		case LEFT:
+			done = EVENT_LEFT & events;
+			break;
+		case RIGHT:
+			done = EVENT_RIGHT & events;
+			break;
+		case DOWN:
+			done = EVENT_DOWN & events;
+			break;
+		case FALL:
+			done = EVENT_FELL & events;
+			break;
+		case DOWN_LEFT:
+			done = (event_down_left & events) == event_down_left;
+			break;
+		case DOWN_RIGHT:
+			done = (event_down_right & events) == event_down_right;
+			break;
+		default: break;
+		}
+
+		wrong = !done && (events & event_moved);
+
+		if (wrong) {
+
+			assert(False);
+		}
+		else if (done) {
+
+			if (game->step < path_length(game) - 1) {
+
+				++game->step;
+				assert(game->step < MAX_STEPS);
+			}
+		}
 	}
 
 	Step way = game->path[game->step];
 	_go_way(game, way);
+}
+
+Step get_step(const struct Game* game, const Index step)
+{
+	if (step >= path_length(game)) {
+
+		assert(False);
+	}
+
+	return game->path[step];
 }
 
 Bool cursor_wrapped(const struct Game* game) {
@@ -921,7 +1047,7 @@ void _take_drop(struct Game* game, Time passed) {
 
 	if (game->dropped && SINCE_SPAWNED(game, passed) >= DROP_RATE(game)) {
 
-		if (_drop(game)) {
+		if (_drop(game, passed)) {
 
 			game->last_moved = game->last_fell = game->time;
 		}
@@ -930,7 +1056,7 @@ void _take_drop(struct Game* game, Time passed) {
 	game->dropped = False;
 }
 
-void _pump(struct Game* game, Time passed) {
+void _pump_recursive(struct Game* game, Time passed) {
 
 	if (game_over(game)) return;
 
@@ -952,8 +1078,10 @@ void pump(struct Game* game, const Time passed) {
 	if (game_over(game) || game->pause) return;
 
 	game->events = 0;
-	_pump(game, passed);
+	_pump_recursive(game, passed);
 	game->time += passed;
+
+	_assert_on_time(game, game->time);
 }
 
 void begin(struct Game* game) {
@@ -1007,6 +1135,7 @@ struct Game* malloc_init_game_moved_copy(struct Game* previous, const Step way)
 {
 	struct Game* next = malloc_init_game_shallow_copy(previous);
 
+	_take_step(next, way);
 	_go_way(next, way);
 
 	if (way == FALL) {
@@ -1018,6 +1147,12 @@ struct Game* malloc_init_game_moved_copy(struct Game* previous, const Step way)
 		pump(next, move_rate(next));
 	}
 
+	if (!path_length(next)) {
+
+		take_path(next, previous->path);
+		_take_step(next, DOWN);
+	}
+	
 	return next;
 }
 
@@ -1045,7 +1180,7 @@ struct Game* malloc_init_game_moved_copy_or_null(struct Game* previous, const St
 	case FALL:
 		good = r < R && f == F; break;
 	case DOWN:
-		good = r < R && f == F || L;
+		good = r < R && f == F || L; break;
 	default: break;
 	}
 

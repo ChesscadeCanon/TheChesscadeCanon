@@ -10,6 +10,7 @@
 #define SQUARE_BIT(__index__) (1ull << (Set)(SQUARE_RANK(__index__) * FILES + SQUARE_FILE(__index__)))
 #define SET_CAPTURE(__captures__, __piece_index__, __value__) (__captures__[__piece_index__] = __value__)
 #define SET_SQUARE(__board__, __index__, __value__) (__board__[__index__] = __value__)
+#define SQUARE_IS_WHITE(__index__) (SQUARE_RANK(__index__) % 2 == SQUARE_FILE(__index__) % 2)
 #define IS_WHITE(__piece__) (__piece__ <= 'Z')
 #define INVERT_PIECE(__piece__) (__piece__ + (IS_WHITE(__piece__) ? 1 : -1) * ('a' - 'A'))
 #define SQUARE_INDEX(__rank__, __file__) ((__rank__) * LINE_LENGTH + (__file__))

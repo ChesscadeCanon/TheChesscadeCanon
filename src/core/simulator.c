@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-const char WAYS[WAY_COUNT + 1] = { DOWN, DOWN_LEFT, DOWN_RIGHT, RIGHT, LEFT, FALL, LANDED };
+const char WAYS[WAY_COUNT + 1] = { DOWN, FALL, RIGHT, LEFT, DOWN_LEFT, DOWN_RIGHT, LANDED };
 
 #define IS_LEAF(__game__) (current_events(__game__) & EVENT_LANDED)
 #define STEP_GAME(__game__) (\
@@ -52,12 +52,6 @@ void _search(struct Game* game, struct Game* leaves[STEPS]) {
 			struct Game* previous = discovered[d];
 			assert(previous);
 
-			if (path_length(previous) >= MAX_STEPS) {
-				discoveries--;
-				discovered[d] = NULL;
-				continue;
-			}
-
 			const Count had = STEP_GAME(previous);
 			
 			for (Count w = 0; w < WAY_COUNT; ++w) {
@@ -73,7 +67,6 @@ void _search(struct Game* game, struct Game* leaves[STEPS]) {
 				if (IS_LEAF(next) && !leaves[had]) {
 
 					leaves[had] = next;
-					take_path(next, current_path(previous));
 				}
 				else if (was) {
 
@@ -86,8 +79,6 @@ void _search(struct Game* game, struct Game* leaves[STEPS]) {
 					discovered[open++] = next;
 					++discoveries;
 				}
-
-				take_step(next, way);
 			}
 
 			discovered[d] = NULL;
@@ -101,24 +92,40 @@ void _search(struct Game* game, struct Game* leaves[STEPS]) {
 	_free_field(visited);
 }
 
+Bool _pick_leaf(struct Game* game, struct Game* leaves[STEPS], const Index pick) {
+
+	const struct Game* leaf = leaves[pick];
+
+	if (leaf) {
+
+		const Step* path = current_path(leaf);
+		take_path(game, path);
+		return True;
+	}
+
+	return False;
+}
+
 void _select_random(struct Game* game, struct Game* leaves[STEPS]) {
 
+	Index limit = STEPS;
+	while (limit) {
 
+		Index p;
+		for (p = rand() % STEPS; p < limit; ++p) {
+
+			if (_pick_leaf(game, leaves, p)) return;
+		}
+
+		limit = p;
+	}
 }
 
 void _select_first(struct Game* game, struct Game* leaves[STEPS]) {
 
-	for (Count p = 0; p < STEPS; ++p) {
+	for (Index p = 0; p < STEPS; ++p) {
 
-		const struct Game* leaf = leaves[p];
-
-		if (leaf) {
-
-			const Step* path = current_path(leaf);
-
-			take_path(game, path);
-			break;
-		}
+		if (_pick_leaf(game, leaves, p)) return;
 	}
 }
 
@@ -126,7 +133,7 @@ void _find_best(struct Game* game) {
 
 	struct Game* leaves[STEPS];
 	_search(game, leaves);
-	_select_first(game, leaves);
+	_select_random(game, leaves);
 	_free_field(leaves);
 }
 
@@ -141,6 +148,8 @@ void automate(struct Game* game) {
 
 		_find_best(game);
 	}
+	else {
 
-	follow_path(game);
+		follow_path(game);
+	}
 }
