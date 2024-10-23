@@ -1,7 +1,6 @@
 #ifdef _WIN32
 #include "application.h"
 #endif
-#include "tests.h"
 #include "def.h"
 #include <stdio.h>
 #include <string.h>
@@ -9,17 +8,19 @@
 #include <simulator.h>
 #include <time.h>
 
+#define ARGMAX 6
+
 void print_help() {
 
 #ifdef _WIN32
 	printf("Run with no arguments to play command line app.\n");
-#else
-	printf("Command line app only available on Windows. Only tests are available.\n");
-#endif
-	printf("Run with -t to run tests.\n");
-	printf("Run with -v to run tests in verbose mode.\n");
-	printf("Run with -t [test number] or -v [test number] to run a specific test.\n");
 	printf("Run with -h to see this message.\n");
+	printf("Run with -a to run an automated game.\n");
+	printf("Follow -a with -s and a number to specify the random seed.\n");
+	printf("When an automated game exits, it will show the seed it used.\n");
+#else
+	printf("Command line app only available on Windows.\n");
+#endif
 }
 
 Bool argmatch(int argc, const char** argv, int index, const char* arg) {
@@ -27,25 +28,38 @@ Bool argmatch(int argc, const char** argv, int index, const char* arg) {
 	return argc > index && strncmp(arg, argv[index], 2) == 0;
 }
 
-void _tests(int argc, const char** argv, Bool verbose) {
+Bool argfind(int argc, const char** argv, const char* arg) {
 
-	int select = -1;
+	for (int ret = 1; ret < ARGMAX; ++ret) {
 
-	if (argc >= 3) {
+		if (argmatch(argc, argv, ret, arg)) {
 
-		select = atoi(argv[2]);
+			return ret;
+		}
 	}
 
-	run_tests(select, verbose);
+	return 0;
+}
+
+unsigned int argget(int argc, const char** argv, unsigned int index) {
+
+	if (index + 1 >= argc) {
+	
+		printf("Could not find data for argument %s; exiting\n", argv[index]);
+		exit(1);
+	}
+	
+	return atol(argv[index + 1]);
 }
 
 void _simulate(int argc, const char** argv) {
 
 	unsigned int seed = 0;
+	unsigned int seed_index = argfind(argc, argv, "-s");
+	
+	if (seed_index) {
 
-	if (argc >= 3) {
-
-		seed = atol(argv[2]);
+		seed = argget(argc, argv, seed_index);
 	}
 
 	if (!seed) {
@@ -67,21 +81,16 @@ int main(int argc, const char** argv) {
 		print_help();
 #endif
 	}
-	else if (argmatch(argc, argv, 1, "-h")) {
+	else if (argfind(argc, argv, "-h")) {
 
 		print_help();
 	}
-	else if (argmatch(argc, argv, 1, "-t")) {
-
-		_tests(argc, argv, False);
-	}
-	else if (argmatch(argc, argv, 1, "-v")) {
-
-		_tests(argc, argv, True);
-	}
-	else if (argmatch(argc, argv, 1, "-s")) {
-
+	else if (argfind(argc, argv, "-a")) {
+#ifdef _WIN32
 		_simulate(argc, argv);
+#else
+		print_help();
+#endif
 	}
 
 	return 0;

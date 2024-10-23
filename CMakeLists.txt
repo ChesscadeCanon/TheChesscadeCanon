@@ -18,7 +18,7 @@ add_custom_command(
 add_executable(ChesscadeApp)
 target_include_directories(ChesscadeApp PRIVATE src/standalone)
 IF(WIN32)
-	target_sources(ChesscadeApp PRIVATE src/standalone/main.c src/core/game.c src/standalone/view.c src/standalone/control.c rules.h src/core/histotrie.c src/core/board.c src/standalone/application.c src/standalone/main.c src/standalone/tests.c src/core/simulator.c)
+	target_sources(ChesscadeApp PRIVATE src/standalone/main.c src/core/game.c src/standalone/view.c src/standalone/control.c rules.h src/core/histotrie.c src/core/board.c src/standalone/application.c src/standalone/main.c  src/core/simulator.c)
 ELSE()
 	target_sources(ChesscadeApp PRIVATE src/standalone/main.c src/core/game.c rules.h src/core/histotrie.c src/core/board.c src/standalone/main.c src/standalone/tests.c src/core/simulator.c)
 ENDIF()
