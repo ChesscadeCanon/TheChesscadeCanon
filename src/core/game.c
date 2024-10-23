@@ -120,10 +120,6 @@ struct Game {
 )
 #define PACMAN(__game__, __index__) (abs(SQUARE_FILE(__index__) - (__game__->player_file)) > 2)
 #define CAN_STRIKE(__game__, __index__) (ON_BOARD(__game__, __index__ + RAISE_FLOOR(__game__)) && EMPTY_SQUARE(__game__->board, __index__))
-#define CAN_MOVE(__game__, __index__) (\
-	CAN_STRIKE(__game__, __index__) && !PACMAN(__game__, __index__) &&\
-	(DOUBLE_BISHOP(__game__) ? IS_WHITE(__game__->player) == SQUARE_IS_WHITE(PLAYER_SQUARE(__game__)) : 1)\
-)
 #define CURSOR_WRAPPED(__game__) (__game__->cursor_grade > 1)
 #define CURSOR_GRADE(__game__, __king__) (!HAS_CAPTURED(__game__->captures) + (__king__) * 2)
 #define CURSOR_INCREMENT(__game__) (\
@@ -140,6 +136,31 @@ struct Game {
 void print_rules() {
 
 	printf("%s", RULES);
+}
+
+Bool _can_move(const struct Game* game, const Index rank, const Index file) {
+
+	const Index square = SQUARE_INDEX(rank, file);
+
+	if (!CAN_STRIKE(game, square)) {
+
+		return False;
+	}
+
+	if (PACMAN(game, square)) {
+
+		return False;
+	}
+
+	if (DOUBLE_BISHOP(game)) {
+
+		if (IS_WHITE(game->player) != SQUARE_IS_WHITE(square)) {
+
+			return False;
+		}
+	}
+
+	return True;
 }
 
 Index _update_cursor(struct Game* game) {
@@ -231,7 +252,7 @@ Index _drop_to(const struct Game* game, const Index from) {
 		to = SQUARE_DOWN(to);
 	}
 
-	if (CAN_MOVE(game, to)) {
+	if (_can_move(game, SQUARE_RANK(to), SQUARE_FILE(to))) {
 
 		return _drop_to(game, to);
 	}
@@ -316,7 +337,9 @@ void _set_last_fell(struct Game* game, const Time passed, const Time to) {
 
 void _resolve(struct Game* game, const Time passed, const Time time_spent) {
 
-	if (path_length(game) <= game->step) {
+	const Index length = path_length(game);
+
+	if (length && path_length(game) <= game->step) {
 
 		assert(False);
 	}
@@ -326,7 +349,7 @@ void _resolve(struct Game* game, const Time passed, const Time time_spent) {
 		assert(False);
 	}
 
-	if (CAN_MOVE(game, PLAYER_DOWN(game))) {
+	if (_can_move(game, SQUARE_RANK(PLAYER_DOWN(game)), game->player_file)) {
 
 		assert(False);
 	}
@@ -364,7 +387,7 @@ Bool _move_player(struct Game* game, const Index to, const Time passed, const Ti
 
 	const Index to_rank = SQUARE_RANK(to), to_file = SQUARE_FILE(to);
 
-	if (CAN_MOVE(game, to)) {
+	if (_can_move(game, to_rank, to_file)) {
 
 		game->player_rank = to_rank;
 		game->player_file = to_file;
@@ -828,9 +851,9 @@ const char* current_path(const struct Game* game)
 	return game->path;
 }
 
-Count path_length(const struct Game* game)
+Index path_length(const struct Game* game)
 {
-	return strnlen(game->path, MAX_STEPS);
+	return (Index)strnlen(game->path, MAX_STEPS);
 }
 
 void follow_path(struct Game* game) {
@@ -1058,13 +1081,17 @@ void _take_drop(struct Game* game, Time passed) {
 
 void _pump_recursive(struct Game* game, Time passed) {
 
-	if (game_over(game)) return;
+	if (game_over(game)) {
+		return;
+	}
 
 	_take_drop(game, passed);
 	_take_drag(game);
 	_take_move(game, passed);
 
-	if (game_over(game)) return;
+	if (game_over(game)) {
+		return;
+	}
 
 	const Bool moved = game->moved_left || game->moved_right || game->moved_down;
 	const Bool time_to_move = SINCE_MOVED(game, passed) >= move_rate(game) && moved;

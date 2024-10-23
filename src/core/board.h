@@ -76,9 +76,9 @@ extern const char SYMBOLS[SYMBOL_COUNT];
 }
 #define BISHOP_DECKS {\
 	"BbBbBbBb", \
-	"bBbBbBbB", \
-	"bbbbbbbb", \
-	"BBBBBBBB" \
+	"BbBbBbBb", \
+	"BbBbBbBb", \
+	"BbBbBbBb" \
 }
 static const char DECKS[GRADES][INCREMENTS + 1] = STANDARD_DECKS;
 

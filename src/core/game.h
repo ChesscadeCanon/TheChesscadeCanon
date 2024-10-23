@@ -73,6 +73,6 @@ Time time_taken(const struct Game*);
 const struct Game* get_source(const struct Game*);
 char last_move(const struct Game*);	
 const char* current_path(const struct Game*);
-Count path_length(const struct Game*);
+Index path_length(const struct Game*);
 void follow_path(struct Game*);
 Step get_step(const struct Game*, const Index);

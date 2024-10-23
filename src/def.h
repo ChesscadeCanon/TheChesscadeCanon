@@ -86,7 +86,6 @@ enum Setting {
 		| DOUBLE_BISHOPS
 		| CHECKMATE
 		| DIAGONALS
-		| FLIP_DECK
 };
 
 enum Event {

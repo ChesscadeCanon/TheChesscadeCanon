@@ -3,7 +3,6 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
-#include <time.h>
 
 const char WAYS[WAY_COUNT + 1] = { DOWN, FALL, RIGHT, LEFT, DOWN_LEFT, DOWN_RIGHT, LANDED };
 
@@ -137,9 +136,9 @@ void _find_best(struct Game* game) {
 	_free_field(leaves);
 }
 
-void init_simulator()
+void init_simulator(const unsigned int seed)
 {
-	srand((unsigned int)time(NULL));
+	srand(seed);
 }
 
 void automate(struct Game* game) {

@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <simulator.h>
+#include <time.h>
 
 void print_help() {
 
@@ -38,12 +39,30 @@ void _tests(int argc, const char** argv, Bool verbose) {
 	run_tests(select, verbose);
 }
 
+void _simulate(int argc, const char** argv) {
+
+	unsigned int seed = 0;
+
+	if (argc >= 3) {
+
+		seed = atol(argv[2]);
+	}
+
+	if (!seed) {
+
+		seed = (unsigned int)time(NULL);
+	}
+
+	init_simulator(seed);
+	run_pretty_auto_text_game(STANDARD_SETTINGS);
+	printf("seed: %ul", seed);
+}
+
 int main(int argc, const char** argv) {
 
 	if (argc == 1) {
 #ifdef _WIN32
-		init_simulator();
-		run_pretty_auto_text_game(STANDARD_SETTINGS);
+		run_pretty_text_game(STANDARD_SETTINGS);
 #else
 		print_help();
 #endif
@@ -59,6 +78,10 @@ int main(int argc, const char** argv) {
 	else if (argmatch(argc, argv, 1, "-v")) {
 
 		_tests(argc, argv, True);
+	}
+	else if (argmatch(argc, argv, 1, "-s")) {
+
+		_simulate(argc, argv);
 	}
 
 	return 0;
