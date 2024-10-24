@@ -18,6 +18,10 @@ void print_help() {
 	printf("Run with -a to run an automated game.\n");
 	printf("Follow -a with -s and a number to specify the random seed.\n");
 	printf("When an automated game exits, it will show the seed it used.\n");
+	printf("Follow -a with -a and a number to specify a custom filter sequence.\n");
+	printf("The expert system will find the shortest path to each square the current piece can reach.\n");
+	printf("Then it will apply the filters in the order specified, from left to right.\n");
+	printf("The currently implemented filters are as follows:\n");
 #else
 	printf("Command line app only available on Windows.\n");
 #endif
@@ -41,7 +45,7 @@ Bool argfind(int argc, const char** argv, const char* arg) {
 	return 0;
 }
 
-unsigned int argget(int argc, const char** argv, unsigned int index) {
+int argget(const int argc, const char** argv, const int index) {
 
 	if (index + 1 >= argc) {
 	
@@ -49,10 +53,10 @@ unsigned int argget(int argc, const char** argv, unsigned int index) {
 		exit(1);
 	}
 	
-	return atol(argv[index + 1]);
+	return strtol(argv[index + 1], NULL, 16);
 }
 
-void _simulate(int argc, const char** argv) {
+void _simulate(const int argc, const char** argv) {
 
 	unsigned int seed = 0;
 	unsigned int seed_index = argfind(argc, argv, "-s");
@@ -69,10 +73,10 @@ void _simulate(int argc, const char** argv) {
 
 	init_simulator(seed);
 	run_pretty_auto_text_game(STANDARD_SETTINGS);
-	printf("seed: %ul", seed);
+	printf("seed: %Xl", seed);
 }
 
-int main(int argc, const char** argv) {
+int main(const int argc, const char** argv) {
 
 	if (argc == 1) {
 #ifdef _WIN32

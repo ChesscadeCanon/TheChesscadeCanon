@@ -91,7 +91,7 @@ void _search(struct Game* game, struct Game* leaves[STEPS]) {
 	_free_field(visited);
 }
 
-Bool _pick_leaf(struct Game* game, struct Game* leaves[STEPS], const Index pick) {
+Bool _pick_leaf(struct Game* game, struct Game* leaves[STEPS], const Count pick) {
 
 	const struct Game* leaf = leaves[pick];
 
@@ -107,21 +107,24 @@ Bool _pick_leaf(struct Game* game, struct Game* leaves[STEPS], const Index pick)
 
 void _select_random(struct Game* game, struct Game* leaves[STEPS]) {
 
-	Index limit = STEPS;
-	while (limit) {
+	struct Game* buffer[STEPS];
+	Count to = 0;
+	for(Count from = 0; from < STEPS; ++from) {
 
-		Index p;
-		for (p = rand() % STEPS; p < limit; ++p) {
+		if (leaves[from]) {
 
-			if (_pick_leaf(game, leaves, p)) return;
+			buffer[to++] = leaves[from];
 		}
+	}
 
-		limit = p;
+	if (to) {
+
+		_pick_leaf(game, buffer, rand() % to);
 	}
 }
 
 void _select_first(struct Game* game, struct Game* leaves[STEPS]) {
-
+	
 	for (Index p = 0; p < STEPS; ++p) {
 
 		if (_pick_leaf(game, leaves, p)) return;
