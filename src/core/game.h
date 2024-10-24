@@ -76,3 +76,5 @@ const char* current_path(const struct Game*);
 Index path_length(const struct Game*);
 void follow_path(struct Game*);
 Step get_step(const struct Game*, const Index);
+void set_filters(struct Game* game, const Set filters);
+Set get_filters(const struct Game* game);

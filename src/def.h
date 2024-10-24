@@ -50,6 +50,7 @@ typedef int Events;
 typedef long long Time;
 typedef unsigned short Bool;
 typedef long double Fraction;
+typedef long long Rating;
 #define True 1u
 #define False 0u
 
@@ -96,4 +97,10 @@ enum Event {
 	EVENT_WRAPPED = 1 << 6,
 	EVENT_LANDED = 1 << 7,
 	EVENT_CAPTURE = 1 << 8
+};
+
+enum Filter {
+
+	FILTER_RANDOM = 0,
+	FILTER_LOSSES = 1
 };

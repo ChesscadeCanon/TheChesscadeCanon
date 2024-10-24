@@ -60,6 +60,7 @@ struct Game {
 	Count copies;
 	Step path[MAX_STEPS];
 	Index step;
+	Set filters;
 };
 
 #define PLAYER_SQUARE(__game__) SQUARE_INDEX(__game__->player_rank, __game__->player_file)
@@ -608,6 +609,7 @@ void _init_game(struct Game* game) {
 	game->source = NULL;
 	game->copies = 1;
 	game->step = 0;
+	game->filters = 0;
 	init_board(game->board);
 	init_captures(game->captures);
 	init_path(game->path);
@@ -919,6 +921,16 @@ Step get_step(const struct Game* game, const Index step)
 	}
 
 	return game->path[step];
+}
+
+void set_filters(struct Game* game, const Set filters)
+{
+	game->filters = filters;
+}
+
+Set get_filters(const struct Game* game)
+{
+	return game->filters;
 }
 
 Bool cursor_wrapped(const struct Game* game) {

@@ -5,6 +5,8 @@
 #include <stdlib.h>
 
 const char WAYS[WAY_COUNT + 1] = { DOWN, FALL, RIGHT, LEFT, DOWN_LEFT, DOWN_RIGHT, LANDED };
+#define MAX_FLAGS 16
+#define FILTER_FUNCTOR(VAR) Rating (*VAR)(struct Game*)
 
 #define IS_LEAF(__game__) (current_events(__game__) & EVENT_LANDED)
 #define STEP_GAME(__game__) (\
@@ -14,6 +16,11 @@ const char WAYS[WAY_COUNT + 1] = { DOWN, FALL, RIGHT, LEFT, DOWN_LEFT, DOWN_RIGH
 		current_cursor_increment(__game__)\
 	)\
 )
+
+Rating _filter_losses(const struct Game* game) {
+
+	return (Rating) !game_over(game);
+}
 
 void _init_path(Step path[MAX_STEPS]) {
 
@@ -46,46 +53,46 @@ void _search(struct Game* game, struct Game* leaves[STEPS]) {
 
 	for (Count start = 0, limit = 1; discoveries > 0;) {
 
-		for (Count d = start; d < limit; ++d) {
+for (Count d = start; d < limit; ++d) {
 
-			struct Game* previous = discovered[d];
-			assert(previous);
+	struct Game* previous = discovered[d];
+	assert(previous);
 
-			const Count had = STEP_GAME(previous);
-			
-			for (Count w = 0; w < WAY_COUNT; ++w) {
+	const Count had = STEP_GAME(previous);
 
-				Step way = WAYS[w];
-				struct Game* next = malloc_init_game_moved_copy_or_null(previous, way);
+	for (Count w = 0; w < WAY_COUNT; ++w) {
 
-				if (!next) continue;
+		Step way = WAYS[w];
+		struct Game* next = malloc_init_game_moved_copy_or_null(previous, way);
 
-				const Count has = STEP_GAME(next);
-				const struct Game* was = visited[has];
+		if (!next) continue;
 
-				if (IS_LEAF(next) && !leaves[had]) {
+		const Count has = STEP_GAME(next);
+		const struct Game* was = visited[has];
 
-					leaves[had] = next;
-				}
-				else if (was) {
+		if (IS_LEAF(next) && !leaves[had]) {
 
-					free_game_shallow(next);
-					continue;
-				}
-				else {
-
-					visited[has] = next;
-					discovered[open++] = next;
-					++discoveries;
-				}
-			}
-
-			discovered[d] = NULL;
-			--discoveries;
+			leaves[had] = next;
 		}
+		else if (was) {
 
-		start = limit;
-		limit = open;
+			free_game_shallow(next);
+			continue;
+		}
+		else {
+
+			visited[has] = next;
+			discovered[open++] = next;
+			++discoveries;
+		}
+	}
+
+	discovered[d] = NULL;
+	--discoveries;
+}
+
+start = limit;
+limit = open;
 	}
 
 	_free_field(visited);
@@ -109,7 +116,7 @@ void _select_random(struct Game* game, struct Game* leaves[STEPS]) {
 
 	struct Game* buffer[STEPS];
 	Count to = 0;
-	for(Count from = 0; from < STEPS; ++from) {
+	for (Count from = 0; from < STEPS; ++from) {
 
 		if (leaves[from]) {
 
@@ -124,10 +131,60 @@ void _select_random(struct Game* game, struct Game* leaves[STEPS]) {
 }
 
 void _select_first(struct Game* game, struct Game* leaves[STEPS]) {
-	
+
 	for (Index p = 0; p < STEPS; ++p) {
 
 		if (_pick_leaf(game, leaves, p)) return;
+	}
+}
+
+void _apply_filter(struct Game* leaves[STEPS], FILTER_FUNCTOR(filter_functor)) {
+
+	Count best = 0;
+	for (Count l = 0; l < STEPS; ++l) {
+
+		struct Game* leaf = leaves[l];
+		if (leaf) {
+
+			const long long result = filter_functor(leaf);
+			best = max(best, result);
+		}
+	}
+
+	for (Count l = 0; l < STEPS; ++l) {
+
+		struct Game* leaf = leaves[l];
+		if (leaf) {
+
+			const long long result = filter_functor(leaf);
+
+			if (result < best) {
+
+				free_game_shallow(leaf);
+				leaves[l] = NULL;
+			}
+		}
+	}
+}
+
+Bool _apply_filter_flag(struct Game* leaves[STEPS], const char flag) {
+
+	switch (flag) {
+
+	case '0': return False;
+	case '1': _apply_filter(leaves, _filter_losses);
+	default: return False;
+	}
+}
+
+void _filter(struct Game* leaves[STEPS], const Set filters) {
+
+	char buffer[MAX_FLAGS + 1];
+	_ultoa_s((unsigned long)filters, buffer, MAX_FLAGS, 16);
+
+	for (Index index = 0; index < MAX_FLAGS && buffer[index]; ++index) {
+
+		_apply_filter_flag(leaves, buffer[index]);
 	}
 }
 
@@ -135,6 +192,7 @@ void _find_best(struct Game* game) {
 
 	struct Game* leaves[STEPS];
 	_search(game, leaves);
+	_filter(leaves, get_filters(game));
 	_select_random(game, leaves);
 	_free_field(leaves);
 }

@@ -94,16 +94,17 @@ void play_pretty_auto(struct Game* game) {
 	play(game, &start, auto_control, default_model, pretty_view);
 }
 
-void run_pretty_text_game(Settings settings) {
+void run_pretty_text_game(const Settings settings) {
 
 	struct Game* game = malloc_init_game(settings);
 	play_pretty(game);
 	free_game(game);
 }
 
-void run_pretty_auto_text_game(Settings settings) {
+void run_pretty_auto_text_game(const Settings settings, const Set filters) {
 
 	struct Game* game = malloc_init_game(settings);
+	set_filters(game, filters);
 	play_pretty_auto(game);
 	free_game(game);
 }
