@@ -33,11 +33,6 @@ extern "C" {
 	EXPORT void delete_game(struct Game*);
 
 	/**
-	* returns the number of consecutive captures
-	*/
-	EXPORT unsigned long long get_combo(const struct Game*);
-
-	/**
 	* returns -1 if the cursor is going left or 1 if it's going right
 	*/
 	EXPORT short get_cursor_direction(const struct Game*);

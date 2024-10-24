@@ -19,7 +19,6 @@ void _print_instructions() {
 
 void _print_info(const struct Game* game) {
 	printf("score %llu\n", current_score(game));
-	printf("combo %llu\n", current_combo(game));
 	printf("repeat %d\n", repeated(game));
 	printf("time %llu\n", milliseconds(game));
 }

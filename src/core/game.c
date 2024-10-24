@@ -31,7 +31,6 @@ struct Game {
 	Fraction dragged_down;
 	char last_move;
 	Count score;
-	Count combo;
 	Count scored;
 	Time time;
 	Time end_time;
@@ -293,7 +292,6 @@ void _judge(struct Game* game) {
 		}
 	}
 
-	count ? ++game->combo : (game->combo = 0);
 	game->scored *= gain + count;
 	game->score += game->scored;
 }
@@ -577,7 +575,6 @@ void _take_step(struct Game* game, const Step step)
 void _init_game(struct Game* game) {
 
 	game->score = 0;
-	game->combo = 0;
 	game->scored = 0;
 	game->time = 0;
 	game->last_moved = -1;
@@ -803,11 +800,6 @@ Count current_score(const struct Game* game) {
 }
 
 Count last_scored(const struct Game* game) {
-
-	return game->scored;
-}
-
-Count current_combo(const struct Game* game) {
 
 	return game->scored;
 }

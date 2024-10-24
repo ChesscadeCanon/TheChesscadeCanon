@@ -140,13 +140,13 @@ void _select_first(struct Game* game, struct Game* leaves[STEPS]) {
 
 void _apply_filter(struct Game* leaves[STEPS], FILTER_FUNCTOR(filter_functor)) {
 
-	Count best = 0;
+	Rating best = 0;
 	for (Count l = 0; l < STEPS; ++l) {
 
 		struct Game* leaf = leaves[l];
 		if (leaf) {
 
-			const long long result = filter_functor(leaf);
+			const Rating result = filter_functor(leaf);
 			best = max(best, result);
 		}
 	}
@@ -156,7 +156,7 @@ void _apply_filter(struct Game* leaves[STEPS], FILTER_FUNCTOR(filter_functor)) {
 		struct Game* leaf = leaves[l];
 		if (leaf) {
 
-			const long long result = filter_functor(leaf);
+			const Rating result = filter_functor(leaf);
 
 			if (result < best) {
 

@@ -139,12 +139,6 @@ Set get_figure(const Piece piece, const int layer, const Index index, const Bool
 	return figure(piece, static_cast<enum Layer>(layer), index);
 }
 
-Count get_combo(const struct Game* game) {
-
-	ASSERT_GAME(game);
-	return current_combo(game);
-}
-
 Trenary get_cursor_direction(const struct Game* game) {
 
 	ASSERT_GAME(game);
