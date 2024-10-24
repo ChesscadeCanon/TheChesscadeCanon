@@ -17,9 +17,57 @@ const char WAYS[WAY_COUNT + 1] = { DOWN, FALL, RIGHT, LEFT, DOWN_LEFT, DOWN_RIGH
 	)\
 )
 
+Rating _filter_kings(const struct Game* game) {
+
+	return PIECE_MAP[player_piece(game)] != KING;
+}
+
+Rating _filter_grade(const struct Game* game) {
+
+	return current_cursor_grade(game) < 2;
+}
+
 Rating _filter_losses(const struct Game* game) {
 
 	return (Rating) !game_over(game);
+}
+
+Rating _filter_score(const struct Game* game) {
+
+	return current_score(game);
+}
+
+Rating _filter_direction(const struct Game* game) {
+
+	const Index increment = current_cursor_increment(game);
+	const Index direction = cursor_direction(game);
+	return direction > 0 && increment < 4 || direction < 0 && increment > 3;
+}
+
+Rating _filter_cursor(const struct Game* game) {
+
+	const struct Game* source = get_source(game);
+	if (!source) {
+
+		assert(False);
+	}
+	
+	const Bool white = IS_WHITE(player_piece(source));
+	const Rating increment = (Rating)current_cursor_increment(game);
+	const grade = current_cursor_grade(source);
+	const Rating target = grade % 2 == 0 ? white ? 3 : 4 : white ? 4 : 3;
+	return -abs(target - increment);
+}
+
+Rating _filter_rank(const struct Game* game) {
+
+	const struct Game* source = get_source(game);
+	if (!source) {
+
+		assert(False);
+	}
+
+	return player_piece_rank(game);
 }
 
 void _init_path(Step path[MAX_STEPS]) {
@@ -140,7 +188,7 @@ void _select_first(struct Game* game, struct Game* leaves[STEPS]) {
 
 void _apply_filter(struct Game* leaves[STEPS], FILTER_FUNCTOR(filter_functor)) {
 
-	Rating best = 0;
+	Rating best = INT_MIN;
 	for (Count l = 0; l < STEPS; ++l) {
 
 		struct Game* leaf = leaves[l];
@@ -172,7 +220,13 @@ Bool _apply_filter_flag(struct Game* leaves[STEPS], const char flag) {
 	switch (flag) {
 
 	case '0': return False;
-	case '1': _apply_filter(leaves, _filter_losses);
+	case '1': _apply_filter(leaves, _filter_losses); return True;
+	case '2': _apply_filter(leaves, _filter_kings); return True;
+	case '3': _apply_filter(leaves, _filter_score); return True;
+	case '4': _apply_filter(leaves, _filter_direction); return True;
+	case '5': _apply_filter(leaves, _filter_cursor); return True;
+	case '6': _apply_filter(leaves, _filter_rank); return True;
+	case '7': _apply_filter(leaves, _filter_grade); return True;
 	default: return False;
 	}
 }
@@ -184,7 +238,10 @@ void _filter(struct Game* leaves[STEPS], const Set filters) {
 
 	for (Index index = 0; index < MAX_FLAGS && buffer[index]; ++index) {
 
-		_apply_filter_flag(leaves, buffer[index]);
+		if (!_apply_filter_flag(leaves, buffer[index])) {
+
+			break;
+		}
 	}
 }
 

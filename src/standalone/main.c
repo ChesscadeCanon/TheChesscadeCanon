@@ -24,6 +24,12 @@ void print_help() {
 	printf("The currently implemented filters are as follows:\n");
 	printf("0: Stop filtering and choose a random destination. Ends the filtering process.");
 	printf("1: Eliminate all choices that result in game over.");
+	printf("2: Eliminate all choices that result in a king spawning.");
+	printf("3: Eliminate all choices that don't get the highest score.");
+	printf("4: Eliminate all choices where the cursor isn't facing the center.");
+	printf("5: Eliminate all choices where the cursor isn't as close as possible to the center.");
+	printf("6: Eliminate all choices where the piece isn't as close as possible to the bottom.");
+	printf("7: Eliminate all choices that result in a king spawning after the following turn.");
 #else
 	printf("Command line app only available on Windows.\n");
 #endif

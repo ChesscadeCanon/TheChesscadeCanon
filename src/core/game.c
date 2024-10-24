@@ -344,7 +344,7 @@ void _resolve(struct Game* game, const Time passed, const Time time_spent) {
 			assert(False);
 		}
 
-		if (game->path[game->step + 1]) {
+		if (game->path[game->step + 1] && game->path[game->step + 1] != DOWN) {
 
 			assert(False);
 		}
@@ -376,6 +376,7 @@ void _resolve(struct Game* game, const Time passed, const Time time_spent) {
 	}
 
 	_set_last_spawned(game, passed, time);
+	_set_last_fell(game, passed, time);
 
 	if (game->end_time < 0 && game_over(game)) {
 
@@ -856,6 +857,7 @@ void follow_path(struct Game* game) {
 	const enum Event events = current_events(game);
 	const enum Event event_down_left = EVENT_LEFT | EVENT_DOWN;
 	const enum Event event_down_right = EVENT_RIGHT | EVENT_DOWN;
+	Index length = path_length(game);
 	
 	if (event_moved & events) {
 
@@ -872,6 +874,7 @@ void follow_path(struct Game* game) {
 			break;
 		case DOWN:
 			done = EVENT_DOWN & events;
+			if (game->step + 1 == length) done |= EVENT_FELL & events;
 			break;
 		case FALL:
 			done = EVENT_FELL & events;
@@ -893,7 +896,7 @@ void follow_path(struct Game* game) {
 		}
 		else if (done) {
 
-			if (game->step < path_length(game) - 1) {
+			if (game->step < length - 1) {
 
 				++game->step;
 				assert(game->step < MAX_STEPS);
